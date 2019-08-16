@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Job">
+	<select id="orderList" resultType="record"
+		parameterType="record">
+		<![CDATA[
+		select * from t_order_tab
+		]]>
+		<where>
+			<![CDATA[
+				and V_STATUS = '0' and date_add(V_CREATE_TIME, interval 5 minute) < now() 
+			]]>
+		</where>
+	</select>
+</mapper>

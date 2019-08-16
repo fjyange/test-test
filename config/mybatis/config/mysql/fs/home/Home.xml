@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Home">
+	<select id="getAppMoney" resultType="record" parameterType="record">
+		<![CDATA[
+		SELECT
+			ifnull(sum(V_TOTAL_COLLECTION),0) COUNT_MONEY,
+			ifnull(sum(V_ALI_COLLECTION),0) ALI_MONEY,
+			ifnull(sum(V_WX_COLLECTION),0) WX_MONEY
+		FROM
+			T_COLLECTION_TAB
+		]]>
+		<where>
+			<if test="V_APP_ID != null and V_APP_ID != ''">
+				<![CDATA[
+					and V_APP_ID = #{V_APP_ID}
+				]]>
+			</if>
+		</where>
+	</select>
+	<select id="getAgentMoney" resultType="record" parameterType="record">
+		<![CDATA[
+		SELECT
+			ifnull(sum(V_TOTAL_MONEY),0) COUNT_MONEY,
+			ifnull(sum(V_ALI_MONEY),0) ALI_MONEY,
+			ifnull(sum(V_WX_MONEY),0) WX_MONEY
+		FROM
+			t_pay_account tpa 
+			left join t_account_collection tac on tac.V_ACCOUNT_ID = tpa.ID
+		]]>
+		<where>
+				<![CDATA[
+					and tpa.V_CREATE_USER = #{V_USER_ID}
+				]]>
+		</where>
+	</select>
+	<select id="getOrderCount" resultType="record" parameterType="record">
+		<![CDATA[
+		SELECT
+			ifnull(sum(1),0) ALL_COUNT,
+			ifnull(sum(
+				CASE
+				WHEN V_STATUS = '1' THEN
+					1
+				WHEN V_STATUS = '3' THEN
+					1
+				END
+			),0) SUCCESS_COUNT,
+			ifnull(sum(CASE WHEN V_PAY_TYPE = '01' then 1 END),0) ALI_COUNT,
+			ifnull(sum(
+				CASE
+				WHEN V_PAY_TYPE = '02' THEN
+					1
+				END
+			),0) WX_COUNT
+				FROM
+				t_order_tab
+		]]>
+		<where>
+			<if test="V_APP_ID != null and V_APP_ID != ''">
+				<![CDATA[
+					and V_BELONG_APP = #{V_APP_ID}
+				]]>
+			</if>
+			<if test="V_USER_ID != null and V_USER_ID != ''">
+				<![CDATA[
+					and V_BELONG_USER = #{V_USER_ID}
+				]]>
+			</if>
+		</where>
+	</select>
+</mapper>

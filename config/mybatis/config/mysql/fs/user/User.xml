@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="User">
+	<select id="userList"  resultType="record" parameterType="record">
+		<![CDATA[
+		 SELECT
+		 	tsub.USER_ID ,
+			tsub.USER_ACCOUNT ,
+			tsub.USER_NAME ,
+			tsub.USER_PHONE ,
+			tsub.BANK_ACCOUNT ,
+			tsub.BANK_NAME,
+			tsub.IS_MATCH,
+			tsub.USER_LEVEL,
+			tsub.CREATE_TIME,
+			tbt.V_WX_RECEIVABLES ,
+			tbt.V_ALI_RECEIVABLES ,
+			tbt.V_COUNT_RECEIVABLES ,
+			tbt.V_SURPLUS_BOND,
+			tsur.ROLE_ID,
+			tpc.V_PAY_NUM
+		FROM
+			t_sys_user_base tsub
+		left join t_paytime_conf tpc on tsub.USER_ID  = tpc.V_USER_ID
+		LEFT JOIN t_bond_today tbt ON tsub.USER_ID = tbt.V_USER_ID 
+		LEFT JOIN t_sys_user_role tsur on tsub.USER_ID = tsur.USER_ID
+		]]>
+		<where>
+			<![CDATA[and tsub.USER_TYPE != '0']]>
+			<if test="IS_ADMIN !=null and IS_ADMIN !=''">
+				<choose>
+					<when test="IS_ADMIN == 0">
+						<if test="USER_ID !=null and USER_ID !=''">
+							<![CDATA[AND (tsub.CREATE_USER = #{USER_ID} or tsub.USER_ID=#{USER_ID})]]>
+						</if>
+					</when>
+				</choose>
+			</if>
+			<if test="USER_TYPE !=null and USER_TYPE !=''">
+				<![CDATA[AND tsub.USER_TYPE =#{USER_TYPE}]]>
+			</if>
+			<if test="USER_NAME !=null and USER_NAME !=''">
+				<![CDATA[AND tsub.USER_NAME like CONCAT('%', #{USER_NAME}, '%')]]>
+			</if>
+			<if test="USER_ACCOUNT !=null and USER_ACCOUNT !=''">
+				<![CDATA[AND tsub.USER_ACCOUNT like CONCAT('%', #{USER_ACCOUNT}, '%')]]>
+			</if>
+		</where>
+		<![CDATA[
+		   order by tsub.CREATE_TIME desc
+		]]>
+	</select>
+</mapper>

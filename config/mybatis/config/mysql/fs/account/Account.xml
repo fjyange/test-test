@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Account">
+	<select id="list" resultType="record" parameterType="record">
+		<![CDATA[
+		 SELECT
+			tpa.*,tft.ID V_FILEID,
+			tac.V_TOTAL_MONEY,tac.V_ALI_MONEY,tac.V_WX_MONEY,tsub.USER_NAME
+		FROM
+		t_pay_account tpa 
+		left join t_account_collection tac on tpa.ID = tac.V_ACCOUNT_ID
+		left join t_sys_user_base tsub on tpa.V_CREATE_USER = tsub.USER_ID 
+		left join t_file_tab tft on tpa.ID = tft.V_BUS_ID 
+		]]>
+		<where>
+			<if test="IS_ADMIN !=null and IS_ADMIN !=''">
+				<choose>
+					<when test="IS_ADMIN == 0">
+						<if test="USER_ID !=null and USER_ID !=''">
+							<![CDATA[AND tpa.V_CREATE_USER = #{USER_ID}]]>
+						</if>
+					</when>
+				</choose>
+			</if>
+			<if test="USER_NAME !=null and USER_NAME !=''">
+				<![CDATA[AND tsub.USER_NAME like CONCAT('%', #{USER_NAME}, '%')]]>
+			</if>
+		</where>
+	</select>
+</mapper>

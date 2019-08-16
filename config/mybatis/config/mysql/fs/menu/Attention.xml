@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Attention">
+	<!-- 获取符合搜索条件的用户关注列表 -->
+	<select id="attentionList" resultType="record" parameterType="record">
+        <![CDATA[
+        	SELECT
+				etp.ID,
+				etp.V_PROJECTID,
+				etp.V_PROJECT_NAME,
+				etp.V_TENDER_NO,
+				etp.V_PROJECT_TYPE,
+				etg.V_NAME,
+				DATE_FORMAT( etg.V_TIME, '%Y-%m-%d' ) V_TIME,
+				etf.id FOLLOW_ID,
+				ea.NAME V_TRADING_PLACE,
+				dy.DY_COUNT,
+				dy.DY_NEW,
+				hx.HX_COUNT,
+				hx.HX_NEW,
+				zb.ZB_COUNT,
+				zb.ZB_NEW
+			FROM
+				ebid_t_follow etf
+				LEFT JOIN ${datasource}.ebid_t_gg etg ON etf.V_PROJECTID = etg.V_PROJECTID
+				LEFT JOIN ${datasource}.ebid_t_project etp ON etf.V_PROJECTID = etp.V_PROJECTID
+				LEFT JOIN ebid_t_areacode ea ON etp.V_TRADING_PLACE = ea.ID
+				LEFT JOIN (
+				SELECT
+					count(1) DY_COUNT,
+					SUM( DATE_FORMAT( V_TIME, '%Y-%m-%d' ) > DATE_FORMAT( DATE_SUB( NOW( ), INTERVAL 15 DAY ), '%Y-%m-%d' ) ) DY_NEW,
+					V_PROJECTID 
+				FROM
+					${datasource}.ebid_t_dy 
+				GROUP BY
+					V_PROJECTID 
+				) dy ON etf.V_PROJECTID = dy.V_PROJECTID
+				LEFT JOIN (
+				SELECT
+					count(1) HX_COUNT,
+					SUM( DATE_FORMAT( V_TIME, '%Y-%m-%d' ) > DATE_FORMAT( DATE_SUB( NOW( ), INTERVAL 15 DAY ), '%Y-%m-%d' ) ) HX_NEW,
+					V_PROJECTID 
+				FROM
+					${datasource}.ebid_t_zbhxrgs 
+				GROUP BY
+					V_PROJECTID 
+				) hx ON etf.V_PROJECTID = hx.V_PROJECTID
+				LEFT JOIN (
+				SELECT
+					count(1) ZB_COUNT,
+					SUM( DATE_FORMAT( V_TIME, '%Y-%m-%d' ) > DATE_FORMAT( DATE_SUB( NOW( ), INTERVAL 15 DAY ), '%Y-%m-%d' ) ) ZB_NEW,
+					V_PROJECTID 
+				FROM
+					${datasource}.ebid_t_zbjggs 
+				GROUP BY
+					V_PROJECTID 
+				) zb ON etf.V_PROJECTID = zb.V_PROJECTID
+		]]>
+		<where>
+			<![CDATA[ AND etf.V_CONCERNID = #{USER_ID}]]>
+			<if test="searchFuzzy !=null and searchFuzzy !=''">
+				<![CDATA[AND (etp.V_PROJECT_NAME LIKE CONCAT('%', #{searchFuzzy}, '%') or etp.V_TENDER_NO LIKE CONCAT('%', #{searchFuzzy}, '%'))]]>
+			</if>
+		</where>
+		<![CDATA[
+	         order by etg.V_TIME desc
+			LIMIT 11
+		]]>
+	</select>
+	
+	<select id="appAttentionList" resultType="record" parameterType="record">
+        <![CDATA[
+        	SELECT
+				etp.ID,
+				etp.V_PROJECTID,
+				etp.V_PROJECT_NAME,
+				etp.V_TENDER_NO,
+				etg.V_GGID,
+				etg.V_NAME,
+				DATE_FORMAT(etp.V_OPENBID_TIME,'%Y-%m-%d %H:%i') V_OPENBID_TIME,
+				etg.ID GGID,
+				etg.V_FILE_URL,
+				etp.V_PROJECT_TYPE,
+				etp.V_TENDER_TYPE,
+				ea.NAME V_TRADING_PLACE,
+				zb.ZB_COUNT,
+				zb.V_WIN_BIDDER,
+				etp.V_OPENBID_PLACE
+			FROM
+			ebid_t_follow etf 
+			left join ${datasource}.ebid_t_gg etg  on etf.V_PROJECTID = etg.V_PROJECTID
+			left join ${datasource}.ebid_t_project etp on etf.V_PROJECTID = etp.V_PROJECTID 
+			LEFT JOIN (
+				SELECT
+					count(1) ZB_COUNT,
+					V_PROJECTID,
+					V_WIN_BIDDER
+				FROM
+					${datasource}.ebid_t_zbjggs 
+				GROUP BY
+					V_PROJECTID 
+				) zb ON etf.V_PROJECTID = zb.V_PROJECTID
+			left join ebid_t_areacode ea on etp.V_TRADING_PLACE = ea.ID  
+		]]>
+		<where>
+			<![CDATA[ AND etf.V_CONCERNID = #{USER_ID}]]>
+			<if test="key !=null and key !=''">
+				<![CDATA[AND etg.V_NAME LIKE CONCAT('%', #{key}, '%')]]>
+			</if>
+			<if test="industryType !=null and industryType !=''">
+				<choose>
+					<when test="industryType =='xmsgsgl'">
+                   		<![CDATA[and etp.V_TENDER_TYPE in ('xmsgsgl','fjsgsgl' )]]>
+					</when>
+					<otherwise>
+                		<![CDATA[and etp.V_TENDER_TYPE = #{industryType}]]>
+					</otherwise>
+				</choose>
+			</if>
+			<if test="date !=null and date !=''">
+				<choose>
+					<when test="date =='D1'">
+                   		<![CDATA[ and DATE_FORMAT(etg.V_TIME,'%Y-%m-%d') >= DATE_FORMAT(now(),'%Y-%m-%d') ]]>
+					</when>
+					<when test="date =='D3'">
+                   		<![CDATA[ and DATE_FORMAT(etg.V_TIME,'%Y-%m-%d') >= DATE_FORMAT(DATE_SUB(NOW(),INTERVAL 3 DAY),'%Y-%m-%d') ]]>
+					</when>
+					<when test="date =='D10'">
+                   		<![CDATA[ and DATE_FORMAT(etg.V_TIME,'%Y-%m-%d') >= DATE_FORMAT(DATE_SUB(NOW(),INTERVAL 10 DAY),'%Y-%m-%d') ]]>
+					</when>
+					<when test="date =='M1'">
+                   		<![CDATA[ and DATE_FORMAT(etg.V_TIME,'%Y-%m-%d') >= DATE_FORMAT(DATE_SUB(NOW(),INTERVAL 1 MONTH),'%Y-%m-%d') ]]>
+					</when>
+					<when test="date =='M3'">
+                   		<![CDATA[ and DATE_FORMAT(etg.V_TIME,'%Y-%m-%d') >= DATE_FORMAT(DATE_SUB(NOW(),INTERVAL 3 MONTH),'%Y-%m-%d') ]]>
+					</when>
+					<when test="date =='M6'">
+                   		<![CDATA[ and DATE_FORMAT(etg.V_TIME,'%Y-%m-%d') >= DATE_FORMAT(DATE_SUB(NOW(),INTERVAL 3 MONTH),'%Y-%m-%d') ]]>
+					</when>
+				</choose>
+				
+			</if>
+			<![CDATA[and etg.V_TIME <= now()]]>
+		</where>
+		<![CDATA[
+	         order by etg.V_TIME desc
+		]]>
+	</select>
+</mapper>

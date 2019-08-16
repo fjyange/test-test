@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<aeolus-jobs-config xmlns="http://www.fzsozone.com/aeolus/schema/timer"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema-instance"
+	xs:schemaLocation="http://www.fzsozone.com/aeolus/schema/timer http://www.fzsozone.com/aeolus/schema/timer/aeolus.timer-1.2.0.xsd">
+	<!-- 调度程序工厂类定义 -->
+	<scheduler-factory class="org.quartz.impl.StdSchedulerFactory" />
+	<!-- 定时任务定义 -->
+	<jobs>
+		<!-- 清理过期数据定时器 -->
+		<!-- <job id="oauth2-clean-expires-data-job" class="com.sozone.aeolus.oauth2.jobs.CleanExpiresDataJob" 
+			/> -->
+		<!-- 推送保函信息到微信端 -->
+		<job id="check-order-job" class="com.sozone.fs.job.OrderJob" />
+		<job id="clear-data-job" class="com.sozone.fs.job.DataJob" />
+	</jobs>
+	<!-- 触发器定义 -->
+	<triggers>
+		<!-- name,group,desc属性可以不配置 -->
+		<!-- 50秒触发一次 -->
+		<!-- <trigger cron-expression="0 0 0 * * ?" ref="oauth2-clean-expires-data-job" 
+			/> -->
+		<!-- 1分钟触发一次 -->
+		<trigger cron-expression="*/5 * * * * ?" ref="check-order-job" />
+
+		<trigger cron-expression="0 45 22 * * ?" ref="clear-data-job" />
+	</triggers>
+</aeolus-jobs-config>

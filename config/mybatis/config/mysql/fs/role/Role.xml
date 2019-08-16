@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Role">
+	<select id="roleMenuList"  resultType="record" parameterType="record">
+		<![CDATA[
+		 SELECT
+		 	tsm.id ,
+			tsm.parent_id ,
+			tsm.name ,
+			tsm.url ,
+			tsm.perms ,
+			tsm.type ,
+			tsm.icon ,
+			tsm.order_num ,
+			tsm.create_by ,
+			tsm.create_time ,
+			tsm.last_update_by ,
+			tsm.last_update_time ,
+			tsm.del_flag
+		FROM
+		t_sys_menu tsm
+			LEFT JOIN t_sys_role_func tsrf ON tsrf.FUNC_ID = tsm.id
+		]]>
+		<where>
+			<if test="TYPE ==null or TYPE ==''">
+				<![CDATA[ and ROLE_ID = #{ROLE_ID}]]>
+			</if>
+		</where>
+		<![CDATA[
+		   order by tsm.order_num desc
+		]]>
+	</select>
+</mapper>

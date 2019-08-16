@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Order">
+	<select id="orderList" resultType="record"
+		parameterType="record">
+		<![CDATA[
+		 select tot.*,tat.V_APP_NAME,tsub.USER_NAME from t_order_tab tot 
+		 left join t_app_tab tat on tot.V_BELONG_APP = tat.ID
+		 left join t_sys_user_base tsub on tot.V_BELONG_USER = tsub.USER_ID
+		]]>
+		<where>
+			<if test="IS_ADMIN !=null and IS_ADMIN !=''">
+				<choose>
+					<when test="IS_ADMIN == 0">
+						<if test="USER_ID !=null and USER_ID !=''">
+							<![CDATA[AND (tat.V_USER_ID = #{USER_ID} or tsub.USER_ID = #{USER_ID})]]>
+						</if>
+					</when>
+				</choose>
+			</if>
+			<if test="USER_NAME !=null and USER_NAME !=''">
+				<![CDATA[AND tsub.USER_NAME like CONCAT('%', #{USER_NAME}, '%')]]>
+			</if>
+			<if test="V_APP_NAME !=null and V_APP_NAME !=''">
+				<![CDATA[AND tat.V_APP_NAME like CONCAT('%', #{V_APP_NAME}, '%')]]>
+			</if>
+			<if test="V_ORDER_NO !=null and V_ORDER_NO !=''">
+				<![CDATA[AND tot.V_ORDER_NO like CONCAT('%', #{V_ORDER_NO}, '%')]]>
+			</if>
+		</where>
+		<![CDATA[
+		   order by tot.V_CREATE_TIME desc
+		]]>
+	</select>
+	<update id="updateApp">
+		<![CDATA[
+		  update t_collection_tab set 
+		  V_CASH_COLLECTION = V_CASH_COLLECTION + #{V_MONEY} ,
+		  V_TOTAL_COLLECTION = V_TOTAL_COLLECTION + #{V_MONEY} ,
+		  V_WX_COLLECTION =V_WX_COLLECTION+#{WX_MONEY},
+		  V_ALI_COLLECTION = V_ALI_COLLECTION + #{ALI_MONEY}
+		  where V_APP_ID = #{V_APP_ID}
+		]]>
+	</update>
+	<update id="updateAccount">
+		<![CDATA[
+		  update t_account_collection set 
+		  V_TOTAL_MONEY = V_TOTAL_MONEY + #{V_MONEY} ,
+		  V_WX_MONEY =V_WX_MONEY+#{WX_MONEY},
+		  V_ALI_MONEY = V_ALI_MONEY + #{ALI_MONEY}
+		  where V_ACCOUNT_ID = #{V_ACCOUNT_ID}
+		]]>
+	</update>
+	<update id="updateUser">
+		<![CDATA[
+		  update t_bond_today set 
+		  V_SURPLUS_BOND = V_SURPLUS_BOND + #{SURPLUS_BOND} ,
+		  V_COUNT_RECEIVABLES = V_COUNT_RECEIVABLES + #{V_MONEY} ,
+		  V_WX_RECEIVABLES =V_WX_RECEIVABLES+#{WX_MONEY},
+		  V_ALI_RECEIVABLES = V_ALI_RECEIVABLES + #{ALI_MONEY}
+		  where V_USER_ID = #{V_USER_ID}
+		]]>
+	</update>
+</mapper>

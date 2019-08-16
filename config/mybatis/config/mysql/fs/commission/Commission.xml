@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Commission">
+	<select id="list" resultType="record" parameterType="record">
+		<![CDATA[
+			select tct.*,tat.V_APP_NAME from t_commission_tab tct
+			left join t_app_tab tat on tct.V_APP_ID = tat.ID
+		]]>
+		<where>
+			<if test="IS_ADMIN !=null and IS_ADMIN !=''">
+				<choose>
+					<when test="IS_ADMIN == 0">
+						<if test="USER_ID !=null and USER_ID !=''">
+							<![CDATA[AND tat.V_USER_ID = #{USER_ID}]]>
+						</if>
+					</when>
+				</choose>
+			</if>
+		</where>
+		<![CDATA[
+			order by tct.V_COMMISSION_TIME desc
+		]]>
+	</select>
+	
+	<select id="getCommssion" resultType="record" parameterType="record">
+		<![CDATA[
+			select tct.*,tat.V_APP_NAME from t_app_tab tat
+			left join t_collection_tab tct on tct.V_APP_ID = tat.ID
+		]]>
+		<where>
+			<![CDATA[AND tat.V_USER_ID = #{USER_ID}]]>
+		</where>
+	</select>
+</mapper>

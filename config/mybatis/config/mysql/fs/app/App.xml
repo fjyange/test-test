@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="App">
+	<select id="list"  resultType="record" parameterType="record">
+		<![CDATA[
+		select tat.V_APPID,tat.ID,tat.V_SECRET,tat.V_APP_NAME,tat.V_RATE
+		,tat.V_IS_MATCH,tsub.USER_ACCOUNT V_USER_ACCOUNT,tsub.USER_PHONE V_USER_PHONE,tsub.USER_ID V_USER_ID,tsur.ROLE_ID V_ROLE_ID
+		 ,tct.V_WX_COLLECTION,tct.V_ALI_COLLECTION,tct.V_TOTAL_COLLECTION,tct.V_CASH_COLLECTION 
+		 from t_app_tab  tat
+		 left join t_collection_tab tct on tat.ID = tct.V_APP_ID
+		left join t_sys_user_base tsub on tat.V_USER_ID = tsub.USER_ID 
+		left join t_sys_user_role tsur on tsub.USER_ID = tsur.USER_ID
+		]]>
+		<where>
+		<if test="IS_ADMIN !=null and IS_ADMIN !=''">
+				<choose>
+					<when test="IS_ADMIN == 0">
+						<if test="USER_ID !=null and USER_ID !=''">
+							<![CDATA[AND (tat.V_CREATE_USER = #{USER_ID} or tsub.USER_ID = #{USER_ID})]]>
+						</if>
+					</when>
+				</choose>
+			</if>
+		<if test="V_APP_NAME != null and V_APP_NAME != ''">
+			<![CDATA[
+			and tat.V_APP_NAME  like CONCAT('%', #{V_APP_NAME}, '%')
+			]]>
+		</if>
+		<if test="V_USER_ACCOUNT != null and V_USER_ACCOUNT != ''">
+			<![CDATA[
+			and tsub.USER_ACCOUNT  like CONCAT('%', #{V_USER_ACCOUNT}, '%')
+			]]>
+		</if>
+		</where>
+		<![CDATA[
+			order by tat.V_UPDATE_TIME desc
+		]]>
+	</select>
+</mapper>

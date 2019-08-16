@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Withdrawal">
+	<select id="list"  resultType="record" parameterType="record">
+		<![CDATA[
+		select twt.ID,twt.V_MONEY,twt.V_REALITY,twt.V_STATUS,twt.V_APPLY_TIME,twt.V_APPLY_USER,tsub.USER_NAME V_USER_NAME 
+		from t_withdraw_tab twt
+		left join t_sys_user_base tsub on twt.V_APPLY_USER = tsub.USER_ID 
+		]]>
+		<where>
+		<if test="IS_ADMIN !=null and IS_ADMIN !=''">
+				<choose>
+					<when test="IS_ADMIN == 0">
+						<if test="USER_ID !=null and USER_ID !=''">
+							<![CDATA[and twt.V_APPLY_USER = #{USER_ID}]]>
+						</if>
+					</when>
+				</choose>
+			</if>
+		<if test="USER_NAME != null and USER_NAME != ''">
+			<![CDATA[
+			and tsub.USER_NAME  like CONCAT('%', #{USER_NAME}, '%')
+			]]>
+		</if>
+		</where>
+		<![CDATA[
+			order by twt.V_APPLY_TIME desc
+		]]>
+	</select>
+</mapper>
