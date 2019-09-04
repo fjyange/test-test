@@ -25,11 +25,6 @@ import com.sozone.aeolus.ext.rs.ResultVO;
 import com.sozone.aeolus.util.CollectionUtils;
 import com.sozone.aeolus.utils.DateUtils;
 import com.sozone.fs.common.Constant;
-
-/**
- * @author Administrator
- *
- */
 @Path(value = "/withdrawal", desc = "提现申请")
 @Permission(Level.Authenticated)
 public class WithdrawalAction {
@@ -116,6 +111,13 @@ public class WithdrawalAction {
 		ResultVO<String> resultVO = new ResultVO<String>(false);
 		Record<String, Object> record = aeolusData.getRecord();
 		String id = record.getString("ID");
+		Record<String, Object> withRecord = this.activeRecordDAO.pandora()
+				.SELECT_ALL_FROM(Constant.TableName.T_WITHDRAW_TAB)
+				.EQUAL("ID", id).get();
+		if(!StringUtils.equals("0", withRecord.getString("V_STATUS"))) {
+			resultVO.setResult("订单已处理");
+			return resultVO;
+		}
 		Record<String, Object> params = new RecordImpl<String, Object>();
 		String status = record.getString("V_STATUS");
 		params.setColumn("V_STATUS", record.getString("V_STATUS"));
@@ -125,9 +127,7 @@ public class WithdrawalAction {
 				.UPDATE(Constant.TableName.T_WITHDRAW_TAB).EQUAL("ID", id)
 				.SET(params).excute();
 		if (StringUtils.equals("2", status)) {
-			Record<String, Object> withRecord = this.activeRecordDAO.pandora()
-					.SELECT_ALL_FROM(Constant.TableName.T_WITHDRAW_TAB)
-					.EQUAL("ID", id).get();
+			
 			String userId = withRecord.getString("V_APPLY_USER");
 			Record<String, Object> bondRecord = this.activeRecordDAO.pandora()
 					.SELECT_ALL_FROM(Constant.TableName.T_BOND_TODAY)

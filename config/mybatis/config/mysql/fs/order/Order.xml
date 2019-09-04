@@ -4,9 +4,10 @@
 	<select id="orderList" resultType="record"
 		parameterType="record">
 		<![CDATA[
-		 select tot.*,tat.V_APP_NAME,tsub.USER_NAME from t_order_tab tot 
+		 select tot.*,tat.V_APP_NAME,tsub.USER_NAME,tpa.V_PAY_NAME from t_order_tab tot 
 		 left join t_app_tab tat on tot.V_BELONG_APP = tat.ID
-		 left join t_sys_user_base tsub on tot.V_BELONG_USER = tsub.USER_ID
+		 left join t_sys_user_base tsub on tot.V_BELONG_USER = tsub.USER_ID 
+		 left join t_pay_account tpa on tot.V_BELONG_ACCOUNT = tpa.ID
 		]]>
 		<where>
 			<if test="IS_ADMIN !=null and IS_ADMIN !=''">
@@ -47,18 +48,42 @@
 		  update t_account_collection set 
 		  V_TOTAL_MONEY = V_TOTAL_MONEY + #{V_MONEY} ,
 		  V_WX_MONEY =V_WX_MONEY+#{WX_MONEY},
-		  V_ALI_MONEY = V_ALI_MONEY + #{ALI_MONEY}
+		  V_ALI_MONEY = V_ALI_MONEY + #{ALI_MONEY},
+		  V_PAY_NUM = V_PAY_NUM + 1
 		  where V_ACCOUNT_ID = #{V_ACCOUNT_ID}
 		]]>
 	</update>
 	<update id="updateUser">
 		<![CDATA[
 		  update t_bond_today set 
-		  V_SURPLUS_BOND = V_SURPLUS_BOND + #{SURPLUS_BOND} ,
+		  V_LOCK_MONEY = V_LOCK_MONEY + #{V_LOCK_MONEY} ,
+		  V_SURPLUS_BOND  = V_SURPLUS_BOND + #{SURPLUS_BOND},
 		  V_COUNT_RECEIVABLES = V_COUNT_RECEIVABLES + #{V_MONEY} ,
 		  V_WX_RECEIVABLES =V_WX_RECEIVABLES+#{WX_MONEY},
 		  V_ALI_RECEIVABLES = V_ALI_RECEIVABLES + #{ALI_MONEY}
 		  where V_USER_ID = #{V_USER_ID}
+		]]>
+	</update>
+	<update id="updateUserLockMoney">
+		<![CDATA[
+		  update t_bond_today set 
+		  V_LOCK_MONEY =V_LOCK_MONEY +  #{V_LOCK_MONEY} 
+		  where V_USER_ID = #{V_USER_ID}
+		]]>
+	</update>
+	<update id="updateAccountTimes">
+		<![CDATA[
+		  update t_account_show set 
+		  V_PAY_NUM =V_PAY_NUM +  #{V_PAY_NUM} ,
+		  V_PAY_TIME = now()
+		  where V_ACCOUNT_ID = #{V_ACCOUNT_ID}
+		]]>
+	</update>
+	<update id="updateJAccountTimes">
+		<![CDATA[
+		  update t_account_show set 
+		  V_PAY_NUM =V_PAY_NUM - 1
+		  where V_ACCOUNT_ID = #{V_ACCOUNT_ID}
 		]]>
 	</update>
 </mapper>

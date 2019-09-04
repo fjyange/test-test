@@ -14,18 +14,6 @@ import com.sozone.aeolus.dao.data.Record;
 import com.sozone.aeolus.dao.data.RecordImpl;
 import com.sozone.aeolus.exception.FacadeException;
 
-/**
- * 
- * 附件删除工具类<br/>
- * <p>
- * 附件删除工具类<br/>
- * </p>
- * Time：2018年1月26日 下午2:06:14<br/>
- * 
- * @author zhangguanxing
- * @version 1.0.0
- * @since 1.0.0
- */
 public class AttachFileUtlis
 {
 	/**

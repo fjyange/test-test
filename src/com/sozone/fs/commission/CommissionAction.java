@@ -1,6 +1,5 @@
 package com.sozone.fs.commission;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,9 +53,7 @@ public class CommissionAction {
 		Record<String, Object> record = aeolusData.getRecord();
 		Pageable pageable = aeolusData.getPageRequest();
 		record.setColumn("USER_ID", ApacheShiroUtils.getCurrentUserID());
-		if (StringUtils.equals("1", ApacheShiroUtils.getCurrentUser().getString("IS_ADMIN"))) {
-			record.setColumn("USER_TYPE", ApacheShiroUtils.getCurrentUser().getString("IS_ADMIN"));
-		}
+		record.setColumn("IS_ADMIN", ApacheShiroUtils.getCurrentUser().getString("IS_ADMIN"));
 		Page<Record<String, Object>> page = this.activeRecordDAO.statement().selectPage("Commission.list", pageable,
 				record);
 		resultVO.setSuccess(true);
@@ -71,7 +68,7 @@ public class CommissionAction {
 		ResultVO<String> resultVO = new ResultVO<>();
 		Record<String, Object> record = aeolusData.getTableRecord(Constant.TableName.T_COMMISSION_TAB);
 		Record<String, Object> params = new RecordImpl<>();
-		params.setColumn("USER_ID", "df2d166501b24deab96b0e8275c63131");
+		params.setColumn("USER_ID", ApacheShiroUtils.getCurrentUserID());
 		Record<String, Object> appRecord =this.activeRecordDAO.statement().selectOne("Commission.getCommssion",
 				params);
 		double cash = appRecord.getDouble("V_CASH_COLLECTION");
@@ -101,7 +98,7 @@ public class CommissionAction {
 	@Service
 	public ResultVO<Record<String, Object>> getRate(AeolusData aeolusData) throws FacadeException{
 		ResultVO<Record<String, Object>> resultVO = new ResultVO<>();
-		Record<String,Object> appRecord = this.activeRecordDAO.pandora().SELECT_ALL_FROM(Constant.TableName.T_APP_TAB).EQUAL("V_USER_ID","df2d166501b24deab96b0e8275c63131").get();
+		Record<String,Object> appRecord = this.activeRecordDAO.pandora().SELECT_ALL_FROM(Constant.TableName.T_APP_TAB).EQUAL("V_USER_ID",ApacheShiroUtils.getCurrentUserID()).get();
 		Record<String, Object> dictRecord = this.activeRecordDAO.pandora().SELECT_ALL_FROM(Constant.TableName.T_DICT_TAB).EQUAL("V_DICT_TYPE","WITHDRAW_HAND_CHARGE").EQUAL("V_DISABLED", "Y").get();
 		Record<String, Object> record = new RecordImpl<>();
 		record.setColumn("V_RATE",appRecord.getString("V_RATE"));
@@ -117,6 +114,13 @@ public class CommissionAction {
 		ResultVO<String> resultVO = new ResultVO<String>(false);
 		Record<String, Object> record = aeolusData.getRecord();
 		String id = record.getString("ID");
+		Record<String, Object> commissionRecord = this.activeRecordDAO.pandora()
+				.SELECT_ALL_FROM(Constant.TableName.T_COMMISSION_TAB)
+				.EQUAL("ID", id).get();
+		if(!StringUtils.equals("0", commissionRecord.getString("V_STATUS"))) {
+			resultVO.setResult("订单已处理");
+			return resultVO;
+		}
 		Record<String, Object> params = new RecordImpl<String, Object>();
 		String status = record.getString("V_STATUS");
 		params.setColumn("V_STATUS", record.getString("V_STATUS"));
@@ -126,9 +130,7 @@ public class CommissionAction {
 				.UPDATE(Constant.TableName.T_COMMISSION_TAB).EQUAL("ID", id)
 				.SET(params).excute();
 		if (StringUtils.equals("2", status)) {
-			Record<String, Object> commissionRecord = this.activeRecordDAO.pandora()
-					.SELECT_ALL_FROM(Constant.TableName.T_COMMISSION_TAB)
-					.EQUAL("ID", id).get();
+			
 			String appID = commissionRecord.getString("V_APP_ID");
 			Record<String, Object> collectionRecord = this.activeRecordDAO.pandora()
 					.SELECT_ALL_FROM(Constant.TableName.T_COLLECTION_TAB)

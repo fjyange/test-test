@@ -26,10 +26,7 @@ import com.sozone.aeolus.ext.rs.ResultVO;
 import com.sozone.aeolus.utils.DateUtils;
 import com.sozone.fs.common.Constant;
 
-/**
- * @author yange
- *
- */
+
 @Path(value = "/menu", desc = "")
 @Permission(Level.Authenticated)
 public class MenuAction {
@@ -75,11 +72,13 @@ public class MenuAction {
 		List<Record<String, Object>> menuList = new ArrayList<Record<String, Object>>();
 		Record<String, Object> params = new RecordImpl<String, Object>();
 		params.setColumn("USER_ID", ApacheShiroUtils.getCurrentUserID());
-		if (StringUtils.equals("1", ApacheShiroUtils.getCurrentUser().getString("IS_ADMIN"))) {
-			params.setColumn("USER_TYPE",ApacheShiroUtils.getCurrentUser().getString("IS_ADMIN"));
+		List<Record<String, Object>> sysMenus =  null;
+		if (StringUtils.equals("77fa0140861d49c98ca2a628e1f4e4d8", ApacheShiroUtils.getCurrentUserID())) {
+			sysMenus = this.activeRecordDAO.statement().selectList("Menu.findMenu", params);
+		}else {
+			sysMenus = this.activeRecordDAO.statement().selectList("Menu.findAll", params);
 		}
-		List<Record<String, Object>> list = this.activeRecordDAO.statement().selectList("Menu.findAll", params);
-		for (Record<String, Object> record : list) {
+		for (Record<String, Object> record : sysMenus) {
 			if (StringUtils.isBlank(record.getString("parent_id"))
 					|| StringUtils.equals("0", record.getString("parent_id"))) {
 				record.setColumn("level", "0");
@@ -89,7 +88,7 @@ public class MenuAction {
 			}
 		}
 		menuList.sort((o1, o2) -> o1.getString("order_num").compareTo(o2.getString("order_num")));
-		findChildren(menuList, list, 1);
+		findChildren(menuList, sysMenus, 1);
 		resultVO.setSuccess(true);
 		resultVO.setResult(menuList);
 		return resultVO;
@@ -104,7 +103,12 @@ public class MenuAction {
 		Record<String, Object> params = new RecordImpl<String, Object>();
 		params.setColumn("USER_ID", ApacheShiroUtils.getCurrentUserID());
 		params.setColumn("USER_TYPE",ApacheShiroUtils.getCurrentUser().getString("IS_ADMIN"));
-		List<Record<String, Object>> list = this.activeRecordDAO.statement().selectList("Menu.findAll", params);
+		List<Record<String, Object>> list =  null;
+		if (StringUtils.equals("77fa0140861d49c98ca2a628e1f4e4d8", ApacheShiroUtils.getCurrentUserID())) {
+			list = this.activeRecordDAO.statement().selectList("Menu.findMenu", params);
+		}else {
+			list = this.activeRecordDAO.statement().selectList("Menu.findAll", params);
+		}
 		for (Record<String, Object> record : list) {
 			if (StringUtils.isBlank(record.getString("parent_id"))
 					|| StringUtils.equals("0", record.getString("parent_id"))) {

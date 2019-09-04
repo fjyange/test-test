@@ -87,7 +87,6 @@ public class AppAction {
 			userRecord.setColumn("IS_LOCK", "0");
 			userRecord.setColumn("USER_TYPE", "2");
 			userRecord.setColumn("CREATE_USER", ApacheShiroUtils.getCurrentUserID());
-			userRecord.setColumn("CREATE_TIME", DateUtils.getDateTime());
 			this.activeRecordDAO.auto().table(Constant.TableName.T_SYS_USER_BASE).save(userRecord);
 			this.activeRecordDAO.auto().table(Constant.TableName.T_SYS_USER_ROLE).save(userRecord);
 		} else {
@@ -104,7 +103,6 @@ public class AppAction {
 			record.setColumn("V_APPID", Random.generateUUID());
 			record.setColumn("V_SECRET", getCode());
 			record.setColumn("V_CREATE_USER", ApacheShiroUtils.getCurrentUserID());
-			record.setColumn("V_CREATE_TIME", DateUtils.getDateTime());
 			this.activeRecordDAO.auto().table(Constant.TableName.T_APP_TAB).save(record);
 			Record<String, Object> params = new RecordImpl<>();
 			params.setColumn("ID", Random.generateUUID());

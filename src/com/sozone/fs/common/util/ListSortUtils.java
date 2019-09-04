@@ -1,16 +1,3 @@
-/**
- * 包名：com.sozone.ebidpb.utils
- * 文件名：ListSortUtils.java<br/>
- * 创建时间：2017年10月8日 上午12:01:25<br/>
- * 创建者：don<br/>
- * 修改者：暂无<br/>
- * 修改简述：暂无<br/>
- * 修改详述：
- * <p>
- * 暂无<br/>
- * </p>
- * 修改时间：暂无<br/>
- */
 package com.sozone.fs.common.util;
 
 import java.text.NumberFormat;
@@ -48,7 +35,6 @@ import com.sozone.aeolus.util.LogFormatUtils;
  * ⑤.list元素对象的对象的每个属性都可以指定是升序还是降序
  * -->使用2个重写的方法(一个方法满足所有属性都按照升序(降序)，另外一个方法满足每个属性都能指定是升序(降序))
  * 
- * @author don
  * @version 1.0.0
  * @since 1.0.0
  */

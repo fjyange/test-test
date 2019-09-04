@@ -4,13 +4,13 @@
 	<select id="list" resultType="record" parameterType="record">
 		<![CDATA[
 		 SELECT
-			tpa.*,tft.ID V_FILEID,
-			tac.V_TOTAL_MONEY,tac.V_ALI_MONEY,tac.V_WX_MONEY,tsub.USER_NAME
+			tpa.*,tft.ID V_FILEID,tac.V_ALI_MONEY,tac.V_WX_MONEY,tsub.USER_NAME,
+			ifnull(tac.V_TOTAL_MONEY,0) V_TOTAL_MONEY,tac.V_PAY_NUM,tft.V_NAME FILE_NAME
 		FROM
 		t_pay_account tpa 
 		left join t_account_collection tac on tpa.ID = tac.V_ACCOUNT_ID
 		left join t_sys_user_base tsub on tpa.V_CREATE_USER = tsub.USER_ID 
-		left join t_file_tab tft on tpa.ID = tft.V_BUS_ID 
+		left join t_file_tab tft on tpa.ID = tft.V_BUS_ID  
 		]]>
 		<where>
 			<if test="IS_ADMIN !=null and IS_ADMIN !=''">

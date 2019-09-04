@@ -3,7 +3,7 @@
 <mapper namespace="Charge">
 	<select id="list"  resultType="record" parameterType="record">
 		<![CDATA[
-		select tut.ID,tut.V_REMARK,tut.V_MONEY,tut.V_TOPUP_TIME,tsub.USER_ACCOUNT,tut.V_STATUS from t_user_topup tut
+		select tut.ID,tut.V_REMARK,tut.V_MONEY,tut.V_TOPUP_TIME,tsub.USER_ACCOUNT,tsub.USER_NAME,tut.V_STATUS from t_user_topup tut
 		left join t_sys_user_base tsub on tut.V_TOPUP_USER = tsub.USER_ID 
 		]]>
 		<where>

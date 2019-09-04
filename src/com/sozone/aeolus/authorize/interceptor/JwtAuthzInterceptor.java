@@ -1,16 +1,3 @@
-/**
- * 包名：com.sozone.ydyq.api.interceptor
- * 文件名：JwtAuthzInterceptor.java<br/>
- * 创建时间：2018年8月28日 下午4:15:46<br/>
- * 创建者：zhenglin<br/>
- * 修改者：暂无<br/>
- * 修改简述：暂无<br/>
- * 修改详述：
- * <p>
- * 暂无<br/>
- * </p>
- * 修改时间：暂无<br/>
- */
 package com.sozone.aeolus.authorize.interceptor;
 
 import org.apache.commons.lang.StringUtils;
@@ -20,14 +7,10 @@ import org.slf4j.LoggerFactory;
 
 import com.alibaba.fastjson.JSONObject;
 import com.sozone.aeolus.authorize.realm.JwtUserToken;
-import com.sozone.aeolus.authorize.utlis.ApacheShiroUtils;
 import com.sozone.aeolus.authorize.utlis.LogUtils;
-import com.sozone.aeolus.dao.StatefulDAO;
-import com.sozone.aeolus.dao.StatefulDAOImpl;
 import com.sozone.aeolus.dao.data.Record;
 import com.sozone.aeolus.data.AeolusData;
 import com.sozone.aeolus.exception.AeolusException;
-import com.sozone.aeolus.exception.ServiceException;
 import com.sozone.aeolus.exception.ValidateException;
 import com.sozone.aeolus.ext.orm.DataEntry;
 import com.sozone.aeolus.ext.orm.impl.DataEntryImpl;
@@ -37,13 +20,6 @@ import com.sozone.aeolus.util.CollectionUtils;
 import com.sozone.fs.common.Constant.TableName;
 import com.sozone.fs.common.util.TokenUtils;
 
-/**
- * JWT 认证拦截器 Time：2018年8月28日 下午4:15:46<br>
- * 
- * @author zhenglin
- * @version 1.0.0
- * @since JDK1.6
- */
 public class JwtAuthzInterceptor implements Interceptor
 {
 
@@ -60,7 +36,9 @@ public class JwtAuthzInterceptor implements Interceptor
 	/**
 	 * Basic
 	 */
-	private static final String AUTHZ_HEADER_NAME = "Basic";
+//	private static final String AUTHZ_HEADER_NAME = "YUNDUANPAYBasic";
+//	private static final String AUTHZ_HEADER_NAME = "JUNPAYBasic";
+	private static final String AUTHZ_HEADER_NAME = "DSPAYBasic";
 
 	/**
 	 * 登录固定Token key
@@ -94,11 +72,25 @@ public class JwtAuthzInterceptor implements Interceptor
 			Record<String, Object> userInfo = de.persist().get();
 			if (CollectionUtils.isEmpty(userInfo))
 			{
-				throw new ValidateException("", "用户信息不存在");
+				logger.error(LogUtils.format("用户id", userID));
+				throw new ValidateException("R-0003", "用户信息异常,请重新登陆");
 			}
+//			String ipAddr = null;
+//			try {
+//				ipAddr = IPUtils.getMACAddress(IPUtils.getIp(data.getHttpServletRequest()));
+//				System.err.println(ipAddr);
+//			} catch (Exception e) {
+//				logger.error(LogUtils.format("用户id", userID));
+//				throw new ValidateException("R-0003", "ip地址获取失败");
+//			}
+//			
+//			if(!StringUtils.equals(ipAddr, userInfo.getString("IP_ADDR"))) {
+//				throw new ValidateException("R-0007", "已在其他ip登录，如有异常请联系客服");
+//			}
+			
 			String userName = userInfo.getString("USER_ACCOUNT");
 			try
-			{
+			{ 	
 				// 登录
 				SecurityUtils.getSubject().login(new JwtUserToken(userName, token));
 			}

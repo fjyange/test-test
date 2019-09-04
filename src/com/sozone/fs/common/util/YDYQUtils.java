@@ -1,16 +1,3 @@
-/**
- * 包名：com.sozone.ydyq.api.test
- * 文件名：TestYDYQAPI.java<br/>
- * 创建时间：2018年11月6日 上午10:57:00<br/>
- * 创建者：don<br/>
- * 修改者：暂无<br/>
- * 修改简述：暂无<br/>
- * 修改详述：
- * <p>
- * 暂无<br/>
- * </p>
- * 修改时间：暂无<br/>
- */
 package com.sozone.fs.common.util;
 
 import java.io.File;
@@ -32,18 +19,6 @@ import com.sozone.aeolus.exception.ServiceException;
 import com.sozone.fs.common.Constant;
 import com.sozone.fs.common.Constant.SysParamKey;
 import com.sozone.fs.common.Constant.faceMethod;
-
-/**
- * TODO 一句话描述类的主要作用<br/>
- * <p>
- * TODO 该类的详细描述<br/>
- * </p>
- * Time：2018年11月6日 上午10:57:00<br/>
- * 
- * @author don
- * @version 1.0.0
- * @since 1.0.0
- */
 public class YDYQUtils
 {
 	/**

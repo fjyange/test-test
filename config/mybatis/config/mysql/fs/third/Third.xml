@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>  
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="Third">
-	<select id="getpayimage" resultType="record" parameterType="record">
+	<select id="getpayimage" resultType="record"
+		parameterType="record">
 		<![CDATA[
 		select tus.ID,tus.V_USER_ID,tas.ID ACCOUNT_SHOW_ID,tbt.ID BOND_ID,tbt.V_WX_RECEIVABLES,tbt.V_ALI_RECEIVABLES
 		,tbt.V_COUNT_RECEIVABLES,tbt.V_SURPLUS_BOND,tpa.ID PAY_ID,tft.ID FILE_ID,tft.V_PATH,tft.V_NAME, tas.V_PAY_NUM,tas.V_ACCOUNT_ID 
@@ -9,20 +10,23 @@
 		left join t_bond_today tbt on tus.V_USER_ID = tbt.V_USER_ID
 		left join t_account_show tas on tus.V_USER_ID = tas.V_USER_ID 
 		left join t_pay_account tpa on tas.V_ACCOUNT_ID = tpa.ID
-		left join t_file_tab tft on tpa.V_FILE_ID= tft.ID
+		left join t_file_tab tft on tpa.V_FILE_ID= tft.ID 
+		left join t_account_collection tac on tas.V_ACCOUNT_ID = tac.V_ACCOUNT_ID 
 		]]>
 		<where>
 		<![CDATA[
-			tus.V_IS_PAY ='Y' and tbt.V_SURPLUS_BOND  >= #{V_MONEY}
-			and tas.V_PAY_NUM > 0 and  tpa.V_IS_MATCH = 'Y' and tpa.V_PAY_TYPE =#{V_PAY_TYPE}
+			tus.V_IS_PAY ='Y' and (tbt.V_SURPLUS_BOND - tbt.V_LOCK_MONEY)  >= #{V_MONEY}
+			and tas.V_PAY_NUM > 0 and  tpa.V_IS_MATCH = 'Y' and tpa.V_PAY_TYPE =#{V_PAY_TYPE} 
+			and (tpa.V_PAY_TOTAL = #{V_MONEY} or tpa.V_PAY_TOTAL = '0.00') and tpa.V_IS_LOCK = 'N'
 		]]>
 		</where>
 		<![CDATA[
-		order by tus.V_USER_LEVEL desc,tus.V_PAY_TIME,tas.V_PAY_TIME
+		order by tus.V_USER_LEVEL,tus.V_PAY_TIME,tas.V_PAY_TIME
 		]]>
 	</select>
-	
-	<select id="getOrderInfo" resultType="record" parameterType="record">
+
+	<select id="getOrderInfo" resultType="record"
+		parameterType="record">
 		<![CDATA[
 			select * from t_order_tab  
 		]]>

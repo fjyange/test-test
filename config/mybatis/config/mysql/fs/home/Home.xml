@@ -1,7 +1,57 @@
 <?xml version="1.0" encoding="UTF-8" ?>  
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="Home">
-	<select id="getAppMoney" resultType="record" parameterType="record">
+	<select id="getAdminOrderMoney" resultType="record"
+		parameterType="record">
+		<![CDATA[
+			select ifnull(sum(V_MONEY),0) ORDER_MONEY,ifnull(sum(CASE
+				WHEN  V_PAY_TYPE = '01' THEN V_MONEY ELSE 0 end ),0) ORDER_ALI_MONEY,
+			ifnull(sum(CASE
+				WHEN V_PAY_TYPE = '02' THEN V_MONEY ELSE 0 end ),0) ORDER_WX_MONEY from t_order_tab  
+		]]>
+		<where>
+			<![CDATA[
+				and to_days(V_CREATE_TIME) = to_days(now()) and (V_STATUS = '1' or V_STATUS='3')
+			]]>
+		</where>
+	</select>
+	<select id="getAdminUserMoney" resultType="record"
+		parameterType="record">
+		<![CDATA[
+			select ifnull(sum(V_COUNT_RECEIVABLES),0) USER_TOTAL_COUNT,ifnull(sum(V_SURPLUS_BOND),0) USER_TOTAL_SURPLUS from t_bond_today  
+		]]>
+	</select>
+	<select id="getAdminAccountMoney" resultType="record"
+		parameterType="record">
+		<![CDATA[
+			select ifnull(sum(V_TOTAL_MONEY),0) ACCOUNT_TOTAL_COUNT from t_account_collection  
+		]]>
+	</select>
+	<select id="getAdminAppMoney" resultType="record"
+		parameterType="record">
+		<![CDATA[
+			SELECT
+			ifnull(sum(V_TOTAL_COLLECTION),0) APP_TOTAL_COUNT,ifnull(sum(V_CASH_COLLECTION),0) APP_CASH_COUNT
+		FROM
+			T_COLLECTION_TAB
+		]]>
+	</select>
+	<select id="getAdminCommisionMoney" resultType="record"
+		parameterType="record">
+		<![CDATA[
+			SELECT
+			ifnull(SUM(V_MONEY),0) COMMISSION_MONEY
+		FROM
+			t_commission_tab
+		]]>
+		<where>
+			<![CDATA[
+				and to_days(V_COMMISSION_TIME) = to_days(now()) and V_STATUS = '1' 
+			]]>
+		</where>
+	</select>
+	<select id="getAppMoney" resultType="record"
+		parameterType="record">
 		<![CDATA[
 		SELECT
 			ifnull(sum(V_TOTAL_COLLECTION),0) COUNT_MONEY,
@@ -18,23 +68,25 @@
 			</if>
 		</where>
 	</select>
-	<select id="getAgentMoney" resultType="record" parameterType="record">
+	<select id="getAgentMoney" resultType="record"
+		parameterType="record">
 		<![CDATA[
 		SELECT
-			ifnull(sum(V_TOTAL_MONEY),0) COUNT_MONEY,
-			ifnull(sum(V_ALI_MONEY),0) ALI_MONEY,
-			ifnull(sum(V_WX_MONEY),0) WX_MONEY
+			ifnull(V_COUNT_RECEIVABLES,0) COUNT_MONEY,
+			ifnull(V_ALI_RECEIVABLES,0) ALI_MONEY,
+			ifnull(V_WX_RECEIVABLES,0) WX_MONEY,
+			ifnull(V_SURPLUS_BOND,0) SURPLUS_BOND
 		FROM
-			t_pay_account tpa 
-			left join t_account_collection tac on tac.V_ACCOUNT_ID = tpa.ID
+			t_bond_today tbt 
 		]]>
 		<where>
 				<![CDATA[
-					and tpa.V_CREATE_USER = #{V_USER_ID}
+					and tbt.V_USER_ID = #{V_USER_ID}
 				]]>
 		</where>
 	</select>
-	<select id="getOrderCount" resultType="record" parameterType="record">
+	<select id="getOrderCount" resultType="record"
+		parameterType="record">
 		<![CDATA[
 		SELECT
 			ifnull(sum(1),0) ALL_COUNT,
@@ -57,6 +109,9 @@
 				t_order_tab
 		]]>
 		<where>
+			<![CDATA[
+				and to_days(V_CREATE_TIME) = to_days(now())
+			]]>
 			<if test="V_APP_ID != null and V_APP_ID != ''">
 				<![CDATA[
 					and V_BELONG_APP = #{V_APP_ID}

@@ -1,16 +1,3 @@
-/**
- * 包名：com.sozone.ebidpb.utils
- * 文件名：SessionUtils.java<br/>
- * 创建时间：2017-8-3 下午4:51:34<br/>
- * 创建者：zouye<br/>
- * 修改者：暂无<br/>
- * 修改简述：暂无<br/>
- * 修改详述：
- * <p>
- * 暂无<br/>
- * </p>
- * 修改时间：暂无<br/>
- */
 package com.sozone.fs.common.util;
 
 import com.sozone.aeolus.authorize.utlis.ApacheShiroUtils;
@@ -24,7 +11,6 @@ import com.sozone.fs.common.Constant;
  * </p>
  * Time：2017-8-3 下午4:51:34<br/>
  * 
- * @author zouye
  * @version 1.0.0
  * @since 1.0.0
  */

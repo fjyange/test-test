@@ -6,7 +6,6 @@ package com.sozone.fs.dict;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.poi.ss.formula.functions.Odd;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,10 +26,6 @@ import com.sozone.aeolus.ext.rs.ResultVO;
 import com.sozone.aeolus.utils.DateUtils;
 import com.sozone.fs.common.Constant;
 
-/**
- * @author Administrator
- *
- */
 @Path(value="/dictIndex",desc="字典管理")
 @Permission(Level.Guest)
 public class DictAction {

@@ -138,14 +138,4 @@ public class JacobUtils
 
 	}
 
-	public static void main(String[] args) throws Exception
-	{
-		String inFilePath = "D:\\Java\\workspace\\jrpt-dt\\WebContent\\doc/投标保证险投保单-长安.xlsx";
-		String outFilePath = "D:/test.pdf";
-		excel2Pdf(inFilePath, outFilePath);
-		// doc2pdf(path + "1.docx", path+ "1.pdf");
-		// new Demo().doc2pdf(path + "1.docx", path+ "1x.pdf");
-
-	}
-
 }

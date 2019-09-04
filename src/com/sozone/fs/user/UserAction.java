@@ -26,9 +26,6 @@ import com.sozone.aeolus.ext.rs.ResultVO;
 import com.sozone.aeolus.util.CollectionUtils;
 import com.sozone.aeolus.utils.DateUtils;
 import com.sozone.fs.common.Constant;
-import com.sun.org.apache.xml.internal.resolver.helpers.PublicId;
-
-import sun.java2d.SurfaceDataProxy.CountdownTracker;
 
 @Path(value = "/user", desc = "用户信息处理接口")
 @Permission(Level.Authenticated)
@@ -62,10 +59,13 @@ public class UserAction {
 		Set<String> perms = new HashSet<>();
 		Record<String, Object> params = new RecordImpl<String, Object>();
 		params.setColumn("USER_ID", ApacheShiroUtils.getCurrentUserID());
-		if (StringUtils.equals("1", ApacheShiroUtils.getCurrentUser().getString("IS_ADMIN"))) {
-			params.setColumn("USER_TYPE", ApacheShiroUtils.getCurrentUser().getString("IS_ADMIN"));
+		List<Record<String, Object>> sysMenus = null;
+		if (StringUtils.equals("77fa0140861d49c98ca2a628e1f4e4d8", ApacheShiroUtils.getCurrentUserID())) {
+			sysMenus = this.activeRecordDAO.statement().selectList("Menu.findMenu", params);
+		} else {
+			sysMenus = this.activeRecordDAO.statement().selectList("Menu.findAll", params);
 		}
-		List<Record<String, Object>> sysMenus = this.activeRecordDAO.statement().selectList("Menu.findAll", params);
+
 		for (Record<String, Object> sysMenu : sysMenus) {
 			if (!StringUtils.isBlank(sysMenu.getString("perms"))) {
 				perms.add(sysMenu.getString("perms"));
@@ -91,6 +91,21 @@ public class UserAction {
 		return resultVO;
 	}
 
+	@Path(value = "/findBelong", desc = "获取用户列表")
+	@Service
+	public ResultVO<Page<Record<String, Object>>> findBelong(AeolusData aeolusData) throws FacadeException {
+		logger.debug(LogUtils.format("获取用户信息", aeolusData));
+		ResultVO<Page<Record<String, Object>>> resultVO = new ResultVO<>();
+		Record<String, Object> record = aeolusData.getRecord();
+		record.setColumn("USER_ID", ApacheShiroUtils.getCurrentUserID());
+		record.setColumn("IS_ADMIN", ApacheShiroUtils.getCurrentUser().getString("IS_ADMIN"));
+		Page<Record<String, Object>> page = this.activeRecordDAO.statement().selectPage("User.belongList",
+				aeolusData.getPageRequest(), record);
+		resultVO.setSuccess(true);
+		resultVO.setResult(page);
+		return resultVO;
+	}
+
 	@SuppressWarnings("deprecation")
 	@Path(value = "/save", desc = "保存用户信息")
 	@Service
@@ -107,7 +122,6 @@ public class UserAction {
 			record.setColumn("USER_TYPE", "1");
 			record.setColumn("USER_LEVEL", "2");
 			record.setColumn("CREATE_USER", ApacheShiroUtils.getCurrentUserID());
-			record.setColumn("CREATE_TIME", DateUtils.getDateTime());
 			this.activeRecordDAO.auto().table(Constant.TableName.T_SYS_USER_BASE).save(record);
 			this.activeRecordDAO.auto().table(Constant.TableName.T_SYS_USER_ROLE).save(record);
 		} else {
@@ -119,6 +133,17 @@ public class UserAction {
 		}
 		resultVO.setSuccess(true);
 		resultVO.setResult("保存成功");
+		return resultVO;
+	}
+
+	@Path(value = "/belongUserList", desc = "获取可以赋值用户")
+	@Service
+	public ResultVO<List<Record<String, Object>>> belongUserList(AeolusData aeolusData) throws FacadeException {
+		logger.debug(LogUtils.format("获取可以赋值用户", aeolusData));
+		ResultVO<List<Record<String, Object>>> resultVO = new ResultVO<>();
+		List<Record<String, Object>> list = this.activeRecordDAO.statement().selectList("User.belongUserList");
+		resultVO.setResult(list);
+		resultVO.setSuccess(true);
 		return resultVO;
 	}
 
@@ -149,23 +174,46 @@ public class UserAction {
 		Record<String, Object> params = new RecordImpl<>();
 		this.activeRecordDAO.auto().table(Constant.TableName.T_SYS_USER_BASE).setCondition("and", "USER_ID=#{USER_ID}")
 				.modify(record);
-		long count  = this.activeRecordDAO.pandora()
-				.SELECT_COUNT_FROM(Constant.TableName.T_USER_SHOW)
+		long count = this.activeRecordDAO.pandora().SELECT_COUNT_FROM(Constant.TableName.T_USER_SHOW)
 				.EQUAL("V_USER_ID", record.getString("USER_ID")).count();
 		if (StringUtils.isNotBlank(record.getString("IS_MATCH"))) {
 			if (count > 0) {
-				params.setColumn("V_IS_PAY",  record.getString("IS_MATCH"));
-				this.activeRecordDAO.pandora().UPDATE(Constant.TableName.T_USER_SHOW).EQUAL("V_USER_ID", record.getString("USER_ID")).SET(params);
+				params.setColumn("V_IS_PAY", record.getString("IS_MATCH"));
+				this.activeRecordDAO.pandora().UPDATE(Constant.TableName.T_USER_SHOW)
+						.EQUAL("V_USER_ID", record.getString("USER_ID")).SET(params).excute();
 			}
 		}
 		if (StringUtils.isNotBlank(record.getString("USER_LEVEL"))) {
 			if (count > 0) {
-				params.setColumn("V_USER_LEVEL",  record.getString("USER_LEVEL"));
-				this.activeRecordDAO.pandora().UPDATE(Constant.TableName.T_USER_SHOW).EQUAL("V_USER_ID", record.getString("USER_ID")).SET(params);
+				params.setColumn("V_USER_LEVEL", record.getString("USER_LEVEL"));
+				this.activeRecordDAO.pandora().UPDATE(Constant.TableName.T_USER_SHOW)
+						.EQUAL("V_USER_ID", record.getString("USER_ID")).SET(params).excute();
 			}
 		}
 		resultVO.setSuccess(true);
 		resultVO.setResult("用户配置修改成功");
+		return resultVO;
+	}
+
+	@Path(value = "/rateConf", desc = "返佣费率")
+	@Service
+	public ResultVO<String> rateConf(AeolusData aeolusData) throws FacadeException {
+		ResultVO<String> resultVO = new ResultVO<>(false);
+		Record<String, Object> record = aeolusData.getRecord();
+		String userId = record.getString("V_USER_ID");
+		Record<String, Object> params = new RecordImpl<>();
+		if (StringUtils.isNotBlank(record.getString("V_RATE"))) {
+			params.setColumn("USER_ID", userId);
+			params.setColumn("V_UPDATE_TIME", DateUtils.getDateTime());
+			params.setColumn("V_UPDATE_USER", ApacheShiroUtils.getCurrentUserID());
+			params.setColumn("USER_RATE", record.getString("V_RATE"));
+			this.activeRecordDAO.auto().table(Constant.TableName.T_SYS_USER_BASE)
+					.setCondition("AND", "USER_ID = #{USER_ID}").modify(params);
+			resultVO.setSuccess(true);
+			resultVO.setResult("费率修改成功");
+		} else {
+			resultVO.setResult("费率未设置");
+		}
 		return resultVO;
 	}
 
@@ -184,10 +232,10 @@ public class UserAction {
 			this.activeRecordDAO.auto().table(Constant.TableName.T_SYS_USER_BASE)
 					.setCondition("AND", "USER_ID = #{USER_ID}").modify(params);
 			resultVO.setResult("密码修改成功");
+			resultVO.setSuccess(true);
 		} else {
 			resultVO.setResult("密码未更改");
 		}
-		resultVO.setSuccess(true);
 		return resultVO;
 	}
 
@@ -214,6 +262,12 @@ public class UserAction {
 		resultVO.setSuccess(true);
 		resultVO.setResult("用户付款次数配置修改成功");
 		return resultVO;
+	}
+
+	public static void main(String[] args) {
+		System.out.println(DigestUtils.md5Hex(DigestUtils.md5Hex("dsallgly")));
+		System.out.println(DigestUtils.md5Hex(DigestUtils.md5Hex("dsztgly")));
+		System.out.println(DigestUtils.md5Hex(DigestUtils.md5Hex("dsztshr")));
 	}
 
 }

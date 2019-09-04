@@ -16,10 +16,7 @@ import com.sozone.aeolus.timer.AeolusJobExecutionContext;
 import com.sozone.aeolus.timer.job.AeolusJob;
 import com.sozone.fs.common.Constant;
 
-/**
- * @author Administrator
- *
- */
+
 public class DataJob implements AeolusJob {
 
 	/**
@@ -39,6 +36,7 @@ public class DataJob implements AeolusJob {
 			record.setColumn("V_TOTAL_MONEY", "0");
 			record.setColumn("V_ALI_MONEY", "0");
 			record.setColumn("V_WX_MONEY", "0");
+			record.setColumn("V_PAY_NUM", "0");
 			statefulDAO.pandora().UPDATE(Constant.TableName.T_ACCOUNT_COLLECTION).SET(record).excute();
 			record.clear();
 			record.setColumn("V_BOND_TODAY", "0");
@@ -50,9 +48,14 @@ public class DataJob implements AeolusJob {
 			record.setColumn("V_WX_COLLECTION", "0");
 			record.setColumn("V_ALI_COLLECTION", "0");
 			record.setColumn("V_TOTAL_COLLECTION", "0");
+			statefulDAO.pandora().DELETE_FROM(Constant.TableName.T_ORDER_OPT).excute();
+			statefulDAO.pandora().DELETE_FROM(Constant.TableName.T_SEND_TAB).excute();
 			statefulDAO.pandora().UPDATE(Constant.TableName.T_COLLECTION_TAB).SET(record).excute();
-			statefulDAO.sql("insert into t_order_history select * from t_order_tab").insert();
 			statefulDAO.sql("delete from t_order_tab where  date_add(V_CREATE_TIME, interval 5 DAY) < now()").delete();
+			statefulDAO.sql("delete from t_recieve_tab where date_add(V_RECIEVE_TIME, interval 1 DAY) < now()").delete();
+			statefulDAO.sql("delete from t_withdraw_tab where  date_add(V_APPLY_TIME, interval 5 DAY) < now()").delete();
+			statefulDAO.sql("delete from t_user_topup where  date_add(V_TOPUP_TIME, interval 5 DAY) < now()").delete();
+			statefulDAO.sql("delete from t_commission_tab where  date_add(V_COMMISSION_TIME, interval 5 DAY) < now()").delete();
 			statefulDAO.commit();
 		} catch (Exception e) {
 			statefulDAO.rollback();

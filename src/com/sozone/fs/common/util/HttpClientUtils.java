@@ -8,7 +8,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
+import java.security.KeyManagementException;
 import java.security.KeyStore;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -19,6 +22,8 @@ import java.util.Set;
 import java.util.UUID;
 
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -39,6 +44,7 @@ import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.LayeredConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
@@ -48,7 +54,6 @@ import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.InputStreamBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicNameValuePair;
@@ -60,15 +65,7 @@ import org.slf4j.LoggerFactory;
 
 import com.sozone.aeolus.authorize.utlis.LogUtils;
 
-/**
- * HTTP 工具类<br/>
- * <p>
- * HTTP 工具类<br/>
- * </p>
- * 
- */
-public final class HttpClientUtils
-{
+public final class HttpClientUtils {
 
 	/**
 	 * 字符集
@@ -95,15 +92,12 @@ public final class HttpClientUtils
 	/**
 	 * 日志
 	 */
-	private static Logger logger = LoggerFactory
-			.getLogger(HttpClientUtils.class);
+	private static Logger logger = LoggerFactory.getLogger(HttpClientUtils.class);
 
-	private HttpClientUtils()
-	{
+	private HttpClientUtils() {
 	}
 
-	static
-	{
+	static {
 		MIME_TYPE.put("audio/mp4a-latm", "m4a");
 		MIME_TYPE.put("application/srgs+xml", "grxml");
 		MIME_TYPE.put("video/mpeg", "mpg");
@@ -113,9 +107,7 @@ public final class HttpClientUtils
 		MIME_TYPE.put("video/ogv", "ogv");
 		MIME_TYPE.put("application/x-shockwave-flash", "swf");
 		MIME_TYPE.put("application/x-shar", "shar");
-		MIME_TYPE
-				.put("application/vnd.openxmlformats-officedocument.presentationml.presentation",
-						"pptx");
+		MIME_TYPE.put("application/vnd.openxmlformats-officedocument.presentationml.presentation", "pptx");
 		MIME_TYPE.put("video/3gpp", "3gp");
 		MIME_TYPE.put("video/webm", "webm");
 		MIME_TYPE.put("application/x-futuresplash", "spl");
@@ -194,9 +186,7 @@ public final class HttpClientUtils
 		MIME_TYPE.put("application/atom+xml", "atom");
 		MIME_TYPE.put("application/octet-stream", "lzh");
 		MIME_TYPE.put("application/vnd.ms-excel", "xls");
-		MIME_TYPE
-				.put("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-						"xlsx");
+		MIME_TYPE.put("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "xlsx");
 		MIME_TYPE.put("image/jpeg", "jpeg");
 		MIME_TYPE.put("application/x-troff", "tr");
 		MIME_TYPE.put("application/smil", "smil");
@@ -270,9 +260,7 @@ public final class HttpClientUtils
 		MIME_TYPE.put("application/x-troff", "roff");
 		MIME_TYPE.put("audio/basic", "snd");
 		MIME_TYPE.put("application/zip", "zip");
-		MIME_TYPE
-				.put("application/vnd.openxmlformats-officedocument.presentationml.slideshow",
-						"ppsx");
+		MIME_TYPE.put("application/vnd.openxmlformats-officedocument.presentationml.slideshow", "ppsx");
 		MIME_TYPE.put("video/vnd.mpegurl", "mxu");
 		MIME_TYPE.put("image/svg+xml", "svg");
 		MIME_TYPE.put("image/pict", "pic");
@@ -287,9 +275,7 @@ public final class HttpClientUtils
 		MIME_TYPE.put("application/x-ustar", "ustar");
 		MIME_TYPE.put("application/x-hdf", "hdf");
 		MIME_TYPE.put("text/html", "html");
-		MIME_TYPE
-				.put("application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-						"docx");
+		MIME_TYPE.put("application/vnd.openxmlformats-officedocument.wordprocessingml.document", "docx");
 		MIME_TYPE.put("application/smil", "smi");
 		MIME_TYPE.put("application/x-csh", "csh");
 		MIME_TYPE.put("application/xhtml+xml", "xht");
@@ -298,31 +284,24 @@ public final class HttpClientUtils
 		// 配置文件获取httpclient的类型 是 http还是https
 		String httpClientType = "HTTP";
 
-		RequestConfig defaultHttpsConfig = RequestConfig
-				.custom()
-				.setCookieSpec(CookieSpecs.STANDARD_STRICT)
+		RequestConfig defaultHttpsConfig = RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD_STRICT)
 				.setExpectContinueEnabled(true)
-				.setTargetPreferredAuthSchemes(
-						Arrays.asList(AuthSchemes.NTLM, AuthSchemes.DIGEST))
-				.setProxyPreferredAuthSchemes(Arrays.asList(AuthSchemes.BASIC))
-				.build();
+				.setTargetPreferredAuthSchemes(Arrays.asList(AuthSchemes.NTLM, AuthSchemes.DIGEST))
+				.setProxyPreferredAuthSchemes(Arrays.asList(AuthSchemes.BASIC)).build();
 
-		RequestConfig httpConfig = RequestConfig.copy(defaultHttpsConfig)
-				.setConnectionRequestTimeout(60000).setConnectTimeout(90000)
-				.setSocketTimeout(60000).build();
+		RequestConfig httpConfig = RequestConfig.copy(defaultHttpsConfig).setConnectionRequestTimeout(60000)
+				.setConnectTimeout(90000).setSocketTimeout(60000).build();
 
 		// HTTPS
-		if (httpClientType != null && "HTTPS".equalsIgnoreCase(httpClientType))
-		{
+		if (httpClientType != null && "HTTPS".equalsIgnoreCase(httpClientType)) {
 
 			PoolingHttpClientConnectionManager connManager = null;
 
 			RegistryBuilder<ConnectionSocketFactory> registryBuilder = RegistryBuilder
-					.<ConnectionSocketFactory> create();
+					.<ConnectionSocketFactory>create();
 			FileInputStream serverfis = null;
 			FileInputStream trustfis = null;
-			try
-			{
+			try {
 				// 获得密匙库
 				KeyStore serverstore = KeyStore.getInstance("PKCS12");
 				KeyStore truststore = KeyStore.getInstance("JKS");
@@ -340,10 +319,8 @@ public final class HttpClientUtils
 				String trustPassword = "password";
 
 				// 密码为空
-				serverPassword = (serverPassword == null || ""
-						.equals(serverPassword)) ? SSLPASSWORD : serverPassword;
-				trustPassword = (trustPassword == null || ""
-						.equals(trustPassword)) ? SSLPASSWORD : trustPassword;
+				serverPassword = (serverPassword == null || "".equals(serverPassword)) ? SSLPASSWORD : serverPassword;
+				trustPassword = (trustPassword == null || "".equals(trustPassword)) ? SSLPASSWORD : trustPassword;
 
 				File serverfile = new File(path, server);
 				serverfis = new FileInputStream(serverfile);
@@ -360,61 +337,75 @@ public final class HttpClientUtils
 				trustfis.close();
 
 				// 设置连接
-				SSLContext sslContext = SSLContextBuilder
-						.create()
+				SSLContext sslContext = SSLContextBuilder.create()
 						.loadKeyMaterial(serverstore, SSLPASSWORD.toCharArray())
-						.loadTrustMaterial(truststore, new AnyTrustStrategy())
-						.build();
-				LayeredConnectionSocketFactory sslSF = new SSLConnectionSocketFactory(
-						sslContext);
+						.loadTrustMaterial(truststore, new AnyTrustStrategy()).build();
+				LayeredConnectionSocketFactory sslSF = new SSLConnectionSocketFactory(sslContext);
 
 				registryBuilder.register("https", sslSF);
-				Registry<ConnectionSocketFactory> registry = registryBuilder
-						.build();
+				Registry<ConnectionSocketFactory> registry = registryBuilder.build();
 
 				connManager = new PoolingHttpClientConnectionManager(registry);
 				connManager.setMaxTotal(1000);// 最大连接数
 				connManager.setDefaultMaxPerRoute(500);// 最大并行连接数
 
-			}
-			catch (Exception e)
-			{
+			} catch (Exception e) {
 				logger.error(LogUtils.format("HttpClientUtils初始化发生异常!"), e);
-			}
-			finally
-			{
+			} finally {
 
 				IOUtils.closeQuietly(serverfis);
 				IOUtils.closeQuietly(trustfis);
 			}
 
-			if (connManager != null)
-			{
+			if (connManager != null) {
 
-				httpClient = HttpClients.custom()
-						.setConnectionManager(connManager)
-						.setDefaultRequestConfig(httpConfig).build();
+				httpClient = HttpClients.custom().setConnectionManager(connManager).setDefaultRequestConfig(httpConfig)
+						.build();
 			}
 
 		}
 
 		// HTTP
-		if (httpClient == null)
-		{
+		if (httpClient == null) {
+			X509TrustManager trustManager = new X509TrustManager() {
+				@Override
+				public X509Certificate[] getAcceptedIssuers() {
+					return null;
+				}
 
-			RegistryBuilder<ConnectionSocketFactory> registryBuilder = RegistryBuilder
-					.<ConnectionSocketFactory> create();
-			registryBuilder.register("http",
-					PlainConnectionSocketFactory.getSocketFactory());
+				@Override
+				public void checkClientTrusted(X509Certificate[] xcs, String str) {
+				}
 
-			PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager(
-					registryBuilder.build());
-			connManager.setMaxTotal(1000);// 最大连接数
-			connManager.setDefaultMaxPerRoute(500);// 最大并行连接数
+				@Override
+				public void checkServerTrusted(X509Certificate[] xcs, String str) {
+				}
+			};
 
-			httpClient = HttpClientBuilder.create()
-					.setConnectionManager(connManager)
-					.setDefaultRequestConfig(httpConfig).build();
+			try {
+				SSLContext ctx = SSLContext.getInstance(SSLConnectionSocketFactory.TLS);
+				ctx.init(null, new TrustManager[] { trustManager }, null);
+				SSLConnectionSocketFactory socketFactory = new SSLConnectionSocketFactory(ctx,
+						NoopHostnameVerifier.INSTANCE);
+				// 创建Registry
+				RequestConfig requestConfig = RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD_STRICT)
+						.setExpectContinueEnabled(Boolean.TRUE)
+						.setTargetPreferredAuthSchemes(Arrays.asList(AuthSchemes.NTLM, AuthSchemes.DIGEST))
+						.setProxyPreferredAuthSchemes(Arrays.asList(AuthSchemes.BASIC)).build();
+				Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder
+						.<ConnectionSocketFactory>create().register("http", PlainConnectionSocketFactory.INSTANCE)
+						.register("https", socketFactory).build();
+				// 创建ConnectionManager，添加Connection配置信息
+				PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(
+						socketFactoryRegistry);
+				httpClient = HttpClients.custom().setConnectionManager(connectionManager)
+						.setDefaultRequestConfig(requestConfig).build();
+			} catch (NoSuchAlgorithmException e) {
+				e.printStackTrace();
+			} catch (KeyManagementException e) {
+				e.printStackTrace();
+			}
+
 		}
 
 	}
@@ -430,9 +421,7 @@ public final class HttpClientUtils
 	 * @throws Exception
 	 *             Exception
 	 */
-	public static String doGet(String url, Map<String, String> params)
-			throws Exception
-	{
+	public static String doGet(String url, Map<String, String> params) throws Exception {
 		return doGet(url, params, CHARSET);
 	}
 
@@ -447,9 +436,7 @@ public final class HttpClientUtils
 	 * @throws Exception
 	 *             Exception
 	 */
-	public static String doPost(String url, Map<String, String> params)
-			throws Exception
-	{
+	public static String doPost(String url, Map<String, String> params) throws Exception {
 		return doPost(url, params, CHARSET);
 	}
 
@@ -466,9 +453,7 @@ public final class HttpClientUtils
 	 * @throws Exception
 	 *             异常
 	 */
-	public static String doGet(String url, Map<String, String> params,
-			String charset) throws Exception
-	{
+	public static String doGet(String url, Map<String, String> params, String charset) throws Exception {
 		return doGet(url, params, null, charset);
 	}
 
@@ -487,42 +472,30 @@ public final class HttpClientUtils
 	 * @throws Exception
 	 *             异常
 	 */
-	public static String doGet(String url, Map<String, String> params,
-			Map<String, String> headMap, String charset) throws Exception
-	{
-		if (StringUtils.isBlank(url))
-		{
+	public static String doGet(String url, Map<String, String> params, Map<String, String> headMap, String charset)
+			throws Exception {
+		if (StringUtils.isBlank(url)) {
 			return null;
 		}
 		CloseableHttpResponse response = null;
-		try
-		{
-			if (params != null && !params.isEmpty())
-			{
-				List<NameValuePair> pairs = new ArrayList<NameValuePair>(
-						params.size());
-				for (Map.Entry<String, String> entry : params.entrySet())
-				{
+		try {
+			if (params != null && !params.isEmpty()) {
+				List<NameValuePair> pairs = new ArrayList<NameValuePair>(params.size());
+				for (Map.Entry<String, String> entry : params.entrySet()) {
 					String value = entry.getValue();
-					if (value != null)
-					{
+					if (value != null) {
 						pairs.add(new BasicNameValuePair(entry.getKey(), value));
 					}
 				}
-				url += "?"
-						+ EntityUtils.toString(new UrlEncodedFormEntity(pairs,
-								charset));
+				url += "?" + EntityUtils.toString(new UrlEncodedFormEntity(pairs, charset));
 			}
 			HttpGet httpGet = new HttpGet(url);
 
-			if (null != headMap && !headMap.isEmpty())
-			{
+			if (null != headMap && !headMap.isEmpty()) {
 				Set<Entry<String, String>> entrySet = headMap.entrySet();
-				for (Entry<String, String> entry : entrySet)
-				{
+				for (Entry<String, String> entry : entrySet) {
 					String value = entry.getValue();
-					if (value != null)
-					{
+					if (value != null) {
 						httpGet.setHeader(entry.getKey(), value);
 					}
 
@@ -530,25 +503,20 @@ public final class HttpClientUtils
 			}
 			response = httpClient.execute(httpGet);
 			int statusCode = response.getStatusLine().getStatusCode();
-			if (statusCode != 200)
-			{
+			if (statusCode != 200) {
 				httpGet.abort();
-				throw new RuntimeException("HttpClient,error status code :"
-						+ statusCode);
+				throw new RuntimeException("HttpClient,error status code :" + statusCode);
 			}
 			HttpEntity entity = response.getEntity();
 			String result = null;
-			if (entity != null)
-			{
+			if (entity != null) {
 				result = EntityUtils.toString(entity, charset);
 			}
 			EntityUtils.consume(entity);
 
 			return result;
 
-		}
-		finally
-		{
+		} finally {
 			IOUtils.closeQuietly(response);
 
 		}
@@ -567,9 +535,7 @@ public final class HttpClientUtils
 	 * @throws Exception
 	 *             Exception
 	 */
-	public static String sendJsonPostRequest(String url, String json,
-			String charset) throws Exception
-	{
+	public static String sendJsonPostRequest(String url, String json, String charset) throws Exception {
 		return sendJsonPostRequest(url, json, null, charset);
 	}
 
@@ -588,32 +554,23 @@ public final class HttpClientUtils
 	 * @throws Exception
 	 *             Exception
 	 */
-	public static String sendJsonPostRequest(String url, String json,
-			Map<String, String> headMap, String charset) throws Exception
-	{
-		logger.error(LogUtils.format("请求url", url));
-		logger.error(LogUtils.format("请求json", json));
-		if (StringUtils.isBlank(url))
-		{
+	public static String sendJsonPostRequest(String url, String json, Map<String, String> headMap, String charset)
+			throws Exception {
+		if (StringUtils.isBlank(url)) {
 			return null;
 		}
 		CloseableHttpResponse response = null;
-		try
-		{
+		try {
 			HttpPost httpPost = new HttpPost(url);
-			httpPost.addHeader("Content-type",
-					"application/json; charset=utf-8");
+			httpPost.addHeader("Content-type", "application/json; charset=utf-8");
 			httpPost.setHeader("Accept", "application/json");
 			httpPost.setEntity(new StringEntity(json, Charset.forName("UTF-8")));
 
-			if (null != headMap && !headMap.isEmpty())
-			{
+			if (null != headMap && !headMap.isEmpty()) {
 				Set<Entry<String, String>> entrySet = headMap.entrySet();
-				for (Entry<String, String> entry : entrySet)
-				{
+				for (Entry<String, String> entry : entrySet) {
 					String value = entry.getValue();
-					if (value != null)
-					{
+					if (value != null) {
 						httpPost.setHeader(entry.getKey(), value);
 					}
 				}
@@ -621,23 +578,18 @@ public final class HttpClientUtils
 
 			response = httpClient.execute(httpPost);
 			int statusCode = response.getStatusLine().getStatusCode();
-			if (statusCode != 200)
-			{
+			if (statusCode != 200) {
 				httpPost.abort();
-				throw new RuntimeException("HttpClient,error status code :"
-						+ statusCode);
+				throw new RuntimeException("HttpClient,error status code :" + statusCode);
 			}
 			HttpEntity entity = response.getEntity();
 			String result = null;
-			if (entity != null)
-			{
+			if (entity != null) {
 				result = EntityUtils.toString(entity, charset);
 			}
 			EntityUtils.consume(entity);
 			return result;
-		}
-		finally
-		{
+		} finally {
 			IOUtils.closeQuietly(response);
 		}
 	}
@@ -655,9 +607,7 @@ public final class HttpClientUtils
 	 * @throws Exception
 	 *             异常
 	 */
-	public static String doPost(String url, Map<String, String> params,
-			String charset) throws Exception
-	{
+	public static String doPost(String url, Map<String, String> params, String charset) throws Exception {
 		return doPost(url, params, null, charset);
 	}
 
@@ -676,45 +626,35 @@ public final class HttpClientUtils
 	 * @throws Exception
 	 *             异常
 	 */
-	public static String doPost(String url, Map<String, String> params,
-			Map<String, String> headMap, String charset) throws Exception
-	{
-		if (StringUtils.isBlank(url))
-		{
+	public static String doPost(String url, Map<String, String> params, Map<String, String> headMap, String charset)
+			throws Exception {
+		if (StringUtils.isBlank(url)) {
 			return null;
 		}
 
 		CloseableHttpResponse response = null;
 
-		try
-		{
+		try {
 			List<NameValuePair> pairs = null;
-			if (params != null && !params.isEmpty())
-			{
+			if (params != null && !params.isEmpty()) {
 				pairs = new ArrayList<NameValuePair>(params.size());
-				for (Map.Entry<String, String> entry : params.entrySet())
-				{
+				for (Map.Entry<String, String> entry : params.entrySet()) {
 					String value = entry.getValue();
-					if (value != null)
-					{
+					if (value != null) {
 						pairs.add(new BasicNameValuePair(entry.getKey(), value));
 					}
 				}
 			}
 			HttpPost httpPost = new HttpPost(url);
-			if (pairs != null && pairs.size() > 0)
-			{
+			if (pairs != null && pairs.size() > 0) {
 				httpPost.setEntity(new UrlEncodedFormEntity(pairs, charset));
 			}
 
-			if (null != headMap && !headMap.isEmpty())
-			{
+			if (null != headMap && !headMap.isEmpty()) {
 				Set<Entry<String, String>> entrySet = headMap.entrySet();
-				for (Entry<String, String> entry : entrySet)
-				{
+				for (Entry<String, String> entry : entrySet) {
 					String value = entry.getValue();
-					if (value != null)
-					{
+					if (value != null) {
 						httpPost.setHeader(entry.getKey(), value);
 					}
 
@@ -725,21 +665,16 @@ public final class HttpClientUtils
 			int statusCode = response.getStatusLine().getStatusCode();
 			HttpEntity entity = response.getEntity();
 			String result = null;
-			if (entity != null)
-			{
+			if (entity != null) {
 				result = EntityUtils.toString(entity, charset);
 			}
 			EntityUtils.consume(entity);
-			if (statusCode != 200)
-			{
+			if (statusCode != 200) {
 				httpPost.abort();
-				throw new RuntimeException("{StatusCode:" + statusCode
-						+ ",ReturnMessage:" + result + "}");
+				throw new RuntimeException("{StatusCode:" + statusCode + ",ReturnMessage:" + result + "}");
 			}
 			return result;
-		}
-		finally
-		{
+		} finally {
 			IOUtils.closeQuietly(response);
 		}
 	}
@@ -757,24 +692,16 @@ public final class HttpClientUtils
 	 * @throws Exception
 	 *             Exception
 	 */
-	public static String encodeURL(String baseURL, Map<String, String> params,
-			String charset) throws Exception
-	{
-		if (params != null && !params.isEmpty())
-		{
-			List<NameValuePair> pairs = new ArrayList<NameValuePair>(
-					params.size());
-			for (Map.Entry<String, String> entry : params.entrySet())
-			{
+	public static String encodeURL(String baseURL, Map<String, String> params, String charset) throws Exception {
+		if (params != null && !params.isEmpty()) {
+			List<NameValuePair> pairs = new ArrayList<NameValuePair>(params.size());
+			for (Map.Entry<String, String> entry : params.entrySet()) {
 				String value = entry.getValue();
-				if (value != null)
-				{
+				if (value != null) {
 					pairs.add(new BasicNameValuePair(entry.getKey(), value));
 				}
 			}
-			baseURL += "?"
-					+ EntityUtils.toString(new UrlEncodedFormEntity(pairs,
-							charset));
+			baseURL += "?" + EntityUtils.toString(new UrlEncodedFormEntity(pairs, charset));
 		}
 		return baseURL;
 	}
@@ -790,41 +717,27 @@ public final class HttpClientUtils
 	 * @throws Exception
 	 *             Exception
 	 */
-	public static String doFileUpload(String url, Map<String, Object> map)
-			throws Exception
-	{
-		if (StringUtils.isEmpty(url))
-		{
+	public static String doFileUpload(String url, Map<String, Object> map) throws Exception {
+		if (StringUtils.isEmpty(url)) {
 			return null;
 		}
 
 		CloseableHttpResponse httpResponse = null;
 
-		try
-		{
-			MultipartEntityBuilder mulipartEntity = MultipartEntityBuilder
-					.create().setMode(HttpMultipartMode.BROWSER_COMPATIBLE)
-					.setCharset(CharsetUtils.get(CHARSET));
-			if (map != null && map.size() > 0)
-			{
-				for (String key : map.keySet())
-				{
+		try {
+			MultipartEntityBuilder mulipartEntity = MultipartEntityBuilder.create()
+					.setMode(HttpMultipartMode.BROWSER_COMPATIBLE).setCharset(CharsetUtils.get(CHARSET));
+			if (map != null && map.size() > 0) {
+				for (String key : map.keySet()) {
 					Object obj = map.get(key);
-					if (obj instanceof File)
-					{
+					if (obj instanceof File) {
 						FileBody fileBody = new FileBody((File) obj);
 						mulipartEntity.addPart(key, fileBody);
-					}
-					else if (obj instanceof InputStream)
-					{
-						InputStreamBody inputStreamBody = new InputStreamBody(
-								(InputStream) obj, "");
+					} else if (obj instanceof InputStream) {
+						InputStreamBody inputStreamBody = new InputStreamBody((InputStream) obj, "");
 						mulipartEntity.addPart(key, inputStreamBody);
-					}
-					else
-					{
-						StringBody stringBody = new StringBody((String) obj,
-								ContentType.TEXT_PLAIN);
+					} else {
+						StringBody stringBody = new StringBody((String) obj, ContentType.TEXT_PLAIN);
 						mulipartEntity.addPart(key, stringBody);
 					}
 				}
@@ -835,28 +748,23 @@ public final class HttpClientUtils
 
 			httpResponse = httpClient.execute(httpPost);
 			int statusCode = httpResponse.getStatusLine().getStatusCode();
-			if (statusCode != 200)
-			{
+			if (statusCode != 200) {
 				httpPost.abort();
-				throw new Exception("HttpClient,error status code :"
-						+ statusCode);
+				throw new Exception("HttpClient,error status code :" + statusCode);
 			}
 
 			HttpEntity httpEntity = httpResponse.getEntity();
 
 			String result = null;
 
-			if (httpEntity != null)
-			{
+			if (httpEntity != null) {
 				result = EntityUtils.toString(httpEntity, CHARSET);
 			}
 			EntityUtils.consume(httpEntity);
 
 			return result;
 
-		}
-		finally
-		{
+		} finally {
 			IOUtils.closeQuietly(httpResponse);
 		}
 	}
@@ -876,55 +784,42 @@ public final class HttpClientUtils
 	 * @throws Exception
 	 *             Exception
 	 */
-	public static File doFileDownLoad(String url, Map<String, String> params,
-			String savePath, String fileName) throws Exception
-	{
-		if (StringUtils.isEmpty(url))
-		{
+	public static File doFileDownLoad(String url, Map<String, String> params, String savePath, String fileName)
+			throws Exception {
+		if (StringUtils.isEmpty(url)) {
 			return null;
 		}
 		CloseableHttpResponse httpResponse = null;
 		InputStream is = null;
 		FileOutputStream fos = null;
-		try
-		{
+		try {
 			List<NameValuePair> list = null;
-			if (params != null && params.size() > 0)
-			{
+			if (params != null && params.size() > 0) {
 				list = new ArrayList<NameValuePair>(params.size());
-				for (Entry<String, String> entry : params.entrySet())
-				{
-					NameValuePair nameValuePair = new BasicNameValuePair(
-							entry.getKey(), entry.getValue());
+				for (Entry<String, String> entry : params.entrySet()) {
+					NameValuePair nameValuePair = new BasicNameValuePair(entry.getKey(), entry.getValue());
 					list.add(nameValuePair);
 				}
-				url += "?"
-						+ EntityUtils.toString(new UrlEncodedFormEntity(list,
-								CHARSET));
+				url += "?" + EntityUtils.toString(new UrlEncodedFormEntity(list, CHARSET));
 			}
 
 			HttpGet httpGet = new HttpGet(url);
 
 			httpResponse = httpClient.execute(httpGet);
 			int statusCode = httpResponse.getStatusLine().getStatusCode();
-			if (statusCode != 200)
-			{
-				throw new Exception("HttpClient,error status code :"
-						+ statusCode);
+			if (statusCode != 200) {
+				throw new Exception("HttpClient,error status code :" + statusCode);
 			}
 			HttpEntity httpEntity = httpResponse.getEntity();
-			if (httpEntity != null)
-			{
+			if (httpEntity != null) {
 				is = httpEntity.getContent();
 				File dir = new File(savePath);
-				if (!dir.exists())
-				{
+				if (!dir.exists()) {
 					// 创建目录
 					dir.mkdirs();
 				}
 
-				if (StringUtils.isEmpty(fileName))
-				{
+				if (StringUtils.isEmpty(fileName)) {
 					fileName = getFileName(httpResponse);
 				}
 				File target = new File(dir, fileName);
@@ -936,9 +831,7 @@ public final class HttpClientUtils
 			EntityUtils.consume(httpEntity);
 			return null;
 
-		}
-		finally
-		{
+		} finally {
 
 			IOUtils.closeQuietly(is);
 			IOUtils.closeQuietly(fos);
@@ -953,18 +846,14 @@ public final class HttpClientUtils
 	 * @param response
 	 * @return
 	 */
-	private static String getFileName(HttpResponse response) throws Exception
-	{
+	private static String getFileName(HttpResponse response) throws Exception {
 
 		Header contentHeader = response.getFirstHeader("Content-Disposition");
-		if (contentHeader != null)
-		{
+		if (contentHeader != null) {
 			HeaderElement[] values = contentHeader.getElements();
-			if (values.length == 1)
-			{
+			if (values.length == 1) {
 				NameValuePair param = values[0].getParameterByName("filename");
-				if (param != null)
-				{
+				if (param != null) {
 					// filename = new
 					// String(param.getValue().toString().getBytes(),
 					// "utf-8");
@@ -974,12 +863,10 @@ public final class HttpClientUtils
 			}
 		}
 		Header contentType = response.getFirstHeader("Content-type");
-		if (null != contentType)
-		{
+		if (null != contentType) {
 			String ct = contentType.getValue();
 			String ext = MIME_TYPE.get(ct);
-			if (StringUtils.isNotEmpty(ext))
-			{
+			if (StringUtils.isNotEmpty(ext)) {
 				return UUID.randomUUID().toString() + "." + ext;
 			}
 		}
@@ -998,31 +885,22 @@ public final class HttpClientUtils
 	 * @throws Exception
 	 *             Exception
 	 */
-	public static void doFileDownLoad(String url, Map<String, String> params,
-			OutputStream os) throws Exception
-	{
-		if (StringUtils.isEmpty(url))
-		{
+	public static void doFileDownLoad(String url, Map<String, String> params, OutputStream os) throws Exception {
+		if (StringUtils.isEmpty(url)) {
 			return;
 		}
 		CloseableHttpResponse httpResponse = null;
 		InputStream is = null;
 		BufferedOutputStream fos = null;
-		try
-		{
+		try {
 			List<NameValuePair> list = null;
-			if (params != null && params.size() > 0)
-			{
+			if (params != null && params.size() > 0) {
 				list = new ArrayList<NameValuePair>(params.size());
-				for (Entry<String, String> entry : params.entrySet())
-				{
-					NameValuePair nameValuePair = new BasicNameValuePair(
-							entry.getKey(), entry.getValue());
+				for (Entry<String, String> entry : params.entrySet()) {
+					NameValuePair nameValuePair = new BasicNameValuePair(entry.getKey(), entry.getValue());
 					list.add(nameValuePair);
 				}
-				url += "?"
-						+ EntityUtils.toString(new UrlEncodedFormEntity(list,
-								CHARSET));
+				url += "?" + EntityUtils.toString(new UrlEncodedFormEntity(list, CHARSET));
 			}
 
 			HttpGet httpGet = new HttpGet(url);
@@ -1030,10 +908,8 @@ public final class HttpClientUtils
 			httpResponse = httpClient.execute(httpGet);
 			int statusCode = httpResponse.getStatusLine().getStatusCode();
 
-			if (statusCode != 200)
-			{
-				throw new Exception("HttpClient,error status code :"
-						+ statusCode);
+			if (statusCode != 200) {
+				throw new Exception("HttpClient,error status code :" + statusCode);
 			}
 
 			HttpEntity httpEntity = httpResponse.getEntity();
@@ -1041,31 +917,26 @@ public final class HttpClientUtils
 			// 判断附件是否存在
 			Header successHeader = httpResponse.getFirstHeader("isSuccess");
 			String isSuccess = "1";
-			if (successHeader != null)
-			{
+			if (successHeader != null) {
 				isSuccess = successHeader.getValue();
 				Header errorMsg = httpResponse.getFirstHeader("errorMsg");
-				String emsg = errorMsg == null ? "" : URLDecoder.decode(
-						errorMsg.getValue(), "UTF-8");
+				String emsg = errorMsg == null ? "" : URLDecoder.decode(errorMsg.getValue(), "UTF-8");
 				throw new Exception(emsg);
 			}
 
-			if (!StringUtils.equals(isSuccess, "0") && httpEntity != null)
-			{
+			if (!StringUtils.equals(isSuccess, "0") && httpEntity != null) {
 				is = httpEntity.getContent();
 				fos = new BufferedOutputStream(os);
 				IOUtils.copy(is, fos);
 			}
 			EntityUtils.consume(httpEntity);
-		}
-		finally
-		{
+		} finally {
 			IOUtils.closeQuietly(is);
 			IOUtils.closeQuietly(fos);
 			IOUtils.closeQuietly(httpResponse);
 		}
 	}
-	
+
 	/**
 	 * 描述：附件下载
 	 * 
@@ -1078,33 +949,24 @@ public final class HttpClientUtils
 	 * @throws Exception
 	 *             Exception
 	 */
-	public static File doFileDownLoad(String url, Map<String, String> params,
-			File parentPath) throws Exception
-	{
-		if (StringUtils.isEmpty(url))
-		{
+	public static File doFileDownLoad(String url, Map<String, String> params, File parentPath) throws Exception {
+		if (StringUtils.isEmpty(url)) {
 			return null;
 		}
 		CloseableHttpResponse httpResponse = null;
 		InputStream is = null;
 		BufferedOutputStream fos = null;
-		OutputStream os=null;
-		File resFile=null;//下载文件
-		try
-		{
+		OutputStream os = null;
+		File resFile = null;// 下载文件
+		try {
 			List<NameValuePair> list = null;
-			if (params != null && params.size() > 0)
-			{
+			if (params != null && params.size() > 0) {
 				list = new ArrayList<NameValuePair>(params.size());
-				for (Entry<String, String> entry : params.entrySet())
-				{
-					NameValuePair nameValuePair = new BasicNameValuePair(
-							entry.getKey(), entry.getValue());
+				for (Entry<String, String> entry : params.entrySet()) {
+					NameValuePair nameValuePair = new BasicNameValuePair(entry.getKey(), entry.getValue());
 					list.add(nameValuePair);
 				}
-				url += "?"
-						+ EntityUtils.toString(new UrlEncodedFormEntity(list,
-								CHARSET));
+				url += "?" + EntityUtils.toString(new UrlEncodedFormEntity(list, CHARSET));
 			}
 
 			HttpGet httpGet = new HttpGet(url);
@@ -1112,10 +974,8 @@ public final class HttpClientUtils
 			httpResponse = httpClient.execute(httpGet);
 			int statusCode = httpResponse.getStatusLine().getStatusCode();
 
-			if (statusCode != 200)
-			{
-				throw new Exception("HttpClient,error status code :"
-						+ statusCode);
+			if (statusCode != 200) {
+				throw new Exception("HttpClient,error status code :" + statusCode);
 			}
 
 			HttpEntity httpEntity = httpResponse.getEntity();
@@ -1123,55 +983,52 @@ public final class HttpClientUtils
 			// 判断附件是否存在
 			Header successHeader = httpResponse.getFirstHeader("isSuccess");
 			String isSuccess = "1";
-			if (successHeader != null)
-			{
+			if (successHeader != null) {
 				isSuccess = successHeader.getValue();
 				Header errorMsg = httpResponse.getFirstHeader("errorMsg");
-				String emsg = errorMsg == null ? "" : URLDecoder.decode(
-						errorMsg.getValue(), "UTF-8");
+				String emsg = errorMsg == null ? "" : URLDecoder.decode(errorMsg.getValue(), "UTF-8");
 				throw new Exception(emsg);
 			}
-			//HttpResponseProxy{HTTP/1.1 200 OK 
-			//[Server: nginx, Date: Wed, 28 Nov 2018 08:31:08 GMT, Content-Type: application/octet-stream, Transfer-Encoding: chunked, Connection: keep-alive, Content-Disposition: attachment;filename="ä¸å®¶åºåè½æ¸å.ssp"]
-			//ResponseEntityProxy{[Content-Type: application/octet-stream,Chunked: true]}}
+			// HttpResponseProxy{HTTP/1.1 200 OK
+			// [Server: nginx, Date: Wed, 28 Nov 2018 08:31:08 GMT, Content-Type:
+			// application/octet-stream, Transfer-Encoding: chunked, Connection: keep-alive,
+			// Content-Disposition: attachment;filename="ä¸å®¶åºåè½æ¸å.ssp"]
+			// ResponseEntityProxy{[Content-Type: application/octet-stream,Chunked: true]}}
 			Header name = httpResponse.getFirstHeader("Content-Disposition");
-			//System.out.println(name.toString());
+			// System.out.println(name.toString());
 			String fileName = "undefinded.ssp";
-			if (name != null)
-			{
+			if (name != null) {
 				fileName = name.getValue();
-				 HeaderElement[] values = name.getElements();  
-		            if (values.length == 1) {  
-		                NameValuePair param = values[0].getParameterByName("filename");  
-		                if (param != null) {  
-		                    try {
-		                    	//此处根据具体编码来设置
-		                    	//fileName = param.getValue() == null ? "" : URLDecoder.decode(param.getValue(), "UTF-8");
-		                    	//System.out.println(fileName);
-		                    	fileName = new String(param.getValue().toString().getBytes("ISO-8859-1"), "UTF-8");  
-		                    	//System.out.println(fileName);
-		                    	//fileName = new String(fileName.getBytes(), "ISO8859-1");
-		                    	//System.out.println(fileName);
-		                    } catch (Exception e) {  
-		                        e.printStackTrace();  
-		                    }  
-		                }  
-		            }  
+				HeaderElement[] values = name.getElements();
+				if (values.length == 1) {
+					NameValuePair param = values[0].getParameterByName("filename");
+					if (param != null) {
+						try {
+							// 此处根据具体编码来设置
+							// fileName = param.getValue() == null ? "" :
+							// URLDecoder.decode(param.getValue(), "UTF-8");
+							// System.out.println(fileName);
+							fileName = new String(param.getValue().toString().getBytes("ISO-8859-1"), "UTF-8");
+							// System.out.println(fileName);
+							// fileName = new String(fileName.getBytes(), "ISO8859-1");
+							// System.out.println(fileName);
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				}
 			}
-			
+
 			resFile = new File(parentPath, fileName);
 			os = new FileOutputStream(resFile);
 
-			if (!StringUtils.equals(isSuccess, "0") && httpEntity != null)
-			{
+			if (!StringUtils.equals(isSuccess, "0") && httpEntity != null) {
 				is = httpEntity.getContent();
 				fos = new BufferedOutputStream(os);
 				IOUtils.copy(is, fos);
 			}
 			EntityUtils.consume(httpEntity);
-		}
-		finally
-		{
+		} finally {
 			IOUtils.closeQuietly(os);
 			IOUtils.closeQuietly(is);
 			IOUtils.closeQuietly(fos);

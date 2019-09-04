@@ -4,11 +4,12 @@
 	<select id="orderList" resultType="record"
 		parameterType="record">
 		<![CDATA[
-		select * from t_order_tab
+		select tot.*,tas.V_PAY_NUM from t_order_tab tot
+		left join t_account_show tas on tot.V_BELONG_ACCOUNT = tas.V_ACCOUNT_ID
 		]]>
 		<where>
 			<![CDATA[
-				and V_STATUS = '0' and date_add(V_CREATE_TIME, interval 5 minute) < now() 
+				and tot.V_STATUS = '0' and date_add(tot.V_CREATE_TIME, interval 5 minute) < now() 
 			]]>
 		</where>
 	</select>

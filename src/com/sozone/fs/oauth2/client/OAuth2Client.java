@@ -44,17 +44,7 @@ import com.sozone.auth2.client.OAuth2ClientConstant;
 import com.sozone.fs.common.Constant.SysParamKey;
 import com.sozone.fs.common.util.SessionUtils;
 
-/**
- * 开放式授权客户端实现<br/>
- * <p>
- * 开放式授权客户端实现<br/>
- * </p>
- * Time：2018-9-26 下午12:54:48<br/>
- * 
- * @author zouye
- * @version 1.0.0
- * @since 1.0.0
- */
+
 @Path(value = "o2c", desc = "开放式授权客户端实现")
 public class OAuth2Client extends RACloudBaseOAuth2Client {
 
@@ -81,23 +71,6 @@ public class OAuth2Client extends RACloudBaseOAuth2Client {
 		String type = data.getParam(ExtConstant.USER_TYPE_PARAM_KEY);
 		Map<Object, Object> params = new HashMap<Object, Object>();
 		params.put(ExtConstant.USER_TYPE_PARAM_KEY, type);
-//		SystemParamUtils.setProperty(com.sozone.auth2.client.OAuth2ClientConstant.SysParamKey.CLIENT_ID_KEY,
-//				"fdd27bf0fe7848f695f945d7af7b4ef2"); 
-//		// 客户端密钥
-		SystemParamUtils.setProperty(com.sozone.auth2.client.OAuth2ClientConstant.SysParamKey.CLIENT_SECRET_KEY,
-				"b7f7b0b304ea3271dd9def17bf730ffdde1dd584c84fcf0c7ce02d5de15e867d17dc00473133013f69c0fd12c0269ad0");
-		// 客户端回调地址
-		SystemParamUtils.setProperty(com.sozone.auth2.client.OAuth2ClientConstant.SysParamKey.REDIRECT_URI_KEY,
-				"http://192.168.1.17:8080/fs/authorize/o2c/gtk");
-		SystemParamUtils.setProperty(com.sozone.auth2.client.OAuth2ClientConstant.SysParamKey.CLIENT_ID_KEY,
-				"d3c8af4c417542a0946d7dba0448ccb9");
-//		// 客户端密钥
-//		SystemParamUtils.setProperty(com.sozone.auth2.client.OAuth2ClientConstant.SysParamKey.CLIENT_SECRET_KEY,
-//				"96a0b94d80ae7e29fdc30b4eaf41415e73c3604b1764faa653639cdbe85ed596a604935f3a500f1718f1404c62c84190");
-//		// 客户端回调地址
-//		SystemParamUtils.setProperty(com.sozone.auth2.client.OAuth2ClientConstant.SysParamKey.REDIRECT_URI_KEY,
-//				"http://jr.bidzcm.com/authorize/o2c/gtk");
-		params.putAll(SystemParamUtils.getProperties());
 		// 表达式解析器
 		StrSubstitutor strs = new StrSubstitutor(params);
 		// 服务器端授权页面

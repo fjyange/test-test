@@ -22,14 +22,9 @@ import com.sozone.aeolus.ext.rs.ResultVO;
 import com.sozone.aeolus.util.CollectionUtils;
 import com.sozone.aeolus.utils.DateUtils;
 import com.sozone.fs.common.Constant;
+import com.sozone.fs.third.ThirdAction;
 
-import javassist.compiler.ast.NewExpr;
 
-/**
- * 
- * @author yange
- *
- */
 @Path(value = "/account", desc = "用户信息处理接口")
 @Permission(Level.Authenticated)
 public class AccountAction {
@@ -76,7 +71,6 @@ public class AccountAction {
 		ResultVO<String> resultVO = new ResultVO<>();
 		Record<String, Object> record = aeolusData.getRecord();
 		String id = record.getString("ID");
-		record.setColumn("V_UPDATE_TIME", DateUtils.getDateTime());
 		record.setColumn("V_UPDATE_USER", ApacheShiroUtils.getCurrentUserID());
 		record.setColumn("V_MATCH_TIME", DateUtils.getDateTime());
 		record.setColumn("V_MATCH_USER", ApacheShiroUtils.getCurrentUserID());
@@ -88,7 +82,6 @@ public class AccountAction {
 			id = Random.generateUUID();
 			record.setColumn("ID", id);
 			record.setColumn("V_CREATE_USER", ApacheShiroUtils.getCurrentUserID());
-			record.setColumn("V_CREATE_TIME", DateUtils.getDateTime());
 			this.activeRecordDAO.auto().table(Constant.TableName.T_PAY_ACCOUNT).save(record);
 			Record<String, Object> account = new RecordImpl<>();
 			account.setColumn("ID", Random.generateUUID());
@@ -98,11 +91,16 @@ public class AccountAction {
 			account.setColumn("V_WX_MONEY", "0");
 			this.activeRecordDAO.pandora().INSERT_INTO(Constant.TableName.T_ACCOUNT_COLLECTION).VALUES(account)
 					.excute();
-			long count = this.activeRecordDAO.pandora().SELECT_COUNT_FROM(Constant.TableName.T_USER_SHOW).EQUAL("V_USER_ID", ApacheShiroUtils.getCurrentUserID()).count();
+			long count = this.activeRecordDAO.pandora().SELECT_COUNT_FROM(Constant.TableName.T_USER_SHOW)
+					.EQUAL("V_USER_ID", ApacheShiroUtils.getCurrentUserID()).count();
 			if (count > 0) {
-				Record<String, Object> userRecord = this.activeRecordDAO.pandora().SELECT_ALL_FROM(Constant.TableName.T_SYS_USER_BASE).EQUAL("USER_ID", ApacheShiroUtils.getCurrentUserID()).get();
-				Record<String, Object> timeRecord = this.activeRecordDAO.pandora().SELECT_ALL_FROM(Constant.TableName.T_PAYTIME_CONF).EQUAL("V_USER_ID", ApacheShiroUtils.getCurrentUserID()).get();
-				Record<String, Object> params =new RecordImpl<>();
+				Record<String, Object> userRecord = this.activeRecordDAO.pandora()
+						.SELECT_ALL_FROM(Constant.TableName.T_SYS_USER_BASE)
+						.EQUAL("USER_ID", ApacheShiroUtils.getCurrentUserID()).get();
+				Record<String, Object> timeRecord = this.activeRecordDAO.pandora()
+						.SELECT_ALL_FROM(Constant.TableName.T_PAYTIME_CONF)
+						.EQUAL("V_USER_ID", ApacheShiroUtils.getCurrentUserID()).get();
+				Record<String, Object> params = new RecordImpl<>();
 				params.setColumn("ID", Random.generateUUID());
 				params.setColumn("V_ACCOUNT_ID", id);
 				params.setColumn("V_USER_ID", ApacheShiroUtils.getCurrentUserID());
@@ -110,10 +108,10 @@ public class AccountAction {
 				params.setColumn("V_PAY_TIME", DateUtils.getDateTime());
 				if (CollectionUtils.isEmpty(timeRecord)) {
 					params.setColumn("V_PAY_NUM", "10");
-				}else {
+				} else {
 					params.setColumn("V_PAY_NUM", timeRecord.getString("V_PAY_NUM"));
 				}
-				
+
 				this.activeRecordDAO.pandora().INSERT_INTO(Constant.TableName.T_ACCOUNT_SHOW).VALUES(params).excute();
 			}
 		} else {
@@ -146,15 +144,24 @@ public class AccountAction {
 	public ResultVO<String> accountConf(AeolusData aeolusData) throws FacadeException {
 		ResultVO<String> resultVO = new ResultVO<>();
 		Record<String, Object> record = aeolusData.getRecord();
-		this.activeRecordDAO.auto().table(Constant.TableName.T_PAY_ACCOUNT).setCondition("and", "ID=#{ID}").modify(record);
+		if (StringUtils.isNotBlank(record.getString("V_PAY_TOTAL"))) {
+			if (!ThirdAction.isDoubleOrFloat(record.getString("V_PAY_TOTAL"))) {
+				resultVO.setResult("金额不是数字");
+				return resultVO;
+			}
+		}
+		
+		this.activeRecordDAO.auto().table(Constant.TableName.T_PAY_ACCOUNT).setCondition("and", "ID=#{ID}")
+				.modify(record);
 		if (StringUtils.isNotBlank(record.getString("V_IS_MATCH"))) {
 			Record<String, Object> params = new RecordImpl<>();
-			if (StringUtils.equals("N", record.getString("V_IS_MATCH"))){
+			if (StringUtils.equals("N", record.getString("V_IS_MATCH"))) {
 				params.setColumn("V_IS_SHOW", "N");
-			}else {
+			} else {
 				params.setColumn("V_IS_SHOW", "Y");
 			}
-			this.activeRecordDAO.pandora().UPDATE(Constant.TableName.T_ACCOUNT_SHOW).EQUAL("V_ACCOUNT_ID", record.getString("ID")).SET(params).excute();
+			this.activeRecordDAO.pandora().UPDATE(Constant.TableName.T_ACCOUNT_SHOW)
+					.EQUAL("V_ACCOUNT_ID", record.getString("ID")).SET(params).excute();
 		}
 		resultVO.setSuccess(true);
 		resultVO.setResult("平台配置修改成功");

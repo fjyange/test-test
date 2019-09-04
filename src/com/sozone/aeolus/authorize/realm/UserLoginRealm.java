@@ -1,16 +1,4 @@
-/**
- * 包名：com.sozone.ydyq.api.realm
- * 文件名：ApiUserLoginRealm.java<br>
- * 创建时间：2018年8月28日 下午2:28:54<br>
- * 创建者：zhenglin<br>
- * 修改者：暂无<br>
- * 修改简述：暂无<br>
- * 修改详述：
- * <p>
- * 暂无<br/>
- * </p>
- * 修改时间：暂无<br>
- */
+
 package com.sozone.aeolus.authorize.realm;
 
 import org.apache.commons.lang.StringUtils;
@@ -24,17 +12,7 @@ import com.sozone.aeolus.exception.ServiceException;
 import com.sozone.fs.common.Constant;
 import com.sozone.fs.common.Constant.TableName;
 
-/**
- * 消息推送验证<br>
- * <p>
- * 消息推送验证<br>
- * </p>
- * Time：2018年8月28日 下午2:28:54<br>
- * 
- * @author zhenglin
- * @version 1.0.0
- * @since JDK1.6
- */
+
 public class UserLoginRealm extends AeolusAccountPasswordAuthorizingRealm
 {
 	/*

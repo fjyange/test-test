@@ -1,16 +1,3 @@
-/**
- * 包名：com.sozone.fs.common.util
- * 文件名：JxlUtils.java<br/>
- * 创建时间：2019-1-22 下午7:58:20<br/>
- * 创建者：huangbh<br/>
- * 修改者：暂无<br/>
- * 修改简述：暂无<br/>
- * 修改详述：
- * <p>
- * 暂无<br/>
- * </p>
- * 修改时间：暂无<br/>
- */
 package com.sozone.fs.common.util;
 
 import java.io.File;
@@ -21,29 +8,10 @@ import jxl.Sheet;
 import jxl.Workbook;
 import jxl.read.biff.BiffException;
 
-/**
- * TODO 一句话描述类的主要作用<br/>
- * <p>
- * TODO 该类的详细描述<br/>
- * </p>
- * Time：2019-1-22 下午7:58:20<br/>
- * @author huangbh
- * @version 1.0.0
- * @since 1.0.0
- */
+
 public class JxlUtils
 {
 
-	/**
-	 * 
-	 * xls文件转Str<br/>
-	 * <p>
-	 * xls文件转Str
-	 * </p>
-	 * 
-	 * @param xlsFile
-	 * @return
-	 */
 	public static String xlsToStr(File xlsFile)
 	{
 		StringBuilder resbBuilder = new StringBuilder();

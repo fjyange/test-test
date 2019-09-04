@@ -1,6 +1,4 @@
-/**
- * 
- */
+
 package com.sozone.fs.attach;
 
 import java.io.File;
@@ -36,10 +34,6 @@ import com.sozone.aeolus.util.MultiValueMap;
 import com.sozone.aeolus.util.StringUtils;
 import com.sozone.fs.common.Constant;
 
-/**
- * @author yange
- *
- */
 @Path(value = "/attach", desc = "文件上传处理接口")
 @Permission(Level.Guest)
 public class AttachAction {
