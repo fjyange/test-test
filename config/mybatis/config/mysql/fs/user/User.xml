@@ -50,7 +50,8 @@
 				<![CDATA[AND tsub.USER_ACCOUNT like CONCAT('%', #{USER_ACCOUNT}, '%')]]>
 			</if>
 			<if test="BELONGUSER !=null and BELONGUSER !=''">
-				<![CDATA[AND t.USER_NAME like CONCAT('%', #{BELONGUSER}, '%')]]>
+				<![CDATA[AND (t.USER_NAME like CONCAT('%', #{BELONGUSER}, '%') 
+				OR tsub.USER_ACCOUNT like CONCAT('%', #{BELONGUSER}, '%'))]]>
 			</if>
 		</where>
 	</select>
