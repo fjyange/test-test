@@ -71,6 +71,7 @@ public class CommissionAction {
 		params.setColumn("USER_ID", ApacheShiroUtils.getCurrentUserID());
 		Record<String, Object> appRecord =this.activeRecordDAO.statement().selectOne("Commission.getCommssion",
 				params);
+		Record<String, Object> dictRecord = this.activeRecordDAO.pandora().SELECT_ALL_FROM(Constant.TableName.T_DICT_TAB).EQUAL("V_DICT_TYPE","WITHDRAW_HAND_CHARGE").EQUAL("V_DISABLED", "Y").get();
 		double cash = appRecord.getDouble("V_CASH_COLLECTION");
 		double money = record.getDouble("V_MONEY");
 		if (cash < money) {
@@ -78,9 +79,15 @@ public class CommissionAction {
 			return resultVO;
 		}
 		double cashMoney = cash - money;
+		double rate = appRecord.getDouble("V_RATE");
+		double formalities = dictRecord.getDouble("V_DICT_VALUE");
+		double reality = money - (money * rate) - formalities;
 		record.setColumn("ID", Random.generateUUID());
 		record.setColumn("V_APP_ID", appRecord.getString("V_APP_ID"));
 		record.setColumn("V_COMMISSION_TIME", DateUtils.getDateTime());
+		record.setColumn("V_RATE", appRecord.getString("V_RATE"));
+		record.setColumn("V_REALITY", reality);
+		record.setColumn("V_FORMALITIES", formalities);
 		this.activeRecordDAO.pandora().INSERT_INTO(Constant.TableName.T_COMMISSION_TAB).VALUES(record).excute();
 		params.clear();
 		params.setColumn("V_CASH_COLLECTION", cashMoney);
@@ -93,21 +100,24 @@ public class CommissionAction {
 		resultVO.setResult("申请成功");
 		return resultVO;
 	}
-	
-	@Path(value="/getRate",desc="获取费率")
+
+	@Path(value = "/getRate", desc = "获取费率")
 	@Service
-	public ResultVO<Record<String, Object>> getRate(AeolusData aeolusData) throws FacadeException{
+	public ResultVO<Record<String, Object>> getRate(AeolusData aeolusData) throws FacadeException {
 		ResultVO<Record<String, Object>> resultVO = new ResultVO<>();
-		Record<String,Object> appRecord = this.activeRecordDAO.pandora().SELECT_ALL_FROM(Constant.TableName.T_APP_TAB).EQUAL("V_USER_ID",ApacheShiroUtils.getCurrentUserID()).get();
-		Record<String, Object> dictRecord = this.activeRecordDAO.pandora().SELECT_ALL_FROM(Constant.TableName.T_DICT_TAB).EQUAL("V_DICT_TYPE","WITHDRAW_HAND_CHARGE").EQUAL("V_DISABLED", "Y").get();
+		Record<String, Object> appRecord = this.activeRecordDAO.pandora().SELECT_ALL_FROM(Constant.TableName.T_APP_TAB)
+				.EQUAL("V_USER_ID", ApacheShiroUtils.getCurrentUserID()).get();
+		Record<String, Object> dictRecord = this.activeRecordDAO.pandora()
+				.SELECT_ALL_FROM(Constant.TableName.T_DICT_TAB).EQUAL("V_DICT_TYPE", "WITHDRAW_HAND_CHARGE")
+				.EQUAL("V_DISABLED", "Y").get();
 		Record<String, Object> record = new RecordImpl<>();
-		record.setColumn("V_RATE",appRecord.getString("V_RATE"));
-		record.setColumn("V_FORMALITIES",dictRecord.getString("V_DICT_VALUE"));
+		record.setColumn("V_RATE", appRecord.getString("V_RATE"));
+		record.setColumn("V_FORMALITIES", dictRecord.getString("V_DICT_VALUE"));
 		resultVO.setResult(record);
 		resultVO.setSuccess(true);
 		return resultVO;
 	}
-	
+
 	@Path(value = "/audit", desc = "提现审核")
 	@Service
 	public ResultVO<String> audit(AeolusData aeolusData) throws FacadeException {
@@ -115,9 +125,8 @@ public class CommissionAction {
 		Record<String, Object> record = aeolusData.getRecord();
 		String id = record.getString("ID");
 		Record<String, Object> commissionRecord = this.activeRecordDAO.pandora()
-				.SELECT_ALL_FROM(Constant.TableName.T_COMMISSION_TAB)
-				.EQUAL("ID", id).get();
-		if(!StringUtils.equals("0", commissionRecord.getString("V_STATUS"))) {
+				.SELECT_ALL_FROM(Constant.TableName.T_COMMISSION_TAB).EQUAL("ID", id).get();
+		if (!StringUtils.equals("0", commissionRecord.getString("V_STATUS"))) {
 			resultVO.setResult("订单已处理");
 			return resultVO;
 		}
@@ -126,23 +135,19 @@ public class CommissionAction {
 		params.setColumn("V_STATUS", record.getString("V_STATUS"));
 		params.setColumn("V_AUDIT_USER", ApacheShiroUtils.getCurrentUserID());
 		params.setColumn("V_AUDIT_TIME", DateUtils.getDateTime());
-		this.activeRecordDAO.pandora()
-				.UPDATE(Constant.TableName.T_COMMISSION_TAB).EQUAL("ID", id)
-				.SET(params).excute();
+		this.activeRecordDAO.pandora().UPDATE(Constant.TableName.T_COMMISSION_TAB).EQUAL("ID", id).SET(params).excute();
 		if (StringUtils.equals("2", status)) {
-			
+
 			String appID = commissionRecord.getString("V_APP_ID");
 			Record<String, Object> collectionRecord = this.activeRecordDAO.pandora()
-					.SELECT_ALL_FROM(Constant.TableName.T_COLLECTION_TAB)
-					.EQUAL("V_APP_ID",appID).get();
+					.SELECT_ALL_FROM(Constant.TableName.T_COLLECTION_TAB).EQUAL("V_APP_ID", appID).get();
 			double cash = collectionRecord.getDouble("V_CASH_COLLECTION");
 			double money = commissionRecord.getDouble("V_MONEY");
 			double account = cash + money;
 			params.clear();
 			params.setColumn("V_CASH_COLLECTION", account);
-			this.activeRecordDAO.pandora()
-					.UPDATE(Constant.TableName.T_COLLECTION_TAB)
-					.EQUAL("V_APP_ID", appID).SET(params).excute();
+			this.activeRecordDAO.pandora().UPDATE(Constant.TableName.T_COLLECTION_TAB).EQUAL("V_APP_ID", appID)
+					.SET(params).excute();
 		}
 		resultVO.setSuccess(true);
 		resultVO.setResult("操作成功");
