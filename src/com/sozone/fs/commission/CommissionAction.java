@@ -81,7 +81,7 @@ public class CommissionAction {
 		double cashMoney = cash - money;
 		double rate = appRecord.getDouble("V_RATE");
 		double formalities = dictRecord.getDouble("V_DICT_VALUE");
-		double reality = (money * rate) - formalities;
+		double reality = money - (money * rate) - formalities;
 		record.setColumn("ID", Random.generateUUID());
 		record.setColumn("V_APP_ID", appRecord.getString("V_APP_ID"));
 		record.setColumn("V_COMMISSION_TIME", DateUtils.getDateTime());

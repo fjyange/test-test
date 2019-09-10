@@ -24,7 +24,7 @@
 	
 	<select id="getCommssion" resultType="record" parameterType="record">
 		<![CDATA[
-			select tct.*,tat.V_APP_NAME from t_app_tab tat
+			select tct.*,tat.V_APP_NAME,tat.V_RATE from t_app_tab tat
 			left join t_collection_tab tct on tct.V_APP_ID = tat.ID
 		]]>
 		<where>

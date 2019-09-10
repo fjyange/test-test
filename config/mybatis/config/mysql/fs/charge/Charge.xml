@@ -21,6 +21,11 @@
 			and tsub.USER_NAME  like CONCAT('%', #{USER_NAME}, '%')
 			]]>
 		</if>
+		<if test="V_STATUS != null and V_STATUS != ''">
+			<![CDATA[
+			and tsub.V_STATUS  like CONCAT('%', #{V_STATUS}, '%')
+			]]>
+		</if>
 		</where>
 		<![CDATA[
 			order by tut.V_TOPUP_TIME desc
