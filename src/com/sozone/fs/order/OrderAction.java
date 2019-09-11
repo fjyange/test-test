@@ -198,6 +198,8 @@ public class OrderAction {
 			statefulDAO.pandora().INSERT_INTO(Constant.TableName.T_ORDER_OPT).VALUES(optParams).excute();
 			statefulDAO.commit();
 		} catch (Exception e) {
+			orderDao.rollback();
+			statefulDAO.rollback();
 			logger.error(LogUtils.format("审核失败", e.getMessage()), e);
 			resultVO.setResult("审核失败");
 			return resultVO;
