@@ -16,6 +16,9 @@
 					</when>
 				</choose>
 			</if>
+			<if test="V_APP_NAME !=null and V_APP_NAME !=''">
+				<![CDATA[AND tat.V_APP_NAME  like CONCAT('%', #{V_APP_NAME}, '%')]]>
+			</if>
 		</where>
 		<![CDATA[
 			order by tct.V_COMMISSION_TIME desc
@@ -29,6 +32,46 @@
 		]]>
 		<where>
 			<![CDATA[AND tat.V_USER_ID = #{USER_ID}]]>
+		</where>
+	</select>
+	
+	<select id="commissionCount" resultType="record" parameterType="record">
+		<![CDATA[
+			SELECT
+				sum(tct.V_MONEY) V_MONEY,
+				SUM(tct.V_REALITY) V_REALITY,
+				SUM(tct.V_FORMALITIES) V_FORMALITIES,
+				(sum(tct.V_MONEY)- SUM(tct.V_REALITY)) RATE_MONEY,
+				tct.V_APP_ID,
+			tat.V_APP_NAME
+			FROM
+				t_commission_tab tct
+			left join t_app_tab tat on tct.V_APP_ID = tat.ID
+	
+		]]>
+		<where>
+			<![CDATA[ AND TO_DAYS(tct.V_COMMISSION_TIME) = TO_DAYS(now()) AND tct.V_STATUS = '1']]>
+		</where>
+		<![CDATA[GROUP BY tct.V_APP_ID]]>
+	</select>
+	<select id="commissionDetail" resultType="record" parameterType="record">
+		<![CDATA[
+			SELECT
+				tct.V_MONEY,
+				tct.V_REALITY V_REALITY,
+				tct.V_FORMALITIES V_FORMALITIES,
+				tct.V_APP_ID,
+				tat.V_APP_NAME
+			FROM
+				t_commission_tab tct
+			left join t_app_tab tat on tct.V_APP_ID = tat.ID
+	
+		]]>
+		<where>
+			<![CDATA[ AND TO_DAYS(tct.V_COMMISSION_TIME) = TO_DAYS(now()) AND tct.V_STATUS = '1']]>
+			<if test="V_APP_NAME !=null and V_APP_NAME !=''">
+				<![CDATA[AND tat.V_APP_NAME  like CONCAT('%', #{V_APP_NAME}, '%')]]>
+			</if>
 		</where>
 	</select>
 </mapper>
