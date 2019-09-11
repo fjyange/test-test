@@ -31,4 +31,38 @@
 			order by tut.V_TOPUP_TIME desc
 		]]>
 	</select>
+	
+	<select id="chargeCount" resultType="record" parameterType="record">
+		<![CDATA[
+			SELECT
+				SUM(tut.V_MONEY) V_MONEY,
+				tsub.USER_NAME
+			FROM
+				t_user_topup tut
+			left join t_sys_user_base tsub on tut.V_TOPUP_USER = tsub.USER_ID
+	
+		]]>
+		<where>
+			<![CDATA[ AND TO_DAYS(tut.V_TOPUP_TIME) = TO_DAYS(now()) AND tut.V_STATUS = '1']]>
+		</where>
+		<![CDATA[GROUP BY tut.V_TOPUP_USER order by tsub.USER_NAME desc]]>
+	</select>
+	<select id="chargeDetail" resultType="record" parameterType="record">
+		<![CDATA[
+			SELECT
+				tut.V_MONEY,
+				tsub.USER_NAME
+			FROM
+				t_user_topup tut
+			left join t_sys_user_base tsub on tut.V_TOPUP_USER = tsub.USER_ID
+	
+		]]>
+		<where>
+			<![CDATA[ AND TO_DAYS(tut.V_TOPUP_TIME) = TO_DAYS(now()) AND tut.V_STATUS = '1']]>
+			<if test="USER_NAME !=null and USER_NAME !=''">
+				<![CDATA[AND tsub.USER_NAME  like CONCAT('%', #{USER_NAME}, '%')]]>
+			</if>
+		</where>
+		<![CDATA[ORDER BY tsub.USER_NAME]]>
+	</select>
 </mapper>

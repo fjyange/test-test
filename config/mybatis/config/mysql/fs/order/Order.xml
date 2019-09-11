@@ -86,4 +86,76 @@
 		  where V_ACCOUNT_ID = #{V_ACCOUNT_ID}
 		]]>
 	</update>
+	
+	<select id="appOrder" resultType="record"
+		parameterType="record">
+		<![CDATA[
+		SELECT
+			sum(tot.V_MONEY) V_MONEY ,
+			tat.V_APP_NAME,
+		sum(tct.V_MONEY) COMMISSION_MONEY,
+		sum(tct.V_FORMALITIES) FORMALITIES_MONEY,
+		sum(tct.V_REALITY) REALITY_MONEY,tot.V_BELONG_APP,
+		sum(tclt.V_CASH_COLLECTION) V_CASH_COLLECTION
+		FROM(
+		select 	sum(V_MONEY) V_MONEY ,V_BELONG_APP from t_order_tab WHERE
+			1 = 1
+		AND TO_DAYS(V_CREATE_TIME) = TO_DAYS(now())
+		AND(
+			V_STATUS = '1'
+			OR V_STATUS = '3'
+		)
+		GROUP BY
+			V_BELONG_APP)tot 
+		LEFT JOIN t_app_tab tat ON tot.V_BELONG_APP = tat.ID
+		LEFT JOIN t_commission_tab tct ON tat.ID = tct.V_APP_ID
+		AND tct.V_STATUS = '1'
+		AND TO_DAYS(tct.V_COMMISSION_TIME) = TO_DAYS(now()) 
+		LEFT JOIN T_COLLECTION_TAB tclt on tot.V_BELONG_APP = tclt.V_APP_ID
+		GROUP BY
+			tot.V_BELONG_APP
+		ORDER BY
+			tat.V_APP_NAME DESC
+		]]>
+	</select>
+	
+	<select id="userOrder" resultType="record"
+		parameterType="record">
+		<![CDATA[
+		SELECT
+			sum(tot.V_MONEY) V_MONEY ,
+			tsub.USER_NAME ,
+			sum(tut.V_MONEY) TOPUP_MONEY ,
+			sum(twt.V_MONEY) WITHDRAW_MONEY ,
+			sum(tbt.V_SURPLUS_BOND) V_SURPLUS_BOND
+		FROM
+			(
+				SELECT
+					sum(tot.V_MONEY) V_MONEY ,
+					tot.V_BELONG_USER
+				FROM
+					t_order_tab tot
+				WHERE
+					TO_DAYS(tot.V_CREATE_TIME) = TO_DAYS(now())
+				AND(
+					tot.V_STATUS = '1'
+					OR tot.V_STATUS = '3'
+				)
+				GROUP BY
+					tot.V_BELONG_USER
+			) tot
+		LEFT JOIN t_sys_user_base tsub ON tot.V_BELONG_USER = tsub.USER_ID
+		LEFT JOIN t_user_topup tut ON tot.V_BELONG_USER = tut.V_TOPUP_USER
+		AND tut.V_STATUS = '1'
+		AND TO_DAYS(tut.V_TOPUP_TIME) = TO_DAYS(now())
+		LEFT JOIN t_withdraw_tab twt ON tot.V_BELONG_USER = twt.V_APPLY_USER
+		AND twt.V_STATUS = '1'
+		AND TO_DAYS(twt.V_APPLY_TIME) = TO_DAYS(now())
+		LEFT JOIN t_bond_today tbt ON tbt.V_USER_ID = tot.V_BELONG_USER
+		GROUP BY
+			tot.V_BELONG_USER
+		ORDER BY
+			tsub.USER_NAME DESC
+		]]>
+	</select>
 </mapper>

@@ -21,13 +21,16 @@
 			tsub.USER_RATE,
 			(tsub.USER_RATE * tbt.V_COUNT_RECEIVABLES) RATE_COUNT,
 			tsub.CREATE_USER,
-			t.USER_NAME BELONG_USER 
+			t.USER_NAME BELONG_USER ,
+			ifnull(sum(tbt2.V_COUNT_RECEIVABLES),0) BELONG_COUNT
 		FROM
 			t_sys_user_base tsub 
 		left join t_sys_user_base t on tsub.CREATE_USER = t.USER_ID 
 		left join t_paytime_conf tpc on tsub.USER_ID  = tpc.V_USER_ID
 		LEFT JOIN t_bond_today tbt ON tsub.USER_ID = tbt.V_USER_ID 
 		LEFT JOIN t_sys_user_role tsur on tsub.USER_ID = tsur.USER_ID
+		left join t_sys_user_base sub on tsub.USER_ID = sub.CREATE_USER
+		left join t_bond_today tbt2 on sub.USER_ID = tbt2.V_USER_ID 
 		]]>
 		<where>
 			<![CDATA[and tsub.USER_TYPE != '0']]>
@@ -54,6 +57,7 @@
 				OR tsub.USER_ACCOUNT like CONCAT('%', #{BELONGUSER}, '%'))]]>
 			</if>
 		</where>
+		<![CDATA[GROUP BY tsub.USER_ID]]>
 	</select>
 	
 	<select id="belongList"  resultType="record" parameterType="record">

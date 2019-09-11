@@ -14,18 +14,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sozone.aeolus.annotation.Path;
-import com.sozone.aeolus.annotation.PathParam;
 import com.sozone.aeolus.annotation.Service;
 import com.sozone.aeolus.authorize.annotation.Level;
 import com.sozone.aeolus.authorize.annotation.Permission;
 import com.sozone.aeolus.dao.ActiveRecordDAO;
 import com.sozone.aeolus.dao.data.Record;
-import com.sozone.aeolus.dao.data.RecordImpl;
 import com.sozone.aeolus.data.AeolusData;
-import com.sozone.aeolus.exception.FacadeException;
-import com.sozone.aeolus.utils.DateUtils;
-import com.sozone.fs.common.util.WebToolUtils;
-
 
 @Path(value = "/export", desc = "文件导出")
 @Permission(Level.Guest)
@@ -50,45 +44,32 @@ public class Export {
 		this.activeRecordDAO = activeRecordDAO;
 	}
 
-	@Path(value = "/tenderLefferExport", desc = "招标人导出保函信息")
+	@Path(value = "/todayCommisionExportCount", desc = "导出今日平台提现")
 	@Service
-	public void tenderLefferExport(AeolusData aeolusData) throws Exception {
+	public void todayCommisionExportCount(AeolusData aeolusData) throws Exception {
 		HttpServletResponse response = aeolusData.getHttpServletResponse();
 		Record<String, Object> params = aeolusData.getRecord();
-		String ids= params.getString("lefferIds");
-		String[] idAttr = ids.split(",");
-		String idArr = "";
-		for (String id : idAttr) {
-			idArr += ",'" + id + "'";
-		}
-		params.setColumn("IDS", idArr.substring(1));
-		List<Record<String, Object>> list = this.activeRecordDAO.statement().selectList("Project.projectInfoList",
+		List<Record<String, Object>> list = this.activeRecordDAO.statement().selectList("Commission.commissionCount",
 				params);
-		List<ProjectLefferBean> projectList = new ArrayList<ProjectLefferBean>();
-		int i = 1;
-		for (Record<String, Object> projectRecord : list)
-		{
-			ProjectLefferBean projectLefferBean = new ProjectLefferBean(i + "",
-					projectRecord.getString("V_NO"),
-					projectRecord.getString("BIDDER_NAME"),
-					projectRecord.getString("FINANCIAL_NAME"),
-					WebToolUtils.timeToString(projectRecord
-							.getString("N_UPDATE_TIME")));
-			projectList.add(projectLefferBean);
-			i++;
+		List<CommissionCountBean> commissionCountBeans = new ArrayList<CommissionCountBean>();
+		for (Record<String, Object> commissionRecord : list) {
+			CommissionCountBean commissionCountBean = new CommissionCountBean(commissionRecord.getString("V_MONEY"),
+					commissionRecord.getString("V_REALITY"), commissionRecord.getString("RATE_MONEY"),
+					commissionRecord.getString("V_FORMALITIES"), commissionRecord.getString("V_APP_NAME"));
+			commissionCountBeans.add(commissionCountBean);
 		}
 		OutputStream out = null;
-		if (projectList.size() > 0) {
-			String[] headers = { "序号", "电子保函单号", "投标人名字", "开具保函的金融机构名称", "开具时间"};
-			ExportExcel<ProjectLefferBean> ex = new ExportExcel<ProjectLefferBean>();
+		if (commissionCountBeans.size() > 0) {
+			String[] headers = { "平台名称", "总提现金额", "实际到账金额", "扣除费用", "手续费" };
+			ExportExcel<CommissionCountBean> ex = new ExportExcel<CommissionCountBean>();
 			try {
 				response.reset();
 				// 设置response的Header
-				String fileName = (DateUtils.getDate()).replace(" ", "-") + "project.xls";
+				String fileName = System.currentTimeMillis() + "commissionCount.xls";
 				response.addHeader("Content-Disposition", "attachment;filename=" + fileName);
 				out = new BufferedOutputStream(response.getOutputStream());
 				response.setContentType("application/octet-stream");
-				InputStream is = ex.exportExcel(headers, projectList, out);
+				InputStream is = ex.exportExcel(headers, commissionCountBeans, out);
 				int c;
 				while ((c = is.read()) != -1) {
 					out.write(c);
@@ -107,31 +88,32 @@ public class Export {
 		}
 	}
 
-	
-	@Path(value = "/financialExportLeffer/{ids}", desc = "金融机构导出选中保函")
+	@Path(value = "/todayCommisionExportDetail", desc = "导出今日平台明细")
 	@Service
-	public void financialExportLeffer(@PathParam("ids") String ids, AeolusData aeolusData) throws Exception {
+	public void todayCommisionExportDetail(AeolusData aeolusData) throws Exception {
 		HttpServletResponse response = aeolusData.getHttpServletResponse();
-		String[] idAttr = ids.split(",");
-		String idArr = "";
-		for (String id : idAttr) {
-			idArr += ",'" + id + "'";
+		Record<String, Object> params = aeolusData.getRecord();
+		List<Record<String, Object>> list = this.activeRecordDAO.statement().selectList("Commission.commissionDetail",
+				params);
+		List<CommissionDetailBean> commissionDetailBeans = new ArrayList<CommissionDetailBean>();
+		for (Record<String, Object> commissionRecord : list) {
+			CommissionDetailBean commissionDetailBean = new CommissionDetailBean(commissionRecord.getString("V_MONEY"),
+					commissionRecord.getString("V_REALITY"), commissionRecord.getString("V_FORMALITIES"),
+					commissionRecord.getString("V_APP_NAME"));
+			commissionDetailBeans.add(commissionDetailBean);
 		}
-		Record<String, Object> params = new RecordImpl<String, Object>();
-		params.setColumn("ID", idArr.substring(1));
-		List<LefferBean> list = selectLeffer(params);
 		OutputStream out = null;
-		if (list.size() > 0) {
-			String[] headers = { "序号", "保单号", "保函申请时间", "招标项目名称", "标段包名称", "保函类型", "投保人名称", "协议签约状态", "电子保函状态" };
-			ExportExcel<LefferBean> ex = new ExportExcel<LefferBean>();
+		if (commissionDetailBeans.size() > 0) {
+			String[] headers = { "平台名称", "总提现金额", "实际到账金额", "手续费" };
+			ExportExcel<CommissionDetailBean> ex = new ExportExcel<CommissionDetailBean>();
 			try {
 				response.reset();
 				// 设置response的Header
-				String fileName = (DateUtils.getDate()).replace(" ", "-") + "_bh.xls";
+				String fileName = System.currentTimeMillis() + "commissionDetail.xls";
 				response.addHeader("Content-Disposition", "attachment;filename=" + fileName);
 				out = new BufferedOutputStream(response.getOutputStream());
 				response.setContentType("application/octet-stream");
-				InputStream is = ex.exportExcel(headers, list, out);
+				InputStream is = ex.exportExcel(headers, commissionDetailBeans, out);
 				int c;
 				while ((c = is.read()) != -1) {
 					out.write(c);
@@ -150,32 +132,173 @@ public class Export {
 		}
 	}
 
-	private List<LefferBean> selectLeffer(Record<String, Object> params) throws FacadeException {
-		List<Record<String, Object>> list = this.activeRecordDAO.statement().selectList("Leffer.financialExportLeffer",
-				params);
-		List<LefferBean> lefferList = new ArrayList<LefferBean>();
-		if (list.size() > 0) {
-			int i = 1;
-			for (Record<String, Object> df : list) {
-				LefferBean lb = new LefferBean();
-				lb.setRowNum(i + "");
-				lb.setVno(df.getString("V_NO") == null ? "" : df.getString("V_NO"));
-				String tempTime=df.getString("N_CREATE_TIME") == null ? "" : df.getString("N_CREATE_TIME");
-				lb.setCreateTime(WebToolUtils.timeToString(tempTime));
-				lb.setTenderName(
-						df.getString("V_PROJECT_TENDER_NAME") == null ? "" : df.getString("V_PROJECT_TENDER_NAME"));
-				lb.setSectionName(
-						df.getString("V_PROJECT_SECTION_NAME") == null ? "" : df.getString("V_PROJECT_SECTION_NAME"));
-				lb.setLefferStatus(
-						df.getString("N_LEFFER_STATUS_TXT") == null ? "" : df.getString("N_LEFFER_STATUS_TXT"));
-				lb.setBidderName(df.getString("BIDDER_NAME") == null ? "" : df.getString("BIDDER_NAME"));
-				lb.setSignStatus(df.getString("N_SIGN_STATUS_TXT") == null ? "" : df.getString("N_SIGN_STATUS_TXT"));
-				lb.setAuditStatus(df.getString("N_AUDIT_STATUS_TXT") == null ? "" : df.getString("N_AUDIT_STATUS_TXT"));
-				lefferList.add(lb);
-				i++;
+	@Path(value = "/todayTopupExportDetail", desc = "导出今日充值明细")
+	@Service
+	public void todayTopupExportDetail(AeolusData aeolusData) throws Exception {
+		HttpServletResponse response = aeolusData.getHttpServletResponse();
+		Record<String, Object> params = aeolusData.getRecord();
+		List<Record<String, Object>> list = this.activeRecordDAO.statement().selectList("Charge.chargeDetail", params);
+		List<TopupBean> topupBeans = new ArrayList<TopupBean>();
+		for (Record<String, Object> topupRecord : list) {
+			TopupBean topupBean = new TopupBean(topupRecord.getString("USER_NAME"), topupRecord.getString("V_MONEY"));
+			topupBeans.add(topupBean);
+		}
+		OutputStream out = null;
+		if (topupBeans.size() > 0) {
+			String[] headers = { "用户名", "充值金额" };
+			ExportExcel<TopupBean> ex = new ExportExcel<TopupBean>();
+			try {
+				response.reset();
+				// 设置response的Header
+				String fileName = System.currentTimeMillis() + "topupdetail.xls";
+				response.addHeader("Content-Disposition", "attachment;filename=" + fileName);
+				out = new BufferedOutputStream(response.getOutputStream());
+				response.setContentType("application/octet-stream");
+				InputStream is = ex.exportExcel(headers, topupBeans, out);
+				int c;
+				while ((c = is.read()) != -1) {
+					out.write(c);
+				}
+				is.close();
+				out.flush();
+				out.close();
+			} catch (NullPointerException e) {
+				e.printStackTrace();
+			} catch (IllegalStateException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+				out.close();
 			}
 		}
-		return lefferList;
+	}
+
+	@Path(value = "/todayTopupExportCount", desc = "导出今日充值总额")
+	@Service
+	public void todayTopupExportCount(AeolusData aeolusData) throws Exception {
+		HttpServletResponse response = aeolusData.getHttpServletResponse();
+		Record<String, Object> params = aeolusData.getRecord();
+		List<Record<String, Object>> list = this.activeRecordDAO.statement().selectList("Charge.chargeCount", params);
+		List<TopupBean> topupBeans = new ArrayList<TopupBean>();
+		for (Record<String, Object> topupRecord : list) {
+			TopupBean topupBean = new TopupBean(topupRecord.getString("USER_NAME"), topupRecord.getString("V_MONEY"));
+			topupBeans.add(topupBean);
+		}
+		OutputStream out = null;
+		if (topupBeans.size() > 0) {
+			String[] headers = { "用户名", "充值金额" };
+			ExportExcel<TopupBean> ex = new ExportExcel<TopupBean>();
+			try {
+				response.reset();
+				// 设置response的Header
+				String fileName = System.currentTimeMillis() + "topupcount.xls";
+				response.addHeader("Content-Disposition", "attachment;filename=" + fileName);
+				out = new BufferedOutputStream(response.getOutputStream());
+				response.setContentType("application/octet-stream");
+				InputStream is = ex.exportExcel(headers, topupBeans, out);
+				int c;
+				while ((c = is.read()) != -1) {
+					out.write(c);
+				}
+				is.close();
+				out.flush();
+				out.close();
+			} catch (NullPointerException e) {
+				e.printStackTrace();
+			} catch (IllegalStateException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+				out.close();
+			}
+		}
+	}
+
+	@Path(value = "/todayAPPOrderExportCount", desc = "导出平台收款总额")
+	@Service
+	public void todayAPPOrderExportCount(AeolusData aeolusData) throws Exception {
+		HttpServletResponse response = aeolusData.getHttpServletResponse();
+		Record<String, Object> params = aeolusData.getRecord();
+		List<Record<String, Object>> list = this.activeRecordDAO.statement().selectList("Order.appOrder", params);
+		List<AppOrderBean> appOrderBeans = new ArrayList<AppOrderBean>();
+		for (Record<String, Object> appOrderRecord : list) {
+			AppOrderBean topupBean = new AppOrderBean(appOrderRecord.getString("V_APP_NAME"),
+					appOrderRecord.getString("V_MONEY"), appOrderRecord.getString("COMMISSION_MONEY"),
+					appOrderRecord.getString("FORMALITIES_MONEY"), appOrderRecord.getString("REALITY_MONEY"),
+					appOrderRecord.getString("V_CASH_COLLECTION"));
+			appOrderBeans.add(topupBean);
+		}
+		OutputStream out = null;
+		if (appOrderBeans.size() > 0) {
+			String[] headers = { "平台名", "收款金额","今日提成金额","手续费","实际到账金额","可提现金额" };
+			ExportExcel<AppOrderBean> ex = new ExportExcel<AppOrderBean>();
+			try {
+				response.reset();
+				// 设置response的Header
+				String fileName = System.currentTimeMillis() + "apporder.xls";
+				response.addHeader("Content-Disposition", "attachment;filename=" + fileName);
+				out = new BufferedOutputStream(response.getOutputStream());
+				response.setContentType("application/octet-stream");
+				InputStream is = ex.exportExcel(headers, appOrderBeans, out);
+				int c;
+				while ((c = is.read()) != -1) {
+					out.write(c);
+				}
+				is.close();
+				out.flush();
+				out.close();
+			} catch (NullPointerException e) {
+				e.printStackTrace();
+			} catch (IllegalStateException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+				out.close();
+			}
+		}
+	}
+
+	@Path(value = "/todayUserOrderExportCount", desc = "导出用户收款总额")
+	@Service
+	public void todayUserOrderExportCount(AeolusData aeolusData) throws Exception {
+		HttpServletResponse response = aeolusData.getHttpServletResponse();
+		Record<String, Object> params = aeolusData.getRecord();
+		List<Record<String, Object>> list = this.activeRecordDAO.statement().selectList("Order.userOrder", params);
+		List<UserOrderBean> userOrderBeans = new ArrayList<UserOrderBean>();
+		for (Record<String, Object> userOrderRecord : list) {
+			UserOrderBean userOrderBean = new UserOrderBean(userOrderRecord.getString("USER_NAME"),
+					userOrderRecord.getString("V_MONEY"), userOrderRecord.getString("TOPUP_MONEY"),
+					userOrderRecord.getString("WITHDRAW_MONEY"), userOrderRecord.getString("V_SURPLUS_BOND"));
+			userOrderBeans.add(userOrderBean);
+		}
+		OutputStream out = null;
+		if (userOrderBeans.size() > 0) {
+			String[] headers = { "用户名", "收款金额", "充值金额", "提现金额", "剩余保证金" };
+			ExportExcel<UserOrderBean> ex = new ExportExcel<UserOrderBean>();
+			try {
+				response.reset();
+				// 设置response的Header
+				String fileName = System.currentTimeMillis() + "userorder.xls";
+				response.addHeader("Content-Disposition", "attachment;filename=" + fileName);
+				out = new BufferedOutputStream(response.getOutputStream());
+				response.setContentType("application/octet-stream");
+				InputStream is = ex.exportExcel(headers, userOrderBeans, out);
+				int c;
+				while ((c = is.read()) != -1) {
+					out.write(c);
+				}
+				is.close();
+				out.flush();
+				out.close();
+			} catch (NullPointerException e) {
+				e.printStackTrace();
+			} catch (IllegalStateException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+				out.close();
+			}
+		}
 	}
 
 }
