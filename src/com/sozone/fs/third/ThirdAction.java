@@ -193,7 +193,7 @@ public class ThirdAction {
 			return resultVO;
 		}
 		try {
-			String url = "http://120.79.91.63:8090/" + fileRecord.getString("V_NAME");
+			String url = "http://120.79.5.65:8090/" + fileRecord.getString("V_NAME");
 			resultVO.setResult(url);
 		} catch (Exception e) {
 			logRecord.setColumn("V_RECIEVE_STATUS", "3");
