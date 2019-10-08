@@ -108,9 +108,8 @@
 		GROUP BY
 			V_BELONG_APP)tot 
 		LEFT JOIN t_app_tab tat ON tot.V_BELONG_APP = tat.ID
-		LEFT JOIN t_commission_tab tct ON tat.ID = tct.V_APP_ID
-		AND tct.V_STATUS = '1'
-		AND TO_DAYS(tct.V_COMMISSION_TIME) = TO_DAYS(now()) 
+		LEFT JOIN (select SUM(V_MONEY) V_MONEY,SUM(V_FORMALITIES) V_FORMALITIES,SUM(V_REALITY) V_REALITY,V_APP_ID from t_commission_tab where V_STATUS = '1'
+		AND TO_DAYS(V_COMMISSION_TIME) = TO_DAYS(now()) GROUP BY V_APP_ID ) tct ON tat.ID = tct.V_APP_ID  
 		LEFT JOIN T_COLLECTION_TAB tclt on tot.V_BELONG_APP = tclt.V_APP_ID
 		GROUP BY
 			tot.V_BELONG_APP
@@ -127,8 +126,11 @@
 			tsub.USER_NAME ,
 			sum(tut.V_MONEY) TOPUP_MONEY ,
 			sum(twt.V_MONEY) WITHDRAW_MONEY ,
-			sum(tbt.V_SURPLUS_BOND) V_SURPLUS_BOND
+			tbt.V_SURPLUS_BOND
 		FROM
+		 t_sys_user_base tsub 
+inner JOIN t_bond_today tbt ON tbt.V_USER_ID = tsub.USER_ID 
+LEFT JOIN
 			(
 				SELECT
 					sum(tot.V_MONEY) V_MONEY ,
@@ -144,16 +146,14 @@
 				GROUP BY
 					tot.V_BELONG_USER
 			) tot
-		LEFT JOIN t_sys_user_base tsub ON tot.V_BELONG_USER = tsub.USER_ID
-		LEFT JOIN t_user_topup tut ON tot.V_BELONG_USER = tut.V_TOPUP_USER
-		AND tut.V_STATUS = '1'
-		AND TO_DAYS(tut.V_TOPUP_TIME) = TO_DAYS(now())
-		LEFT JOIN t_withdraw_tab twt ON tot.V_BELONG_USER = twt.V_APPLY_USER
-		AND twt.V_STATUS = '1'
-		AND TO_DAYS(twt.V_APPLY_TIME) = TO_DAYS(now())
-		LEFT JOIN t_bond_today tbt ON tbt.V_USER_ID = tot.V_BELONG_USER
+ 		ON tot.V_BELONG_USER = tsub.USER_ID 
+LEFT JOIN (select SUM(V_MONEY) V_MONEY,V_TOPUP_USER from t_user_topup where V_STATUS = '1'
+		AND TO_DAYS(V_TOPUP_TIME) = TO_DAYS(now()) GROUP BY V_TOPUP_USER) tut ON tot.V_BELONG_USER = tut.V_TOPUP_USER 
+	LEFT JOIN (select SUM(V_MONEY) V_MONEY,V_APPLY_USER from t_withdraw_tab where V_STATUS = '1'
+		AND TO_DAYS(V_APPLY_TIME) = TO_DAYS(now()) GROUP BY V_APPLY_USER)  twt ON tot.V_BELONG_USER = twt.V_APPLY_USER 
+		
 		GROUP BY
-			tot.V_BELONG_USER
+			tsub.USER_ID
 		ORDER BY
 			tsub.USER_NAME DESC
 		]]>
