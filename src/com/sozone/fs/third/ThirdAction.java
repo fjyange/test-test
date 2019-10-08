@@ -270,15 +270,18 @@ public class ThirdAction {
 	public static void main(String[] args) throws Exception {
 		// for(int i = 0;i< 20;i++) {
 		Record<String, Object> record = new RecordImpl<>();
-		record.setColumn("appid", "f11530b8a20b48c3af36d939dc605d6e");
-		 record.setColumn("money", "500");
-		record.setColumn("orderno", "OP237705");
+		record.setColumn("appid", "0a82b4fb7e2446e2a52619d2bc0fd424");
+		 record.setColumn("money", "5000");
+		record.setColumn("orderno", "201909142035013425921532");
 		 record.setColumn("paytype", "01");
-		// record.setColumn("notifyurl", "www.baidu.com");
-		String sign = getSign(record, "5adDHQLHfh7d8iQ");
+		 record.setColumn("notifyurl", "http:\\/\\/47.75.253.95:10002\\/callback\\/test\\/testCallBack");
+//		record.setColumn("orderno", "test12312");
+//		record.setColumn("money", "123");
+//		record.setColumn("status", "1");
+		String sign = getSign(record, "oRELu0wCXTvPovH");
 		record.setColumn("sign", sign);
 		 System.out.println(HttpClientUtils.sendJsonPostRequest(
-		 "http://120.24.93.47/authorize/third/sendorder",
+		 "http://121.40.168.73/authorize/third/sendorder",
 		 JSONObject.toJSONString(record), "utf-8"));
 //		System.out.println(HttpClientUtils.sendJsonPostRequest(
 //				"http://120.24.93.47/authorize/third/confirmorder", JSONObject.toJSONString(record), "utf-8"));
