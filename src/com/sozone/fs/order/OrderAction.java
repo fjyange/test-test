@@ -68,7 +68,22 @@ public class OrderAction {
 		resultVO.setResult(page);
 		return resultVO;
 	}
-
+	
+	@Path(value = "/findHistory", desc = "获取订单列表")
+	@Service
+	public ResultVO<Page<Record<String, Object>>> findHistory(AeolusData aeolusData) throws FacadeException {
+		logger.debug(LogUtils.format("获取订单信息", aeolusData));
+		ResultVO<Page<Record<String, Object>>> resultVO = new ResultVO<>();
+		Record<String, Object> record = aeolusData.getRecord();
+		record.setColumn("USER_ID", ApacheShiroUtils.getCurrentUserID());
+		record.setColumn("IS_ADMIN", ApacheShiroUtils.getCurrentUser().getString("IS_ADMIN"));
+		Page<Record<String, Object>> page = this.activeRecordDAO.statement().selectPage("Order.historyList",
+				aeolusData.getPageRequest(), record);
+		resultVO.setSuccess(true);
+		resultVO.setResult(page);
+		return resultVO;
+	}
+	
 	@Path(value = "/audit", desc = "订单审核")
 	@Service
 	public ResultVO<String> audit(AeolusData aeolusData) throws Exception {
@@ -222,13 +237,25 @@ public class OrderAction {
 					try {
 						sendPar.setColumn("ID", Random.generateUUID());
 						sendPar.setColumn("V_SEND_URL", orderRecord.getString("V_NOTIFY_URL"));
-						sendPar.setColumn("V_SEND_ORDER", orderRecord.getString("V_ORDER_NO"));
+						sendPar.setColumn("V_SEND_ORDER", id);
 						sendPar.setColumn("V_SEND_TIME", System.currentTimeMillis());
 						String result = HttpClientUtils.sendJsonPostRequest(orderRecord.getString("V_NOTIFY_URL"),
 								JSONObject.toJSONString(sendRecord), "utf-8");
+						sendPar.setColumn("V_SEND_MSG", JSONObject.toJSONString(sendRecord));
+						if (StringUtils.equals("success", result)) {
+							sendPar.setColumn("V_SEND_STATUS", "success");
+						}else {
+							JSONObject jsonObject = JSONObject.parseObject(result);
+							if (StringUtils.equals("success", jsonObject.getString("success"))) {
+								sendPar.setColumn("V_SEND_STATUS", "success");
+							}else {
+								sendPar.setColumn("V_SEND_STATUS", "fail");
+							}
+						}
 						sendPar.setColumn("V_RETURN_MSG", result);
 						sendPar.setColumn("V_RETURN_TIME", System.currentTimeMillis());
 					} catch (Exception e) {
+						sendPar.setColumn("V_SEND_STATUS", "fail");
 						sendPar.setColumn("V_RETURN_MSG", e.getMessage());
 						sendPar.setColumn("V_RETURN_TIME", System.currentTimeMillis());
 						logger.error(LogUtils.format("发送数据失败", e.getMessage()), e);
@@ -237,7 +264,6 @@ public class OrderAction {
 								.excute();
 					}
 				}
-
 			}
 		}
 		resultVO.setSuccess(true);

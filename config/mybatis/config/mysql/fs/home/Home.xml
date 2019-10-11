@@ -18,13 +18,14 @@
 	<select id="getAdminUserMoney" resultType="record"
 		parameterType="record">
 		<![CDATA[
-			select ifnull(sum(V_COUNT_RECEIVABLES),0) USER_TOTAL_COUNT,ifnull(sum(V_SURPLUS_BOND),0) USER_TOTAL_SURPLUS from t_bond_today  
+			select ifnull(sum(V_COUNT_RECEIVABLES),0) USER_TOTAL_COUNT,ifnull(sum(V_SURPLUS_BOND),0) USER_TOTAL_SURPLUS from t_bond_today tbt
+			inner join  t_sys_user_base tsub on tbt.V_USER_ID = tsub.USER_ID 
 		]]>
 	</select>
 	<select id="getAdminAccountMoney" resultType="record"
 		parameterType="record">
 		<![CDATA[
-			select ifnull(sum(V_TOTAL_MONEY),0) ACCOUNT_TOTAL_COUNT from t_account_collection  
+			select ifnull(sum(V_TOTAL_MONEY),0) ACCOUNT_TOTAL_COUNT from t_account_collection
 		]]>
 	</select>
 	<select id="getAdminAppMoney" resultType="record"

@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Send">
+	<select id="getErrorOrder" resultType="record"
+		parameterType="record">
+		<![CDATA[
+				select tst.ID,V_RETURN_MSG,FROM_UNIXTIME(tst.V_SEND_TIME/1000,"%Y-%m-%d %T") V_SEND_TIME,
+			FROM_UNIXTIME(tst.V_RETURN_TIME/1000,"%Y-%m-%d %T") V_RETURN_TIME,tst.V_SEND_ORDER,tot.V_ORDER_NO,tat.V_APP_NAME
+			from t_send_tab tst 
+			left join t_order_tab tot on tst.V_SEND_ORDER = tot.ID
+			left join t_app_tab tat on tot.V_BELONG_APP = tat.ID
+		]]>
+		<where>
+			<![CDATA[
+				and tst.V_SEND_STATUS !='success' 
+			]]>
+			<if test="V_APP_NAME != null and V_APP_NAME != ''">
+				<![CDATA[
+					and tat.V_APP_NAME  like CONCAT('%', #{V_APP_NAME}, '%')
+				]]>
+			</if>
+			<if test="V_NO != null and V_NO != ''">
+				<![CDATA[
+					and tot.V_NO  like CONCAT('%', #{V_NO}, '%')
+				]]>
+			</if>
+		</where>
+	</select>
+	<select id=" " resultType="record"
+		parameterType="record">
+		<![CDATA[
+			select COUNT(1) ORDER_COUNT,V_SEND_ORDER from t_send_tab GROUP BY V_SEND_ORDER HAVING ORDER_COUNT > 1 
+		]]>
+	</select>
+	<select id="getUserCount" resultType="record"
+		parameterType="record">
+		<![CDATA[
+		select * from (
+			select SUM(V_MONEY) ORDER_MONEY,V_BELONG_USER from T_ORDER_TAB
+			where  to_days(V_UPDATE_TIME) = to_days(now()) and (V_STATUS = '1' or V_STATUS='3')
+			group by V_BELONG_USER ) tot
+			left join t_bond_today  tbt on tot.V_BELONG_USER = tbt.V_USER_ID 
+			where tbt.V_COUNT_RECEIVABLES != tot.ORDER_MONEY
+		]]>
+	</select>
+	<select id="getTopupCount" resultType="record"
+		parameterType="record">
+		<![CDATA[
+			select ifnull(sum(V_MONEY),0) TOPUP_MONEY from t_user_topup 
+		]]>
+		<where>
+			<![CDATA[to_days(V_TOPUP_TIME) = to_days(now()) and V_STATUS = '1' and V_TOPUP_USER = #{USER_ID}]]>
+		</where>
+	</select>
+	
+	<update id="updateUserCount">
+	<![CDATA[
+		update t_bond_today set V_COUNT_RECEIVABLES = V_COUNT_RECEIVABLES + #{syMoney},V_ALI_RECEIVABLES = V_ALI_RECEIVABLES+ #{syMoney},
+		V_SURPLUS_BOND  = V_SURPLUS_BOND + #{MONEY} where V_USER_ID = #{USER_ID}
+	]]>
+	</update>
+	<select id="getAppCount" resultType="record"
+		parameterType="record">
+		<![CDATA[
+		select * from (
+			select SUM(V_MONEY) ORDER_MONEY,V_BELONG_APP from T_ORDER_TAB
+			where  to_days(V_UPDATE_TIME) = to_days(now()) and (V_STATUS = '1' or V_STATUS='3')
+			group by V_BELONG_APP ) tot
+			left join t_collection_tab  tct on tot.V_BELONG_APP = tct.V_APP_ID 
+			where tct.V_TOTAL_COLLECTION != tot.ORDER_MONEY
+		]]>
+	</select>
+	<select id="getCommissionCount" resultType="record"
+		parameterType="record">
+		<![CDATA[
+			select ifnull(sum(V_MONEY),0) COMMISSION_MONEY from t_commission_tab 
+		]]>
+		<where>
+			<![CDATA[to_days(V_COMMISSION_TIME) = to_days(now()) and V_STATUS = '1' and V_APP_ID = #{USER_ID}]]>
+		</where>
+	</select>
+	<update id="updateAppCount">
+	<![CDATA[
+		update t_collection_tab set V_ALI_COLLECTION = V_ALI_COLLECTION + #{syMoney},V_TOTAL_COLLECTION = V_TOTAL_COLLECTION+ #{syMoney},
+		V_CASH_COLLECTION  = V_CASH_COLLECTION + #{syMoney} where V_APP_ID = #{USER_ID}
+	]]>
+	</update>
+	
+	<select id="getAccountCount" resultType="record"
+		parameterType="record">
+		<![CDATA[
+		select * from (
+			select SUM(V_MONEY) ORDER_MONEY,V_BELONG_ACCOUNT from T_ORDER_TAB
+			where  to_days(V_UPDATE_TIME) = to_days(now()) and (V_STATUS = '1' or V_STATUS='3')
+			group by V_BELONG_ACCOUNT ) tot
+			left join t_account_collection  tac on tot.V_BELONG_ACCOUNT = tac.V_ACCOUNT_ID 
+			where tac.V_TOTAL_MONEY != tot.ORDER_MONEY
+		]]>
+	</select>
+	<update id="updateAccountCount">
+	<![CDATA[
+		update t_account_collection set V_TOTAL_MONEY = V_TOTAL_MONEY + #{syMoney},V_ALI_MONEY = V_ALI_MONEY+ #{syMoney}
+		 where V_ACCOUNT_ID = #{USER_ID}
+	]]>
+	</update>
+</mapper>
