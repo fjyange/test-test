@@ -1,6 +1,31 @@
 <?xml version="1.0" encoding="UTF-8" ?>  
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="Send">
+	<select id="getErrorOrder" resultType="record"
+		parameterType="record">
+		<![CDATA[
+				select tst.ID,V_RETURN_MSG,FROM_UNIXTIME(tst.V_SEND_TIME/1000,"%Y-%m-%d %T") V_SEND_TIME,
+			FROM_UNIXTIME(tst.V_RETURN_TIME/1000,"%Y-%m-%d %T") V_RETURN_TIME,tst.V_SEND_ORDER,tot.V_ORDER_NO,tat.V_APP_NAME
+			from t_send_tab tst 
+			left join t_order_tab tot on tst.V_SEND_ORDER = tot.ID
+			left join t_app_tab tat on tot.V_BELONG_APP = tat.ID
+		]]>
+		<where>
+			<![CDATA[
+				and tst.V_SEND_STATUS !='success' 
+			]]>
+			<if test="V_APP_NAME != null and V_APP_NAME != ''">
+				<![CDATA[
+					and tat.V_APP_NAME  like CONCAT('%', #{V_APP_NAME}, '%')
+				]]>
+			</if>
+			<if test="V_NO != null and V_NO != ''">
+				<![CDATA[
+					and tot.V_NO  like CONCAT('%', #{V_NO}, '%')
+				]]>
+			</if>
+		</where>
+	</select>
 	<select id=" " resultType="record"
 		parameterType="record">
 		<![CDATA[

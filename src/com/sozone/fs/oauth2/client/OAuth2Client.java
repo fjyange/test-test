@@ -21,7 +21,6 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.text.StrSubstitutor;
 import org.apache.oltu.oauth2.common.OAuth;
-import org.apache.shiro.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +40,6 @@ import com.sozone.aeolus.ext.ExtConstant.TableName;
 import com.sozone.aeolus.ext.client.RACloudBaseOAuth2Client;
 import com.sozone.aeolus.util.CollectionUtils;
 import com.sozone.auth2.client.OAuth2ClientConstant;
-import com.sozone.fs.common.Constant.SysParamKey;
 import com.sozone.fs.common.util.SessionUtils;
 
 
@@ -129,16 +127,8 @@ public class OAuth2Client extends RACloudBaseOAuth2Client {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		// 首页
-		String successUrl = SystemParamUtils.getProperty(SysParamKey.MAIN_PAGE_KEY, "");
-		String basePath = SystemParamUtils.getProperty(SysParamKey.MAIN_FORWARD_URL_KEY, data.getBasePath());
-		successUrl = basePath + "/" + successUrl + "?user_type=" + userType + "&user_id=" + userId;
-		// 如果是运维登录且是运维管理员
-		if (StringUtils.equalsIgnoreCase(userType, PM_TYPE)
-				&& SecurityUtils.getSubject().hasRole(SystemParamUtils.getProperty(SysParamKey.PM_ADMIN_ID))) {
-			successUrl = basePath + "/authorize/view/manage/index.html";
-		}
-		return successUrl;
+		
+		return null;
 	}
 
 	/**
