@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import com.alibaba.fastjson.JSONObject;
 import com.sozone.aeolus.annotation.Path;
+import com.sozone.aeolus.annotation.PathParam;
 import com.sozone.aeolus.annotation.Service;
 import com.sozone.aeolus.authorize.annotation.Level;
 import com.sozone.aeolus.authorize.annotation.Permission;
@@ -20,11 +21,13 @@ import com.sozone.aeolus.dao.data.RecordImpl;
 import com.sozone.aeolus.data.AeolusData;
 import com.sozone.aeolus.exception.FacadeException;
 import com.sozone.aeolus.ext.rs.ResultVO;
+import com.sozone.aeolus.object.ResJson;
 import com.sozone.aeolus.util.CollectionUtils;
 import com.sozone.aeolus.utils.DateUtils;
 import com.sozone.fs.common.Constant;
 import com.sozone.fs.common.util.HttpClientUtils;
 import com.sozone.fs.common.util.UtilSign;
+import com.sun.glass.ui.View;
 
 @Path(value = "/third", desc = "第三方接入")
 @Permission(Level.Guest)
@@ -95,14 +98,15 @@ public class ThirdAction {
 
 	@Path(value = "/sendorder", desc = "接收订单信息")
 	@Service
-	public synchronized ResultVO<String> sendorder(AeolusData aeolusData) throws FacadeException {
+	public synchronized ResJson sendorder(AeolusData aeolusData) throws FacadeException {
 		logger.debug(LogUtils.format("接收订单信息", aeolusData));
-		ResultVO<String> resultVO = new ResultVO<>(false);
+		ResJson resJson = new ResJson(false,"下单失败");
 		Record<String, Object> dictRecord = this.activeRecordDAO.pandora()
 				.SELECT_ALL_FROM(Constant.TableName.T_DICT_TAB).EQUAL("V_DICT_TYPE", "SYS_SWICH").get();
 		if (StringUtils.equals("off", dictRecord.getString("V_DICT_VALUE"))) {
-			resultVO.setResult("系统已停止接单");
-			return resultVO;
+			resJson.setMsg("系统已停止接单");
+			resJson.setMapData("result", "系统已停止接单");
+			return resJson;
 		}
 		Record<String, Object> logRecord = new RecordImpl<>();
 		logRecord.setColumn("ID", Random.generateUUID());
@@ -111,58 +115,65 @@ public class ThirdAction {
 		Record<String, Object> record = aeolusData.getRecord();
 		String appId = record.getString("appid");
 		if (StringUtils.isEmpty(appId)) {
-			resultVO.setResult("平台id为空");
 			logRecord.setColumn("V_RECIEVE_STATUS", "2");
 			logRecord.setColumn("V_RECIEVE_MSG", "平台id为空");
 			writeLog(logRecord);
-			return resultVO;
+			resJson.setMsg("平台id为空");
+			resJson.setMapData("result", "平台id为空");
+			return resJson;
 		}
 		String money = record.getString("money");
 		if (StringUtils.isEmpty(money)) {
 			logRecord.setColumn("V_RECIEVE_STATUS", "2");
 			logRecord.setColumn("V_RECIEVE_MSG", "金额为空");
 			writeLog(logRecord);
-			resultVO.setResult("金额为空");
-			return resultVO;
+			resJson.setMsg("金额为空");
+			resJson.setMapData("result", "金额为空");
+			return resJson;
 		}
 		if (!isDoubleOrFloat(money)) {
-			resultVO.setResult("金额不是数字");
 			logRecord.setColumn("V_RECIEVE_STATUS", "2");
 			logRecord.setColumn("V_RECIEVE_MSG", "金额不是数字");
 			writeLog(logRecord);
-			return resultVO;
+			resJson.setMsg("金额不是数字");
+			resJson.setMapData("result", "金额不是数字");
+			return resJson;
 		}
 		String orderno = record.getString("orderno");
 		if (StringUtils.isEmpty(orderno)) {
-			resultVO.setResult("订单号为空");
 			logRecord.setColumn("V_RECIEVE_STATUS", "2");
 			logRecord.setColumn("V_RECIEVE_MSG", "订单号为空");
 			writeLog(logRecord);
-			return resultVO;
+			resJson.setMsg("订单号为空");
+			resJson.setMapData("result", "订单号为空");
+			return resJson;
 		}
 		String payType = record.getString("paytype");
 		if (StringUtils.isEmpty(payType)) {
-			resultVO.setResult("付款方式为空");
 			logRecord.setColumn("V_RECIEVE_STATUS", "2");
 			logRecord.setColumn("V_RECIEVE_MSG", "付款方式为空");
 			writeLog(logRecord);
-			return resultVO;
+			resJson.setMsg("付款方式为空");
+			resJson.setMapData("result", "付款方式为空");
+			return resJson;
 		}
 		Record<String, Object> appRecord = this.activeRecordDAO.pandora().SELECT_ALL_FROM(Constant.TableName.T_APP_TAB)
 				.EQUAL("V_APPID", appId).get();
 		if (CollectionUtils.isEmpty(appRecord)) {
-			resultVO.setResult("此平台在系统中不存在，请联系客服");
 			logRecord.setColumn("V_RECIEVE_STATUS", "2");
 			logRecord.setColumn("V_RECIEVE_MSG", "此平台在系统中不存在，请联系客服");
 			writeLog(logRecord);
-			return resultVO;
+			resJson.setMsg("此平台在系统中不存在，请联系客服");
+			resJson.setMapData("result", "此平台在系统中不存在，请联系客服");
+			return resJson;
 		}
 		if (StringUtils.equals("N", appRecord.getString("V_IS_MATCH"))) {
-			resultVO.setResult("此平台已被禁止传入数据");
 			logRecord.setColumn("V_RECIEVE_STATUS", "2");
 			logRecord.setColumn("V_RECIEVE_MSG", "此平台已被禁止传入数据");
 			writeLog(logRecord);
-			return resultVO;
+			resJson.setMsg("此平台已被禁止传入数据");
+			resJson.setMapData("result", "此平台已被禁止传入数据");
+			return resJson;
 		}
 		Record<String, Object> sendRecord = new RecordImpl<>();
 		sendRecord.setColumn("appid", appId);
@@ -178,8 +189,9 @@ public class ThirdAction {
 			logRecord.setColumn("V_RECIEVE_STATUS", "2");
 			logRecord.setColumn("V_RECIEVE_MSG", "签名失败");
 			writeLog(logRecord);
-			resultVO.setResult("签名失败");
-			return resultVO;
+			resJson.setMsg("签名失败");
+			resJson.setMapData("result", "签名失败");
+			return resJson;
 		}
 		Record<String, Object> params = new RecordImpl<>();
 		params.setColumn("V_MONEY", money);
@@ -189,23 +201,17 @@ public class ThirdAction {
 			logRecord.setColumn("V_RECIEVE_STATUS", "2");
 			logRecord.setColumn("V_RECIEVE_MSG", "无可收款商户");
 			writeLog(logRecord);
-			resultVO.setResult("无可收款商户");
-			return resultVO;
+			resJson.setMsg("无可收款商户");
+			resJson.setMapData("result", "无可收款商户");
+			return resJson;
 		}
-		try {
-			String url = "http://120.79.5.65:8090/" + fileRecord.getString("V_NAME");
-			resultVO.setResult(url);
-		} catch (Exception e) {
-			logRecord.setColumn("V_RECIEVE_STATUS", "3");
-			logRecord.setColumn("V_RECIEVE_MSG", "读取付款图片异常");
-			writeLog(logRecord);
-			logger.error(LogUtils.format("读取付款图片异常", e.getMessage()), e);
-			resultVO.setResult("读取付款图片异常");
-			return resultVO;
-		}
-
+		String url = Constant.WEB_URL + fileRecord.getString("V_NAME");
+		resJson.setMapData("result", url);
+		
 		Record<String, Object> orderRecord = new RecordImpl<>();
-		orderRecord.setColumn("ID", Random.generateUUID());
+		String id = Random.generateUUID();
+		resJson.setMapData("view", Constant.VIEW_URL + "/showPay.jsp?id=" + id);
+		orderRecord.setColumn("ID", id);
 		orderRecord.setColumn("V_ORDER_NO", orderno);
 		orderRecord.setColumn("V_BELONG_APP", appRecord.getString("ID"));
 		orderRecord.setColumn("V_NOTIFY_URL", record.getString("notifyurl"));
@@ -234,11 +240,12 @@ public class ThirdAction {
 		updateRecord.setColumn("V_PAY_NUM", "-1");
 		// 修改账户支付次数
 		this.activeRecordDAO.statement().update("Order.updateAccountTimes", updateRecord);
-		resultVO.setSuccess(true);
+		resJson.setSuccess(true);
+		resJson.setMsg("下单成功");
 		logRecord.setColumn("V_RECIEVE_STATUS", "1");
 		logRecord.setColumn("V_RECIEVE_MSG", "成功");
 		writeLog(logRecord);
-		return resultVO;
+		return resJson;
 	}
 
 	public static String getSign(Record<String, ?> record, String key) {
@@ -252,6 +259,20 @@ public class ThirdAction {
 		this.activeRecordDAO.pandora().INSERT_INTO(Constant.TableName.T_RECIEVE_TAB).VALUES(record).excute();
 	}
 
+	@Path(value="/getOrderMsg/{id}",desc="获取订单信息")
+	@Service
+	public ResJson getOrderMsg(@PathParam("id")String id) throws FacadeException{
+		ResJson resJson = new ResJson(false,"获取订单信息失败");
+		Record<String, Object> params = new RecordImpl<>();
+		params.setColumn("ID", id);
+		Record<String, Object> orderRecord = this.activeRecordDAO.statement().getOne("Order.getOrderMsg", params);
+		orderRecord.setColumn("IMG_URL", Constant.WEB_URL + orderRecord.getString("V_NAME"));
+		resJson.setSuccess(true);
+		resJson.setMap(orderRecord);
+		resJson.setMsg("订单获取成功");
+		return resJson;
+	}
+	
 	/*
 	 * 是否为浮点数？double或float类型。
 	 * 
@@ -271,17 +292,17 @@ public class ThirdAction {
 		// for(int i = 0;i< 20;i++) {
 		Record<String, Object> record = new RecordImpl<>();
 		record.setColumn("appid", "0a82b4fb7e2446e2a52619d2bc0fd424");
-		 record.setColumn("money", "5000");
+		 record.setColumn("money", "5");
 		record.setColumn("orderno", "201909142035013425921532");
 		 record.setColumn("paytype", "01");
-		 record.setColumn("notifyurl", "http:\\/\\/47.75.253.95:10002\\/callback\\/test\\/testCallBack");
+//		 record.setColumn("notifyurl", "http:\\/\\/47.75.253.95:10002\\/callback\\/test\\/testCallBack");
 //		record.setColumn("orderno", "test12312");
 //		record.setColumn("money", "123");
 //		record.setColumn("status", "1");
 		String sign = getSign(record, "oRELu0wCXTvPovH");
 		record.setColumn("sign", sign);
 		 System.out.println(HttpClientUtils.sendJsonPostRequest(
-		 "http://121.40.168.73/authorize/third/sendorder",
+		 "http://localhost:8080/yunduanpay/authorize/third/sendorder",
 		 JSONObject.toJSONString(record), "utf-8"));
 //		System.out.println(HttpClientUtils.sendJsonPostRequest(
 //				"http://120.24.93.47/authorize/third/confirmorder", JSONObject.toJSONString(record), "utf-8"));

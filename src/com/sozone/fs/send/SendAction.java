@@ -89,7 +89,6 @@ public class SendAction {
 				if (StringUtils.isNotBlank(orderRecord.getString("V_NOTIFY_URL"))) {
 					Record<String, Object> sendPar = new RecordImpl<>();
 					try {
-						sendPar.setColumn("ID", Random.generateUUID());
 						sendPar.setColumn("V_SEND_URL", orderRecord.getString("V_NOTIFY_URL"));
 						sendPar.setColumn("V_SEND_ORDER", orderRecord.getString("V_ORDER_NO"));
 						sendPar.setColumn("V_SEND_TIME", System.currentTimeMillis());
@@ -98,6 +97,8 @@ public class SendAction {
 						sendPar.setColumn("V_SEND_MSG", JSONObject.toJSONString(sendRecord));
 						if (StringUtils.equals("success", result)) {
 							sendPar.setColumn("V_SEND_STATUS", "success");
+							resJson.setSuccess(true);
+							resJson.setMsg("重新发送成功");
 						}else {
 							JSONObject jsonObject = JSONObject.parseObject(result);
 							if (StringUtils.equals("success", jsonObject.getString("success"))) {
@@ -115,8 +116,9 @@ public class SendAction {
 						sendPar.setColumn("V_RETURN_MSG", e.getMessage());
 						sendPar.setColumn("V_RETURN_TIME", System.currentTimeMillis());
 						logger.error(LogUtils.format("发送数据失败", e.getMessage()), e);
+						resJson.setMsg("发送异常");
 					} finally {
-						this.activeRecordDAO.pandora().INSERT_INTO(Constant.TableName.T_SEND_TAB).VALUES(sendPar)
+						this.activeRecordDAO.pandora().UPDATE(Constant.TableName.T_SEND_TAB).SET(sendPar).EQUAL("ID", id)
 								.excute();
 					}
 				}
@@ -180,14 +182,10 @@ public class SendAction {
 			String userId = record.getString("V_BELONG_APP");
 			double orderMoney = record.getDouble("ORDER_MONEY");
 			double countMoney = record.getDouble("V_TOTAL_COLLECTION");
-			double cashMoney = record.getDouble("V_CASH_COLLECTION");
-			double lastMoney = record.getDouble("V_LAST_COLLECTION");
 			Record<String, Object> params  = new RecordImpl<>();
 			params.setColumn("USER_ID", userId);
-			Record<String, Object> topupRecord = this.activeRecordDAO.statement().selectOne("Send.getCommissionCount", params);
-			double topupMoney = topupRecord.getDouble("COMMISSION_MONEY");
 			
-			if ((countMoney +cashMoney)  == (lastMoney + topupMoney)) {
+			if (countMoney != orderMoney) {
 				double syMoney = orderMoney - countMoney;
 				params.clear();
 				params.setColumn("syMoney", syMoney);

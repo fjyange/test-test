@@ -68,7 +68,22 @@ public class OrderAction {
 		resultVO.setResult(page);
 		return resultVO;
 	}
-
+	
+	@Path(value = "/findHistory", desc = "获取订单列表")
+	@Service
+	public ResultVO<Page<Record<String, Object>>> findHistory(AeolusData aeolusData) throws FacadeException {
+		logger.debug(LogUtils.format("获取订单信息", aeolusData));
+		ResultVO<Page<Record<String, Object>>> resultVO = new ResultVO<>();
+		Record<String, Object> record = aeolusData.getRecord();
+		record.setColumn("USER_ID", ApacheShiroUtils.getCurrentUserID());
+		record.setColumn("IS_ADMIN", ApacheShiroUtils.getCurrentUser().getString("IS_ADMIN"));
+		Page<Record<String, Object>> page = this.activeRecordDAO.statement().selectPage("Order.historyList",
+				aeolusData.getPageRequest(), record);
+		resultVO.setSuccess(true);
+		resultVO.setResult(page);
+		return resultVO;
+	}
+	
 	@Path(value = "/audit", desc = "订单审核")
 	@Service
 	public ResultVO<String> audit(AeolusData aeolusData) throws Exception {
