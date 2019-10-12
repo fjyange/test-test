@@ -19,9 +19,9 @@
 					and tat.V_APP_NAME  like CONCAT('%', #{V_APP_NAME}, '%')
 				]]>
 			</if>
-			<if test="V_NO != null and V_NO != ''">
+			<if test="V_ORDER_NO != null and V_ORDER_NO != ''">
 				<![CDATA[
-					and tot.V_NO  like CONCAT('%', #{V_NO}, '%')
+					and tot.V_ORDER_NO  like CONCAT('%', #{V_ORDER_NO}, '%')
 				]]>
 			</if>
 		</where>
