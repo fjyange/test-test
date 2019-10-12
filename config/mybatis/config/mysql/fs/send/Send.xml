@@ -25,6 +25,9 @@
 				]]>
 			</if>
 		</where>
+		<![CDATA[
+			order by tst.V_SEND_TIME desc
+		]]>
 	</select>
 	<select id=" " resultType="record"
 		parameterType="record">
