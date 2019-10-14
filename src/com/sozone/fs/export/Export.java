@@ -9,15 +9,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.sound.midi.VoiceStatus;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.alibaba.fastjson.JSONArray;
 import com.sozone.aeolus.annotation.Path;
 import com.sozone.aeolus.annotation.Service;
 import com.sozone.aeolus.authorize.annotation.Level;
 import com.sozone.aeolus.authorize.annotation.Permission;
+import com.sozone.aeolus.authorize.utlis.ApacheShiroUtils;
 import com.sozone.aeolus.dao.ActiveRecordDAO;
+import com.sozone.aeolus.dao.data.Page;
 import com.sozone.aeolus.dao.data.Record;
 import com.sozone.aeolus.data.AeolusData;
 
@@ -301,4 +306,136 @@ public class Export {
 		}
 	}
 
+	@Path(value="/exportOrder",desc="导出订单")
+	@Service
+	public void exportOrder(AeolusData aeolusData)  throws Exception {
+		HttpServletResponse response = aeolusData.getHttpServletResponse();
+		Record<String, Object> record = aeolusData.getRecord();
+		String searchTime = record.getString("SEARCH_TIME");
+		if (StringUtils.isNotBlank(searchTime)) {
+			JSONArray jsonArray = record.getJSONArray("SEARCH_TIME");
+			record.setColumn("START_TIME", jsonArray.get(0));
+			record.setColumn("END_TIME", jsonArray.get(1));
+		}
+		List<Record<String, Object>> list =  this.activeRecordDAO.statement().selectList("Order.orderList",record);
+		List<OrderBean> orderBeans = new ArrayList<OrderBean>();
+		for (Record<String, Object> orderRecord : list) {
+			String payType = "";
+			if (StringUtils.equals("01",  orderRecord.getString("V_PAY_TYPE"))) {
+				payType = "支付宝";
+			}else {
+				payType = "微信";
+			}
+			String status = "";
+			if (StringUtils.equals("0", orderRecord.getString("V_STATUS"))) {
+				status = "未确认";
+			}else if (StringUtils.equals("1", orderRecord.getString("V_STATUS"))) {
+				status = "已确认";
+			}else if (StringUtils.equals("2", orderRecord.getString("V_STATUS"))) {
+				status = "超时";
+			}else if (StringUtils.equals("3", orderRecord.getString("V_STATUS"))) {
+				status = "补单";
+			} 
+			OrderBean orderBean = new OrderBean(orderRecord.getString("V_ORDER_NO"),
+					orderRecord.getString("V_MONEY"), payType,
+					orderRecord.getString("V_APP_NAME"), orderRecord.getString("USER_NAME"), orderRecord.getString("V_PAY_NAME")
+					, orderRecord.getString("V_CREATE_TIME"),status);
+			orderBeans.add(orderBean);
+		}
+		OutputStream out = null;
+		if (orderBeans.size() > 0) {
+			String[] headers = { "订单号", "金额", "支付方式", "所属平台", "所属用户","支付账户","订单时间","订单状态" };
+			ExportExcel<OrderBean> ex = new ExportExcel<OrderBean>();
+			try {
+				response.reset();
+				// 设置response的Header
+				String fileName = System.currentTimeMillis() + "order.xls";
+				response.addHeader("Content-Disposition", "attachment;filename=" + fileName);
+				out = new BufferedOutputStream(response.getOutputStream());
+				response.setContentType("application/octet-stream");
+				InputStream is = ex.exportExcel(headers, orderBeans, out);
+				int c;
+				while ((c = is.read()) != -1) {
+					out.write(c);
+				}
+				is.close();
+				out.flush();
+				out.close();
+			} catch (NullPointerException e) {
+				e.printStackTrace();
+			} catch (IllegalStateException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+				out.close();
+			}
+		}
+	}
+	
+	@Path(value="/exportOrderHistory",desc="导出历史订单")
+	@Service
+	public void exportOrderHistory(AeolusData aeolusData)  throws Exception {
+		HttpServletResponse response = aeolusData.getHttpServletResponse();
+		Record<String, Object> record = aeolusData.getRecord();
+		String searchTime = record.getString("SEARCH_TIME");
+		if (StringUtils.isNotBlank(searchTime)) {
+			JSONArray jsonArray = record.getJSONArray("SEARCH_TIME");
+			record.setColumn("START_TIME", jsonArray.get(0));
+			record.setColumn("END_TIME", jsonArray.get(1));
+		}
+		List<Record<String, Object>> list =  this.activeRecordDAO.statement().selectList("Order.historyList",record);
+		List<OrderBean> orderBeans = new ArrayList<OrderBean>();
+		for (Record<String, Object> orderRecord : list) {
+			String payType = "";
+			if (StringUtils.equals("01",  orderRecord.getString("V_PAY_TYPE"))) {
+				payType = "支付宝";
+			}else {
+				payType = "微信";
+			}
+			String status = "";
+			if (StringUtils.equals("0", orderRecord.getString("V_STATUS"))) {
+				status = "未确认";
+			}else if (StringUtils.equals("1", orderRecord.getString("V_STATUS"))) {
+				status = "已确认";
+			}else if (StringUtils.equals("2", orderRecord.getString("V_STATUS"))) {
+				status = "超时";
+			}else if (StringUtils.equals("3", orderRecord.getString("V_STATUS"))) {
+				status = "补单";
+			} 
+			OrderBean orderBean = new OrderBean(orderRecord.getString("V_ORDER_NO"),
+					orderRecord.getString("V_MONEY"), payType,
+					orderRecord.getString("V_APP_NAME"), orderRecord.getString("USER_NAME"), orderRecord.getString("V_PAY_NAME")
+					, orderRecord.getString("V_CREATE_TIME"),status);
+			orderBeans.add(orderBean);
+		}
+		OutputStream out = null;
+		if (orderBeans.size() > 0) {
+			String[] headers = { "订单号", "金额", "支付方式", "所属平台", "所属用户","支付账户","订单时间","订单状态" };
+			ExportExcel<OrderBean> ex = new ExportExcel<OrderBean>();
+			try {
+				response.reset();
+				// 设置response的Header
+				String fileName = System.currentTimeMillis() + "orderHistory.xls";
+				response.addHeader("Content-Disposition", "attachment;filename=" + fileName);
+				out = new BufferedOutputStream(response.getOutputStream());
+				response.setContentType("application/octet-stream");
+				InputStream is = ex.exportExcel(headers, orderBeans, out);
+				int c;
+				while ((c = is.read()) != -1) {
+					out.write(c);
+				}
+				is.close();
+				out.flush();
+				out.close();
+			} catch (NullPointerException e) {
+				e.printStackTrace();
+			} catch (IllegalStateException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+				out.close();
+			}
+		}
+	}
+	
 }
