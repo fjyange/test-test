@@ -313,9 +313,9 @@ public class Export {
 		Record<String, Object> record = aeolusData.getRecord();
 		String searchTime = record.getString("SEARCH_TIME");
 		if (StringUtils.isNotBlank(searchTime)) {
-			JSONArray jsonArray = record.getJSONArray("SEARCH_TIME");
-			record.setColumn("START_TIME", jsonArray.get(0));
-			record.setColumn("END_TIME", jsonArray.get(1));
+			String[] times = searchTime.split(",");
+			record.setColumn("START_TIME", times[0]);
+			record.setColumn("END_TIME", times[1]);
 		}
 		List<Record<String, Object>> list =  this.activeRecordDAO.statement().selectList("Order.orderList",record);
 		List<OrderBean> orderBeans = new ArrayList<OrderBean>();
@@ -379,9 +379,9 @@ public class Export {
 		Record<String, Object> record = aeolusData.getRecord();
 		String searchTime = record.getString("SEARCH_TIME");
 		if (StringUtils.isNotBlank(searchTime)) {
-			JSONArray jsonArray = record.getJSONArray("SEARCH_TIME");
-			record.setColumn("START_TIME", jsonArray.get(0));
-			record.setColumn("END_TIME", jsonArray.get(1));
+			String[] times = searchTime.split(",");
+			record.setColumn("START_TIME", times[0]);
+			record.setColumn("END_TIME", times[1]);
 		}
 		List<Record<String, Object>> list =  this.activeRecordDAO.statement().selectList("Order.historyList",record);
 		List<OrderBean> orderBeans = new ArrayList<OrderBean>();
