@@ -210,7 +210,7 @@ public class ThirdAction {
 		
 		Record<String, Object> orderRecord = new RecordImpl<>();
 		String id = Random.generateUUID();
-		resJson.setMapData("view", "http://localhost:8080/yunduanpay/showPay.jsp?id=" + id);
+		resJson.setMapData("view", Constant.VIEW_URL + "/showPay.jsp?id=" + id);
 		orderRecord.setColumn("ID", id);
 		orderRecord.setColumn("V_ORDER_NO", orderno);
 		orderRecord.setColumn("V_BELONG_APP", appRecord.getString("ID"));

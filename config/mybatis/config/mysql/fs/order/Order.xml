@@ -19,6 +19,9 @@
 					</when>
 				</choose>
 			</if>
+			<if test="V_STATUS !=null and V_STATUS !=''">
+				<![CDATA[AND tot.V_STATUS = #{V_STATUS}]]>
+			</if>
 			<if test="USER_NAME !=null and USER_NAME !=''">
 				<![CDATA[AND tsub.USER_NAME like CONCAT('%', #{USER_NAME}, '%')]]>
 			</if>
@@ -27,6 +30,12 @@
 			</if>
 			<if test="V_ORDER_NO !=null and V_ORDER_NO !=''">
 				<![CDATA[AND tot.V_ORDER_NO like CONCAT('%', #{V_ORDER_NO}, '%')]]>
+			</if>
+			<if test="START_TIME !=null and START_TIME !=''">
+				<![CDATA[AND tot.V_CREATE_TIME >= #{START_TIME}]]>
+			</if>
+			<if test="END_TIME !=null and END_TIME !=''">
+				<![CDATA[AND tot.V_CREATE_TIME <= #{END_TIME}]]>
 			</if>
 		</where>
 		<![CDATA[
@@ -51,6 +60,9 @@
 					</when>
 				</choose>
 			</if>
+			<if test="V_STATUS !=null and V_STATUS !=''">
+				<![CDATA[AND tot.V_STATUS = #{V_STATUS}]]>
+			</if>
 			<if test="USER_NAME !=null and USER_NAME !=''">
 				<![CDATA[AND tsub.USER_NAME like CONCAT('%', #{USER_NAME}, '%')]]>
 			</if>
@@ -59,6 +71,12 @@
 			</if>
 			<if test="V_ORDER_NO !=null and V_ORDER_NO !=''">
 				<![CDATA[AND tot.V_ORDER_NO like CONCAT('%', #{V_ORDER_NO}, '%')]]>
+			</if>
+			<if test="START_TIME !=null and START_TIME !=''">
+				<![CDATA[AND tot.V_CREATE_TIME >= #{START_TIME}]]>
+			</if>
+			<if test="END_TIME !=null and END_TIME !=''">
+				<![CDATA[AND tot.V_CREATE_TIME <= #{END_TIME}]]>
 			</if>
 		</where>
 		<![CDATA[

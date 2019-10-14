@@ -95,7 +95,7 @@ public class UserLogin {
 			statefulDAO.pandora().UPDATE(Constant.TableName.T_SYS_USER_BASE).EQUAL("USER_ID", userID)
 					.SET(updateRecord).excute();
 			statefulDAO.commit();
-			resultVO.setResult(new RecordImpl<String, Object>().setColumn("token", token));
+			resultVO.setResult(new RecordImpl<String, Object>().setColumn("token", token).setColumn("USER_ACCOUNT", account).setColumn("USER_ID", userID).setColumn("IS_ADMIN", userRecord.getString("IS_ADMIN")));
 		} catch (DAOException e) {
 			logger.error(LogUtils.format(account + "登录失败", new Object[0]), e);
 			throw new ValidateException("AUTH-1013");

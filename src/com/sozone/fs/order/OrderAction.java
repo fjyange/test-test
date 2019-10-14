@@ -5,9 +5,11 @@ import java.util.Date;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang.StringUtils;
+import org.omg.CosNaming.NamingContextExtPackage.StringNameHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.sozone.aeolus.annotation.Path;
 import com.sozone.aeolus.annotation.Service;
@@ -60,6 +62,12 @@ public class OrderAction {
 		logger.debug(LogUtils.format("获取订单信息", aeolusData));
 		ResultVO<Page<Record<String, Object>>> resultVO = new ResultVO<>();
 		Record<String, Object> record = aeolusData.getRecord();
+		String searchTime = record.getString("SEARCH_TIME");
+		if (StringUtils.isNotBlank(searchTime)) {
+			JSONArray jsonArray = record.getJSONArray("SEARCH_TIME");
+			record.setColumn("START_TIME", jsonArray.get(0));
+			record.setColumn("END_TIME", jsonArray.get(1));
+		}
 		record.setColumn("USER_ID", ApacheShiroUtils.getCurrentUserID());
 		record.setColumn("IS_ADMIN", ApacheShiroUtils.getCurrentUser().getString("IS_ADMIN"));
 		Page<Record<String, Object>> page = this.activeRecordDAO.statement().selectPage("Order.orderList",
@@ -77,6 +85,12 @@ public class OrderAction {
 		Record<String, Object> record = aeolusData.getRecord();
 		record.setColumn("USER_ID", ApacheShiroUtils.getCurrentUserID());
 		record.setColumn("IS_ADMIN", ApacheShiroUtils.getCurrentUser().getString("IS_ADMIN"));
+		String searchTime = record.getString("SEARCH_TIME");
+		if (StringUtils.isNotBlank(searchTime)) {
+			JSONArray jsonArray = record.getJSONArray("SEARCH_TIME");
+			record.setColumn("START_TIME", jsonArray.get(0));
+			record.setColumn("END_TIME", jsonArray.get(1));
+		}
 		Page<Record<String, Object>> page = this.activeRecordDAO.statement().selectPage("Order.historyList",
 				aeolusData.getPageRequest(), record);
 		resultVO.setSuccess(true);

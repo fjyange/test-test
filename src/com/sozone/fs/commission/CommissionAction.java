@@ -71,7 +71,6 @@ public class CommissionAction {
 		params.setColumn("USER_ID", ApacheShiroUtils.getCurrentUserID());
 		Record<String, Object> appRecord =this.activeRecordDAO.statement().selectOne("Commission.getCommssion",
 				params);
-		Record<String, Object> dictRecord = this.activeRecordDAO.pandora().SELECT_ALL_FROM(Constant.TableName.T_DICT_TAB).EQUAL("V_DICT_TYPE","WITHDRAW_HAND_CHARGE").EQUAL("V_DISABLED", "Y").get();
 		double cash = appRecord.getDouble("V_CASH_COLLECTION");
 		double money = record.getDouble("V_MONEY");
 		if (cash < money) {
@@ -80,7 +79,7 @@ public class CommissionAction {
 		}
 		double cashMoney = cash - money;
 		double rate = appRecord.getDouble("V_RATE");
-		double formalities = dictRecord.getDouble("V_DICT_VALUE");
+		double formalities = appRecord.getDouble("V_FORMALITIES");
 		double reality = money - (money * rate) - formalities;
 		record.setColumn("ID", Random.generateUUID());
 		record.setColumn("V_APP_ID", appRecord.getString("V_APP_ID"));
@@ -107,12 +106,9 @@ public class CommissionAction {
 		ResultVO<Record<String, Object>> resultVO = new ResultVO<>();
 		Record<String, Object> appRecord = this.activeRecordDAO.pandora().SELECT_ALL_FROM(Constant.TableName.T_APP_TAB)
 				.EQUAL("V_USER_ID", ApacheShiroUtils.getCurrentUserID()).get();
-		Record<String, Object> dictRecord = this.activeRecordDAO.pandora()
-				.SELECT_ALL_FROM(Constant.TableName.T_DICT_TAB).EQUAL("V_DICT_TYPE", "WITHDRAW_HAND_CHARGE")
-				.EQUAL("V_DISABLED", "Y").get();
 		Record<String, Object> record = new RecordImpl<>();
 		record.setColumn("V_RATE", appRecord.getString("V_RATE"));
-		record.setColumn("V_FORMALITIES", dictRecord.getString("V_DICT_VALUE"));
+		record.setColumn("V_FORMALITIES", appRecord.getString("V_FORMALITIES"));
 		resultVO.setResult(record);
 		resultVO.setSuccess(true);
 		return resultVO;
