@@ -43,7 +43,7 @@ public class JwtAuthzInterceptor implements Interceptor
 	/**
 	 * 登录固定Token key
 	 */
-	public final static String TOKEN_KEY = "ds2flk3h";
+	public final static String TOKEN_KEY = "ds2flk3f";
 
 	/*
 	 * (non-Javadoc)
