@@ -11,7 +11,7 @@
 
 <title>树人支付</title>
 
-<%@include file="static/include/inc.jsp"%>
+<script src="${pageContext.request.contextPath}/static/res/jquery/jquery.min.js" type="text/javascript"></script>
 
 <script type="text/javascript">
 var time ;
@@ -28,7 +28,6 @@ var time ;
 						$("#money").html(result.V_MONEY);
 						$("#qrcode").attr("src",result.IMG_URL);
 						time =result.TIME_OUT; 
-						clock();
 					}
 				},
 				// 失败回调
@@ -70,101 +69,150 @@ var time ;
 		}
 	</script>
 <style type="text/css">
-.pay_body {
-	width: 100%;
-	height: 100%;
-	background-color: #d0d0d0;
+body {
+	font: 12px/150% Arial, Verdana, "\5b8b\4f53";
+	color: #666;
+	background: #fff;
 }
 
-.pay_title {
-	height: 15%;
+.main {
 	background-color: #fff;
-	width: 90%;
-	margin: 0 auto;
-	display: flex;
-	justify-content: center;
-	align-items: center;
+	padding-bottom: 50px;
 }
 
-.pay_title span {
-	margin: auto 0;
-	font-size: 26px;
-	color: red;
+body, div, html {
+	margin: 0;
+	padding: 0;
+	padding-bottom: 0px;
 }
 
-.pay_content {
-	height: 78%;
-	width: 90%;
+.w {
+	width: 990px;
 	margin: 0 auto;
-	margin-top: 3%;
+}
+
+.payment {
+	margin-top: 110px;
 	background-color: #fff;
-	text-align: center;
+	padding: 12px 30px;
+	box-shadow: 0 6px 32px rgba(0, 0, 0, .13);
 }
 
-.pay_money {
-	height: 60px;
-	line-height: 60px;
-	color: red;
-	font-size: 32px;
+.p-w-bd::after, .pay-weixin::after {
+	display: table;
+	content: "";
+	clear: both;
 }
 
-.pay_tip {
-	height: 40px;
-	line-height: 40px;
-	color: red;
-	font-size: 24px;
+.p-w-hd {
+	margin-bottom: 20px;
+	font-size: 18px;
+	font-family: "Microsoft Yahei";
 }
 
-.qrcode_img {
-	height: 200px;
-	width: 200px;
-	margin: auto;
+.p-w-bd::after, .pay-weixin::after {
+	display: table;
+	content: "";
+	clear: both;
 }
 
-.pay_time span {
-	color: green;
-	margin-right: 20px;
+.o-price {
+	position: absolute;
+	top: -36px;
+	left: 205px;
+	text-align: right;
+	line-height: 26px;
 }
 
-.pay_red_msg {
-	color: red;
+.o-price em {
+	vertical-align: bottom;
 }
 
-.pay_black_msg {
-	color: black;
+em {
+	font-style: normal;
 }
 
-.pay_bottom {
-	margin-top: 40px;
-	width: 100%;
+.o-price strong {
+	font-size: 18px;
+	vertical-align: bottom;
+	color: #e31613;
+	margin: 0 3px;
+}
+
+.p-w-box {
+	float: left;
+	width: 300px;
+}
+
+.pw-box-hd {
+	margin-bottom: 20px;
+	border: 1px solid #ddd;
+	width: 298px;
+	height: 298px;
+}
+
+.pw-box-hd img {
+	width: 298px;
+	height: 298px;
+	background: url("${path}/static/images/pc_loading.gif") center
+		center no-repeat;
+}
+
+.pw-box-ft-ali {
+	height: 44px;
+	padding: 8px 0 8px 125px;
+	background: #1e81d2 url("${path}/static/images/pc_scan.png")
+		50px 8px no-repeat;
+}
+
+.pw-box-ft-ali p {
+	margin: 0;
+	font-size: 14px;
+	line-height: 22px;
+	color: #fff;
+	font-weight: 700;
+}
+
+.p-w-sidebar-ali {
+	float: left;
+	width: 379px;
+	height: 421px;
+	padding-left: 50px;
+	margin-top: -20px;
+	background: url("${path}/static/images/pc_ali.png")
+		50px 0 no-repeat;
+}
+.p-w-bd {
+    padding-left: 130px;
+    margin-bottom: 30px;
 }
 </style>
 </head>
 <body>
-	<div class="pay_body">
-		<div class="pay_title">
-			<span>请按页面提示金额付款</span>
-		</div>
-		<div class="pay_content">
-			<div class="pay_money">￥<span id="money"></span></div>
-			<div class="pay_tip">切勿重复支付</div>
-
-			<div class="pay_time">
-				<span id="hours"></span> <span id="minutes"></span> <span
-					id="seconds"></span>
-			</div>
-			<div class="qrcode_img">
-				<img alt="" id="qrcode" src="" width="200" height="200">
-			</div>
-			<div class="pay_red_msg">此二维码不可多次扫码，否则会出现无法到账</div>
-			<div class="pay_red_msg">请付款 <span id="pay_money"></span>元，请不要多付或少付</div>
-			<div class="pay_red_msg">请在<span id="out_time"></span>前付款，超时请不要付款</div>
-			<div class="pay_black_msg">付款十分钟未到账，请联系在线客服</div>
-			<div class="pay_black_msg">遇到任何问题请咨询平台客服，不要留言收款号</div>
-			<div class="pay_bottom">
-				<img alt="" src="${path}/static/images/scan.png" width="100%">
+	<div class="main" id="pc">
+		<div class="w">
+			<div class="payment">
+				<div class="pay-weixin">
+					<div class="p-w-hd">支付宝支付</div>
+					<div class="p-w-bd" style="position: relative">
+						<div class="o-price">
+							<em>应付金额</em><strong id="pay_money"></strong><em>元</em>
+						</div>
+						<div class="p-w-box">
+							<div class="pw-box-hd" id="show_qrcode">
+								<img alt="" id="qrcode" style="display: block;" src="">
+							</div>
+							<div class="pw-box-ft-ali">
+								<p>请使用支付宝扫一扫</p>
+								<p>扫描二维码支付</p>
+							</div>
+						</div>
+						<div class="p-w-sidebar-ali"></div>
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>
+	Ï
 </body>
 </html>
