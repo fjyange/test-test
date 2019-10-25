@@ -11,11 +11,22 @@
 
 <title>树人支付</title>
 
-<script src="${pageContext.request.contextPath}/static/res/jquery/jquery.min.js" type="text/javascript"></script>
+<script
+	src="${pageContext.request.contextPath}/static/res/jquery/jquery.min.js"
+	type="text/javascript"></script>
 
 <script type="text/javascript">
 var time ;
+function browserRedirect() {
+  var sUserAgent = navigator.userAgent.toLowerCase();
+  if (/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test(sUserAgent)) {
+  } else {
+   location.href="${path}/showPayPC.jsp?id=${param.id}"
+  }
+ }
+	
 		$(function(){
+			browserRedirect(); 
 			$.ajax({
 				url : '${path}/authorize/third/getOrderMsg/${param.id}',
 				// 设置请求方法
@@ -25,6 +36,7 @@ var time ;
 					if (result.success){
 						$("#out_time").html(result.TIME_OUT);
 						$("#pay_money").html(result.V_MONEY);
+						$("#pay_order").html(result.V_ORDER_NO);
 						$("#money").html(result.V_MONEY);
 						$("#qrcode").attr("src",result.IMG_URL);
 						time =result.TIME_OUT;
@@ -109,14 +121,19 @@ var time ;
 	border-bottom: 1px solid #eee
 }
 
+.order {
+	font-size: 40px;
+	line-height: 80px;
+}
+
 .img-box {
 	margin: 10px 0 2px
 }
 
 .img-box img {
 	width: 60%;
-	background: url("${path}/static/images/pc_loading.gif") center
-		center no-repeat;
+	background: url("${path}/static/images/pc_loading.gif") center center
+		no-repeat;
 }
 
 .red {
@@ -134,7 +151,7 @@ var time ;
 }
 
 .black {
-	font-size: 24px;
+	font-size: 28px;
 	line-height: 40px;
 	color: #333;
 	text-align: left;
@@ -203,17 +220,19 @@ var time ;
 			<p class="price">
 				￥ <span style="color: #ff6600;" id="pay_money"></span>
 			</p>
+			<p class="order">
+				订单号: <span style="color: #ff6600;" id="pay_order"></span>
+			</p>
 			<div class="img-box">
-				<img title="支付二维码" id=qrcode
-					src="" />
+				<img title="支付二维码" id=qrcode src="" />
 			</div>
 			<div class="span-div">
-				订单 <span id="hours">0 时</span><span id="minutes" class="span">0 分</span><span
-					id="seconds">0 秒</span> 后过期
+				订单 <span id="hours">0 时</span><span id="minutes" class="span">0
+					分</span><span id="seconds">0 秒</span> 后过期
 			</div>
 			<div class="text">
 				<p class="gren"></p>
-				<p class="red" id="msg">付款即时到账，未到账可联系我们客服</p>
+				<p class="red" id="msg">正常十分钟到账，未到账请将改图给客服补单</p>
 				<div class="tips">
 					<p class="black">1、每张二维码仅限转账一次，多次转账将无法自动到账。</p>
 					<p class="black">2、如需转账多笔相同金额，请返回上步重新下单生成二维码。</p>

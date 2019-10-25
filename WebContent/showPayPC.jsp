@@ -25,6 +25,7 @@ var time ;
 					if (result.success){
 						$("#out_time").html(result.TIME_OUT);
 						$("#pay_money").html(result.V_MONEY);
+						$("#pay_order").html(result.V_ORDER_NO);
 						$("#money").html(result.V_MONEY);
 						$("#qrcode").attr("src",result.IMG_URL);
 						time =result.TIME_OUT; 
@@ -118,13 +119,25 @@ body, div, html {
 
 .o-price {
 	position: absolute;
-	top: -36px;
+	top: -46px;
 	left: 205px;
 	text-align: right;
 	line-height: 26px;
 }
 
 .o-price em {
+	vertical-align: bottom;
+}
+
+.o-order {
+	position: absolute;
+	top: -20px;
+	left: 205px;
+	text-align: right;
+	line-height: 26px;
+}
+
+.o-order em {
 	vertical-align: bottom;
 }
 
@@ -142,6 +155,7 @@ em {
 .p-w-box {
 	float: left;
 	width: 300px;
+	margin-top: 20px;
 }
 
 .pw-box-hd {
@@ -197,6 +211,9 @@ em {
 					<div class="p-w-bd" style="position: relative">
 						<div class="o-price">
 							<em>应付金额</em><strong id="pay_money"></strong><em>元</em>
+						</div>
+						<div class="o-order">
+							<em>订单号：</em><strong id="pay_order"></strong>
 						</div>
 						<div class="p-w-box">
 							<div class="pw-box-hd" id="show_qrcode">
