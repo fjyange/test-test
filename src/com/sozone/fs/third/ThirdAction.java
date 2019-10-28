@@ -27,7 +27,6 @@ import com.sozone.aeolus.utils.DateUtils;
 import com.sozone.fs.common.Constant;
 import com.sozone.fs.common.util.HttpClientUtils;
 import com.sozone.fs.common.util.UtilSign;
-import com.sun.glass.ui.View;
 
 @Path(value = "/third", desc = "第三方接入")
 @Permission(Level.Guest)
@@ -210,7 +209,8 @@ public class ThirdAction {
 		
 		Record<String, Object> orderRecord = new RecordImpl<>();
 		String id = Random.generateUUID();
-		resJson.setMapData("view", Constant.VIEW_URL + "/showPay.jsp?id=" + id);
+		resJson.setMapData("view", Constant.VIEW_URL + "/showPayApp.jsp?id=" + id);
+		resJson.setMapData("pcView", Constant.VIEW_URL + "/showPayPC.jsp?id=" + id);
 		orderRecord.setColumn("ID", id);
 		orderRecord.setColumn("V_ORDER_NO", orderno);
 		orderRecord.setColumn("V_BELONG_APP", appRecord.getString("ID"));
@@ -302,7 +302,7 @@ public class ThirdAction {
 		String sign = getSign(record, "oRELu0wCXTvPovH");
 		record.setColumn("sign", sign);
 		 System.out.println(HttpClientUtils.sendJsonPostRequest(
-		 "http://localhost:8080/yunduanpay/authorize/third/sendorder",
+		 "http://120.24.93.47/authorize/third/sendorder",
 		 JSONObject.toJSONString(record), "utf-8"));
 //		System.out.println(HttpClientUtils.sendJsonPostRequest(
 //				"http://120.24.93.47/authorize/third/confirmorder", JSONObject.toJSONString(record), "utf-8"));
