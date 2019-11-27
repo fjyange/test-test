@@ -42,7 +42,7 @@ public class DataJob implements AeolusJob {
 			statefulDAO.sql("update t_collection_tab set V_WX_COLLECTION = 0,V_ALI_COLLECTION = 0,V_TOTAL_COLLECTION = 0,V_LAST_COLLECTION = V_CASH_COLLECTION").update();
 			statefulDAO.pandora().DELETE_FROM(Constant.TableName.T_ORDER_OPT).excute();
 			statefulDAO.pandora().DELETE_FROM(Constant.TableName.T_SEND_TAB).excute();
-			statefulDAO.sql("delete from t_order_history where  date_add(V_CREATE_TIME, interval 5 DAY) < now()");
+			statefulDAO.sql("delete from t_order_history where  date_add(V_CREATE_TIME, interval 5 DAY) < now()").delete();
 			statefulDAO.sql("insert into t_order_history select * from t_order_tab").insert();
 			statefulDAO.sql("delete from t_order_tab").delete();
 			statefulDAO.sql("delete from t_recieve_tab where date_add(V_RECIEVE_TIME, interval 1 DAY) < now()").delete();
