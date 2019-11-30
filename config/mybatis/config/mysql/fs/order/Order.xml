@@ -211,7 +211,7 @@ LEFT JOIN (select SUM(V_MONEY) V_MONEY,V_TOPUP_USER from t_user_topup where V_ST
 	<select id="getOrderMsg" resultType="record"
 		parameterType="record">
 		<![CDATA[
-			select tot.V_MONEY,tft.V_NAME,date_add(tot.V_CREATE_TIME, interval 5 minute) TIME_OUT,tot.V_ORDER_NO from t_order_tab tot
+			select tot.V_MONEY,tft.V_NAME,date_add(tot.V_CREATE_TIME, interval 10 minute) TIME_OUT,tot.V_ORDER_NO from t_order_tab tot
 			left join t_pay_account tpa on tot.V_BELONG_ACCOUNT = tpa.ID
 			left join t_file_tab tft on tpa.V_FILE_ID = tft.ID 
 			]]>
