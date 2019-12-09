@@ -90,7 +90,7 @@ public class SendAction {
 					Record<String, Object> sendPar = new RecordImpl<>();
 					try {
 						sendPar.setColumn("V_SEND_URL", orderRecord.getString("V_NOTIFY_URL"));
-						sendPar.setColumn("V_SEND_ORDER", orderRecord.getString("V_ORDER_NO"));
+						sendPar.setColumn("V_SEND_ORDER", sendMsgRecord.getString("V_SEND_ORDER"));
 						sendPar.setColumn("V_SEND_TIME", System.currentTimeMillis());
 						String result = HttpClientUtils.sendJsonPostRequest(orderRecord.getString("V_NOTIFY_URL"),
 								JSONObject.toJSONString(sendRecord), "utf-8");

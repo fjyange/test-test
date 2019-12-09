@@ -267,6 +267,7 @@ public class ThirdAction {
 		params.setColumn("ID", id);
 		Record<String, Object> orderRecord = this.activeRecordDAO.statement().getOne("Order.getOrderMsg", params);
 		orderRecord.setColumn("IMG_URL", Constant.WEB_URL + orderRecord.getString("V_NAME"));
+		orderRecord.setColumn("DOWN_URL", Constant.VIEW_URL +"/authorize/attach/downFile?ID="+ orderRecord.getString("ID"));
 		resJson.setSuccess(true);
 		resJson.setMap(orderRecord);
 		resJson.setMsg("订单获取成功");
@@ -291,7 +292,7 @@ public class ThirdAction {
 	public static void main(String[] args) throws Exception {
 		// for(int i = 0;i< 20;i++) {
 		Record<String, Object> record = new RecordImpl<>();
-		record.setColumn("appid", "0a82b4fb7e2446e2a52619d2bc0fd424");
+		record.setColumn("appid", "b69939cdb01b4aab90a18c5b4876d378");
 		 record.setColumn("money", "5");
 		record.setColumn("orderno", "201909142035013425921532");
 		 record.setColumn("paytype", "01");
@@ -299,10 +300,10 @@ public class ThirdAction {
 //		record.setColumn("orderno", "test12312");
 //		record.setColumn("money", "123");
 //		record.setColumn("status", "1");
-		String sign = getSign(record, "oRELu0wCXTvPovH");
+		String sign = getSign(record, "kNT1SIH8OAKYGEZ");
 		record.setColumn("sign", sign);
 		 System.out.println(HttpClientUtils.sendJsonPostRequest(
-		 "http://120.24.93.47/authorize/third/sendorder",
+		 "http://www.tdwj.xyz/Pay_YfuScan_notifyurl.html",
 		 JSONObject.toJSONString(record), "utf-8"));
 //		System.out.println(HttpClientUtils.sendJsonPostRequest(
 //				"http://120.24.93.47/authorize/third/confirmorder", JSONObject.toJSONString(record), "utf-8"));
