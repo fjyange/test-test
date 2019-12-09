@@ -12,8 +12,8 @@ public interface Constant {
 	String CITY_THEME = "CITY_THEME";
 
 	String SYS_SWICH = "on";
-	String WEB_URL ="http://120.24.184.96:8090/";
-	String VIEW_URL = "http://120.24.184.96/";
+	String WEB_URL ="http://www.shurenpay.com:8090/";
+	String VIEW_URL = "http://www.shurenpay.com/";
 	public interface TableName {
 		/**
 		 * 用户信息表
