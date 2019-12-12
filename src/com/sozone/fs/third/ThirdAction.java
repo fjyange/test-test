@@ -296,14 +296,14 @@ public class ThirdAction {
 		 record.setColumn("money", "5");
 		record.setColumn("orderno", "201909142035013425921532");
 		 record.setColumn("paytype", "01");
-//		 record.setColumn("notifyurl", "http:\\/\\/47.75.253.95:10002\\/callback\\/test\\/testCallBack");
+		 record.setColumn("notifyurl", "http://www.shurenpay.com/authorize/test/test");
 //		record.setColumn("orderno", "test12312");
 //		record.setColumn("money", "123");
 //		record.setColumn("status", "1");
 		String sign = getSign(record, "kNT1SIH8OAKYGEZ");
 		record.setColumn("sign", sign);
 		 System.out.println(HttpClientUtils.sendJsonPostRequest(
-		 "http://www.tdwj.xyz/Pay_YfuScan_notifyurl.html",
+		 "http://47.91.210.225/authorize/third/sendorder",
 		 JSONObject.toJSONString(record), "utf-8"));
 //		System.out.println(HttpClientUtils.sendJsonPostRequest(
 //				"http://120.24.93.47/authorize/third/confirmorder", JSONObject.toJSONString(record), "utf-8"));
