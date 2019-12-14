@@ -267,6 +267,7 @@ public class ThirdAction {
 		params.setColumn("ID", id);
 		Record<String, Object> orderRecord = this.activeRecordDAO.statement().getOne("Order.getOrderMsg", params);
 		orderRecord.setColumn("IMG_URL", Constant.WEB_URL + orderRecord.getString("V_NAME"));
+		orderRecord.setColumn("ALI_URL", Constant.ALI_URL + orderRecord.getString("V_URL_SCHEME"));
 		orderRecord.setColumn("DOWN_URL", Constant.VIEW_URL +"/authorize/attach/downFile?ID="+ orderRecord.getString("ID"));
 		resJson.setSuccess(true);
 		resJson.setMap(orderRecord);
