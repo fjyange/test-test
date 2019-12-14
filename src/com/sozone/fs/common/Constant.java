@@ -14,6 +14,7 @@ public interface Constant {
 	String SYS_SWICH = "on";
 	String WEB_URL ="http://www.yunfu-pay.com:8090/";
 	String VIEW_URL = "http://www.yunfu-pay.com/";
+	String ALI_URL = "alipayqr://platformapi/startapp?saId=10000007&qrcode=";
 	public interface TableName {
 		/**
 		 * 用户信息表
