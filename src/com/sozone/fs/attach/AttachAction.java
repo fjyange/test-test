@@ -1,10 +1,14 @@
 
 package com.sozone.fs.attach;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
@@ -27,6 +31,7 @@ import com.sozone.aeolus.dao.data.Record;
 import com.sozone.aeolus.dao.data.RecordImpl;
 import com.sozone.aeolus.data.AeolusData;
 import com.sozone.aeolus.exception.DAOException;
+import com.sozone.aeolus.exception.ServiceException;
 import com.sozone.aeolus.ext.rs.ResultVO;
 import com.sozone.aeolus.upload.handler.MultipartFormDataHandler;
 import com.sozone.aeolus.util.CollectionUtils;
@@ -204,6 +209,60 @@ public class AttachAction {
 
 	}
 
+
+	@Path(value = "/downFile", desc = "下载图片")
+	@Service
+	@Permission(Level.Guest)
+	public void downFile(AeolusData aeolusData) throws Exception {
+		HttpServletResponse response = aeolusData.getHttpServletResponse();
+		Record<String, Object> record = aeolusData.getRecord();
+		String fileId = record.getString("FILE_ID");
+		Record<String, Object> fileParams = new RecordImpl<String, Object>();
+		fileParams.setColumn("ID", fileId);
+		Record<String, Object> fileRecord = this.activeRecordDAO.pandora()
+				.SELECT_ALL_FROM(Constant.TableName.T_FILE_TAB)
+				.EQUAL("ID", record.getString("ID")).get();
+		if (CollectionUtils.isEmpty(fileRecord)) {
+			throw new Exception("图片丢失，请联系客服");
+		}
+		InputStream is = null;
+		OutputStream os = null;
+		try {
+			File file = new File(fileRecord.getString("V_PATH"),
+					fileRecord.getString("V_NAME"));
+			if (file.exists()) {
+				response.reset();
+				response.addHeader("Content-Disposition",
+						"attachment;filename=" + new String(fileRecord.getString("V_NAME").getBytes(), "ISO-8859-1"));
+				// response.setContentType(getServletContext().getMimeType(fileName));
+				response.setContentType("application/octet-stream");
+				os = new BufferedOutputStream(response.getOutputStream());
+				is = new BufferedInputStream(new FileInputStream(file));
+				byte[] buffer = new byte[1024];
+				int len;
+				while ((len = is.read(buffer)) != -1) {
+					os.write(buffer, 0, len);
+				}
+			} else {
+				throw new ServiceException("文件不存在");
+			}
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			logger.error(LogUtils.format("操作错误", e.getMessage()), e);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			logger.error(LogUtils.format("操作错误", e.getMessage()), e);
+		} finally {
+			if (os != null) {
+				os.flush();
+				os.close();
+			}
+			if (is != null) {
+				is.close();
+			}
+		}
+	}
+	
 	/**
 	 * 渲染HTML输出
 	 * 
