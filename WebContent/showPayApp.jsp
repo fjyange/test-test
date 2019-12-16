@@ -9,7 +9,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
-<title>树人支付</title>
+<title>瀚海支付</title>
 
 <script
 	src="${pageContext.request.contextPath}/static/res/jquery/jquery.min.js"
@@ -24,7 +24,29 @@ function browserRedirect() {
    location.href="${path}/showPayPC.jsp?id=${param.id}"
   }
  }
-	
+	window.onload = function(){
+		//屏蔽键盘事件
+		document.onkeydown = function (){
+		var e = window.event || arguments[0];
+		//F12
+		if(e.keyCode == 123){
+		return false;
+		//Ctrl+Shift+I
+		}else if((e.ctrlKey) && (e.shiftKey) && (e.keyCode == 73)){
+		return false;
+		//Shift+F10
+		}else if((e.shiftKey) && (e.keyCode == 121)){
+		return false;
+		//Ctrl+U
+		}else if((e.ctrlKey) && (e.keyCode == 85)){
+		return false;
+		}
+		};
+		//屏蔽鼠标右键
+		document.oncontextmenu = function (){
+		return false;
+		}
+		}
 		$(function(){
 			browserRedirect(); 
 			$.ajax({
@@ -39,6 +61,9 @@ function browserRedirect() {
 						$("#pay_order").html(result.V_ORDER_NO);
 						$("#money").html(result.V_MONEY);
 						$("#qrcode").attr("src",result.IMG_URL);
+						$("#qrcode").attr("alt",result.V_NAME);
+						$("#downloadUrl").val(result.DOWN_URL);
+						
 						time =result.TIME_OUT;
 						setTimeout(clock,500);
 					}
@@ -50,6 +75,9 @@ function browserRedirect() {
 				}
 			});
 		});
+		function openImg(){
+			location.href = $("#qrcode").attr("src");
+		}
 		function clock(){
 			var today=new Date(),//当前时间
 			    h=today.getHours(),
@@ -79,6 +107,25 @@ function browserRedirect() {
 			  location.href="${path}/timeOut.jsp"
 		  }
 		   
+		}
+		function saveimg(){	
+		let image = new Image();
+  // 解决跨域 Canvas 污染问题
+  image.setAttribute("crossOrigin", "anonymous");
+  image.onload = function() {
+    let canvas = document.createElement("canvas");
+    canvas.width = image.width;
+    canvas.height = image.height;
+    let context = canvas.getContext("2d");
+    context.drawImage(image, 0, 0, image.width, image.height);
+    let url = canvas.toDataURL("image/png"); //得到图片的base64编码数据
+    let a = document.createElement("a"); // 生成一个a元素
+    let event = new MouseEvent("click"); // 创建一个单击事件
+    a.download = $("#qrcode").attr("alt"); // 设置图片名称
+    a.href = url; // 将生成的URL设置为a.href属性
+    a.dispatchEvent(event); // 触发a的单击事件
+  };
+  image.src = $("#downloadUrl").val();
 		}
 	</script>
 <style type="text/css">
@@ -241,11 +288,14 @@ function browserRedirect() {
 			<p class="order">
 				订单号: <span style="color: #ff6600;" id="pay_order"></span>
 			</p>
-			<p class="msg-tip">
-				<span>请不要保存扫码</span>
-			</p>
 			<div class="img-box">
-				<span>请使用其他手机进行扫码支付</span> <img title="支付二维码" id=qrcode src="" /> <span>或使用电脑端登录扫码</span>
+				<span>如无法下载支付二维码</span>
+				<img title="支付二维码" id=qrcode src="" onclick="openImg()"/>
+				<span>点击二维码后截图付款</span>
+			</div>
+			<div class="img-box">
+				<input type="hidden" value="" id="downloadUrl"/>
+				<button onclick="saveimg()" style="width: 30%;height: 60px;font-size: 30px;border-radius: 20px;border: none;background-color:#108ee9;color:white;">保存图片</button>
 			</div>
 			<div class="span-div">
 				订单 <span id="hours">0 时</span><span id="minutes" class="span">0
