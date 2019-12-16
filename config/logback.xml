@@ -17,7 +17,7 @@
         <connectionSource class="ch.qos.logback.core.db.DataSourceConnectionSource">
             <dataSource class="com.alibaba.druid.pool.DruidDataSource">
                 <param name="driverClassName" value="com.mysql.jdbc.Driver" />
-                <param name="url" value="jdbc:mysql://rm-wz9jj7jfxt4ek5335bo.mysql.rds.aliyuncs.com/DB_YUNDUAN_PAY_LOG?characterEncoding=utf-8" />
+                <param name="url" value="jdbc:mysql://127.0.0.1/DB_YUNDUAN_PAY_LOG?characterEncoding=utf-8" />
                 <param name="username" value="DB_YUNDUAN_PAY_LOG" />
                 <param name="password" value="DB_YUNDUAN_PAY_LOG" />
                 <!-- 配置初始化大小、最小、最大 -->

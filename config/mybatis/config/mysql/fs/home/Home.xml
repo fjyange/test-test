@@ -11,7 +11,7 @@
 		]]>
 		<where>
 			<![CDATA[
-				and to_days(V_CREATE_TIME) = to_days(now()) and (V_STATUS = '1' or V_STATUS='3')
+				and (V_STATUS = '1' or V_STATUS='3')
 			]]>
 		</where>
 	</select>
@@ -110,9 +110,6 @@
 				t_order_tab
 		]]>
 		<where>
-			<![CDATA[
-				and to_days(V_CREATE_TIME) = to_days(now())
-			]]>
 			<if test="V_APP_ID != null and V_APP_ID != ''">
 				<![CDATA[
 					and V_BELONG_APP = #{V_APP_ID}
