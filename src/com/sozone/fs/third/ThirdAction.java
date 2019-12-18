@@ -309,7 +309,7 @@ public class ThirdAction {
 		Record<String, Object> record = new RecordImpl<>();
 		record.setColumn("appid", "4f5442209f644ed3b44a78074c566f97");
 		 record.setColumn("money", "5");
-		record.setColumn("orderno", "201909142035013425921532");
+		record.setColumn("orderno", "201909142035013425921535");
 		 record.setColumn("paytype", "01");
 //		 record.setColumn("notifyurl", "http:\\/\\/47.75.253.95:10002\\/callback\\/test\\/testCallBack");
 //		record.setColumn("orderno", "test12312");
@@ -321,7 +321,7 @@ public class ThirdAction {
 //		 "http://www.tdwj.xyz/Pay_YfuScan_notifyurl.html",
 //		 JSONObject.toJSONString(record), "utf-8"));
 		System.out.println(HttpClientUtils.sendJsonPostRequest(
-				"http://www.shurenpay.com/authorize/third/sendorder", JSONObject.toJSONString(record), "utf-8"));
+				"https://www.shurenpay.com/authorize/third/sendorder", JSONObject.toJSONString(record), "utf-8"));
 		// }
 		// Record<String, Object> record = new RecordImpl<>();
 		// String url = "https://qr-test2.chinaums.com/netpay-route-server/api/";
