@@ -113,6 +113,8 @@ public class HomeAction {
 		Record<String, Object> record = new RecordImpl<>();
 		Record<String, Object> orderMoneyRecord = this.activeRecordDAO.statement().selectOne("Home.getAdminOrderMoney");
 		record.setColumns(orderMoneyRecord);
+		Record<String, Object> ysorderMoneyRecord = this.activeRecordDAO.statement().selectOne("Home.getAdminYSOrderMoney");
+		record.setColumns(ysorderMoneyRecord);
 		Record<String, Object> userMoneyRecord = this.activeRecordDAO.statement().selectOne("Home.getAdminUserMoney");
 		record.setColumns(userMoneyRecord);
 		Record<String, Object> accountMoneyRecord = this.activeRecordDAO.statement().selectOne("Home.getAdminAccountMoney");
@@ -160,6 +162,7 @@ public class HomeAction {
 			moneyRecord.setColumn("ALI_MONEY", "0");
 			moneyRecord.setColumn("WX_MONEY", "0");
 			moneyRecord.setColumn("SURPLUS_BOND", "0");
+			moneyRecord.setColumn("V_YS_RECEIVABLES", "0");
 		}else {
 			moneyRecord.setColumns(record);
 		}
