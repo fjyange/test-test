@@ -176,7 +176,7 @@
 			tsub.USER_NAME ,
 			sum(tut.V_MONEY) TOPUP_MONEY ,
 			sum(twt.V_MONEY) WITHDRAW_MONEY ,
-			tbt.V_SURPLUS_BOND
+			sum(tbt.V_SURPLUS_BOND) V_SURPLUS_BOND
 		FROM
 		 t_sys_user_base tsub 
 inner JOIN t_bond_today tbt ON tbt.V_USER_ID = tsub.USER_ID 
