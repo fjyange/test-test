@@ -3,7 +3,7 @@
 <mapper namespace="App">
 	<select id="list"  resultType="record" parameterType="record">
 		<![CDATA[
-		select tat.V_APPID,tat.ID,tat.V_SECRET,tat.V_APP_NAME,tat.V_RATE,tat.V_FORMALITIES
+		select tat.V_APPID,tat.ID,tat.V_SECRET,tat.V_APP_NAME,tat.V_RATE,tat.V_WX_RATE,tat.V_FORMALITIES
 		,tat.V_IS_MATCH,tsub.USER_ACCOUNT V_USER_ACCOUNT,tsub.USER_PHONE V_USER_PHONE,tsub.USER_ID V_USER_ID,tsur.ROLE_ID V_ROLE_ID
 		 ,tct.V_WX_COLLECTION,tct.V_ALI_COLLECTION,tct.V_TOTAL_COLLECTION,tct.V_CASH_COLLECTION 
 		 from t_app_tab  tat

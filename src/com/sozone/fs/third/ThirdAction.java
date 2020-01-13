@@ -211,6 +211,9 @@ public class ThirdAction {
 		Record<String, Object> orderRecord = new RecordImpl<>();
 		double monayD = Double.parseDouble(money);
 		double rate = appRecord.getDouble("V_RATE");
+		if(StringUtils.equals("02", payType)) {
+			rate = appRecord.getDouble("V_WX_RATE");
+		}
 		double rateMoney = monayD * rate;
 		double actualPay = monayD - rateMoney;
 		DecimalFormat df = new DecimalFormat("#.##");   
@@ -302,18 +305,18 @@ public class ThirdAction {
 	public static void main(String[] args) throws Exception {
 		// for(int i = 0;i< 20;i++) {
 		Record<String, Object> record = new RecordImpl<>();
-		record.setColumn("appid", "d17143a67f004813ad00ef926fadfefe");
+		record.setColumn("appid", "68a4505e446744cfa47e60c02b57aafa");
 		record.setColumn("money", "5");
 		record.setColumn("orderno", "2019091420350134259215332");
-		record.setColumn("paytype", "01");
+		record.setColumn("paytype", "02");
 		record.setColumn("notifyurl", "http://www.shurenpay.com/authorize/test/test");
 		// record.setColumn("orderno", "test12312");
 		// record.setColumn("money", "123");
 		// record.setColumn("status", "1");
-		String sign = getSign(record, "fIE1hE7vkRVouyX");
+		String sign = getSign(record, "aE7u9B7HGrVPV48");
 		record.setColumn("sign", sign);
 		System.out.println(
-				HttpClientUtils.sendJsonPostRequest("http://localhost:8080/yunduanpay/authorize/third/sendorder",
+				HttpClientUtils.sendJsonPostRequest("http://120.78.222.26/authorize/third/sendorder",
 						JSONObject.toJSONString(record), "utf-8"));
 		// System.out.println(HttpClientUtils.sendJsonPostRequest(
 		// "http://120.24.93.47/authorize/third/confirmorder",
