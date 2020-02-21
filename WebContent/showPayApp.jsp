@@ -9,7 +9,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
-<title>树人支付</title>
+<title>龙越支付</title>
 
 <script
 	src="${pageContext.request.contextPath}/static/res/jquery/jquery.min.js"

@@ -318,21 +318,21 @@ public class ThirdAction {
 	public static void main(String[] args) throws Exception {
 		// for(int i = 0;i< 20;i++) {
 		Record<String, Object> record = new RecordImpl<>();
-		record.setColumn("appid", "4f5442209f644ed3b44a78074c566f97");
+		record.setColumn("appid", "fe84986402b74ffca7439956107cc4c7");
 		 record.setColumn("money", "5");
-		record.setColumn("orderno", "201909142035013425921535");
+		record.setColumn("orderno", "201909142035013425921532");
 		 record.setColumn("paytype", "01");
 //		 record.setColumn("notifyurl", "http:\\/\\/47.75.253.95:10002\\/callback\\/test\\/testCallBack");
 //		record.setColumn("orderno", "test12312");
 //		record.setColumn("money", "123");
 //		record.setColumn("status", "1");
-		String sign = getSign(record, "G6ZeCZ3rdYsQInD");
+		String sign = getSign(record, "lyKEvIZdVnoJGOz");
 		record.setColumn("sign", sign);
 //		 System.out.println(HttpClientUtils.sendJsonPostRequest(
 //		 "http://www.tdwj.xyz/Pay_YfuScan_notifyurl.html",
 //		 JSONObject.toJSONString(record), "utf-8"));
 		System.out.println(HttpClientUtils.sendJsonPostRequest(
-				"http://47.113.110.43/authorize/third/sendorder", JSONObject.toJSONString(record), "utf-8"));
+				"http://www.longyuezhifu.com/authorize/third/sendorder", JSONObject.toJSONString(record), "utf-8"));
 		// }
 		// Record<String, Object> record = new RecordImpl<>();
 		// String url = "https://qr-test2.chinaums.com/netpay-route-server/api/";
