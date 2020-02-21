@@ -39,27 +39,35 @@ window.onload = function(){
 		}
 var time ;
 		$(function(){
-			$.ajax({
-				url : '${path}/authorize/third/getOrderMsg/${param.id}',
-				// 设置请求方法
-				type : 'POST',
-				contentType : 'application/json;charset=UTF-8',
-				success : function(result) {
-					if (result.success){
-						$("#out_time").html(result.TIME_OUT);
-						$("#pay_money").html(result.V_MONEY);
-						$("#pay_order").html(result.V_ORDER_NO);
-						$("#money").html(result.V_MONEY);
-						$("#qrcode").attr("src",result.IMG_URL);
-						time =result.TIME_OUT; 
-					}
-				},
-				// 失败回调
-				error : function(XMLHttpRequest, textStatus, errorThrown) {
-					var result = jQuery.parseJSON(XMLHttpRequest.responseText);
-					top.$.messager.alert('操作失败', "操作失败[" + result.errorDesc + "]");
-				}
+			$(function(){
+				var sUserAgent = navigator.userAgent.toLowerCase();
+			  if (/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test(sUserAgent)) {
+				  location.href="${path}/showWxPayApp.jsp?id=${param.id}"
+			  } else {
+				  $.ajax({
+						url : '${path}/authorize/third/getOrderMsg/${param.id}',
+						// 设置请求方法
+						type : 'POST',
+						contentType : 'application/json;charset=UTF-8',
+						success : function(result) {
+							if (result.success){
+								$("#out_time").html(result.TIME_OUT);
+								$("#pay_money").html(result.V_MONEY);
+								$("#pay_order").html(result.V_ORDER_NO);
+								$("#money").html(result.V_MONEY);
+								$("#qrcode").attr("src",result.IMG_URL);
+								time =result.TIME_OUT; 
+							}
+						},
+						// 失败回调
+						error : function(XMLHttpRequest, textStatus, errorThrown) {
+							var result = jQuery.parseJSON(XMLHttpRequest.responseText);
+							top.$.messager.alert('操作失败', "操作失败[" + result.errorDesc + "]");
+						}
+					});
+			  }
 			});
+			
 		});
 		/* window.onload=clock; */
 		function clock(){
@@ -216,7 +224,7 @@ em {
 	height: 421px;
 	padding-left: 50px;
 	margin-top: -20px;
-	background: url("${path}/static/images/pc_ali.png")
+	background: url("${path}/static/images/pc_wx.jpg")
 		50px 0 no-repeat;
 }
 .p-w-bd {
@@ -230,7 +238,7 @@ em {
 		<div class="w">
 			<div class="payment">
 				<div class="pay-weixin">
-					<div class="p-w-hd">支付宝支付</div>
+					<div class="p-w-hd">微信支付</div>
 					<div class="p-w-bd" style="position: relative">
 						<div class="o-price">
 							<em>应付金额</em><strong id="pay_money"></strong><em>元</em>
@@ -243,7 +251,7 @@ em {
 								<img alt="" id="qrcode" style="display: block;" src="">
 							</div>
 							<div class="pw-box-ft-ali">
-								<p>请使用支付宝扫一扫</p>
+								<p>请使用微信扫一扫</p>
 								<p>扫描二维码支付</p>
 							</div>
 						</div>

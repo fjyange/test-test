@@ -182,8 +182,13 @@ public class ThirdAction {
 			Record<String, Object> fileRecord = this.activeRecordDAO.pandora().SELECT_ALL_FROM(Constant.TableName.T_FILE_TAB).EQUAL("ID", accountRecord.getString("V_FILE_ID")).get();
 			String url = Constant.WEB_URL + fileRecord.getString("V_NAME");
 			resJson.setMapData("result", url);
-			resJson.setMapData("view", Constant.VIEW_URL + "/showPayApp.jsp?id=" + checkOrder.getString("ID"));
-			resJson.setMapData("pcView", Constant.VIEW_URL + "/showPayPC.jsp?id=" + checkOrder.getString("ID"));
+			if(StringUtils.equals("02", payType)) {
+				resJson.setMapData("view", Constant.VIEW_URL + "/showWxPayApp.jsp?id=" + checkOrder.getString("ID"));
+				resJson.setMapData("pcView", Constant.VIEW_URL + "/showWxPayPC.jsp?id=" + checkOrder.getString("ID"));
+			}else {
+				resJson.setMapData("view", Constant.VIEW_URL + "/showPayApp.jsp?id=" + checkOrder.getString("ID"));
+				resJson.setMapData("pcView", Constant.VIEW_URL + "/showPayPC.jsp?id=" + checkOrder.getString("ID"));
+			}
 			resJson.setSuccess(true);
 			resJson.setMsg("下单成功");
 			return resJson;
@@ -223,8 +228,14 @@ public class ThirdAction {
 		
 		Record<String, Object> orderRecord = new RecordImpl<>();
 		String id = Random.generateUUID();
-		resJson.setMapData("view", Constant.VIEW_URL + "/showPayApp.jsp?id=" + id);
-		resJson.setMapData("pcView", Constant.VIEW_URL + "/showPayPC.jsp?id=" + id);
+		if(StringUtils.equals("02", payType)) {
+			resJson.setMapData("view", Constant.VIEW_URL + "/showWxPayApp.jsp?id=" + id);
+			resJson.setMapData("pcView", Constant.VIEW_URL + "/showWxPayPC.jsp?id=" + id);
+		}else {
+			resJson.setMapData("view", Constant.VIEW_URL + "/showPayApp.jsp?id=" + id);
+			resJson.setMapData("pcView", Constant.VIEW_URL + "/showPayPC.jsp?id=" + id);
+		}
+		
 		orderRecord.setColumn("ID", id);
 		orderRecord.setColumn("V_ORDER_NO", orderno);
 		orderRecord.setColumn("V_BELONG_APP", appRecord.getString("ID"));
@@ -321,7 +332,7 @@ public class ThirdAction {
 //		 "http://www.tdwj.xyz/Pay_YfuScan_notifyurl.html",
 //		 JSONObject.toJSONString(record), "utf-8"));
 		System.out.println(HttpClientUtils.sendJsonPostRequest(
-				"https://www.shurenpay.com/authorize/third/sendorder", JSONObject.toJSONString(record), "utf-8"));
+				"http://47.113.110.43/authorize/third/sendorder", JSONObject.toJSONString(record), "utf-8"));
 		// }
 		// Record<String, Object> record = new RecordImpl<>();
 		// String url = "https://qr-test2.chinaums.com/netpay-route-server/api/";
