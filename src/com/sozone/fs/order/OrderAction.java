@@ -5,7 +5,6 @@ import java.util.Date;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang.StringUtils;
-import org.omg.CosNaming.NamingContextExtPackage.StringNameHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,6 +94,48 @@ public class OrderAction {
 				aeolusData.getPageRequest(), record);
 		resultVO.setSuccess(true);
 		resultVO.setResult(page);
+		return resultVO;
+	}
+	
+	@Path(value="/errorOrder",desc="错单重提")
+	@Service
+	public ResultVO<String> errorOrder(AeolusData aeolusData) throws FacadeException{
+		ResultVO<String> resultVO = new ResultVO<>();
+		Record<String, Object> record = aeolusData.getRecord();
+		String id = record.getString("ID");
+		Double money = record.getDouble("V_MONEY");
+		Record<String, Object> orderRecord = this.activeRecordDAO.pandora()
+				.SELECT_ALL_FROM(Constant.TableName.T_ORDER_TAB).EQUAL("ID", id).get();
+		String userID = orderRecord.getString("V_BELONG_USER");
+		if (StringUtils.equals("1", orderRecord.getString("V_STATUS"))
+				|| StringUtils.equals("3", orderRecord.getString("V_STATUS"))) {
+			resultVO.setResult("订单已被确认，无法重提错单");
+			return resultVO;
+		}
+		Date date = DateUtils.parseDate(orderRecord.getString("V_CREATE_TIME"), "yyyy-MM-dd HH:mm:ss");
+		long outtime = date.getTime() + 5 * 58 * 1000;
+		if (outtime > System.currentTimeMillis()) {
+			resultVO.setSuccess(false);
+			resultVO.setResult("订单未过期，请稍后");
+			return resultVO;
+		}
+		Record<String, Object> bondRecord = this.activeRecordDAO.pandora()
+				.SELECT_ALL_FROM(Constant.TableName.T_BOND_TODAY).EQUAL("V_USER_ID", userID).get();
+		if (bondRecord.getDouble("V_SURPLUS_BOND") < money) {
+			resultVO.setResult("保证金额度不足，请充值");
+			return resultVO;
+		}
+		orderRecord.remove("ID");
+		orderRecord.remove("V_MONEY");
+		orderRecord.setColumn("ID", Random.generateUUID());
+		orderRecord.setColumn("V_MONEY", money);
+		orderRecord.setColumn("V_UPDATE_USER", ApacheShiroUtils.getCurrentUserID());
+		orderRecord.setColumn("V_UPDATE_TIME", DateUtils.getDateTime());
+		orderRecord.setColumn("V_CREATE_TIME", DateUtils.getDateTime());
+		orderRecord.setColumn("V_STATUS", "4");
+		this.activeRecordDAO.pandora().INSERT_INTO(Constant.TableName.T_ORDER_TAB).VALUES(orderRecord).excute();
+		resultVO.setSuccess(true);
+		resultVO.setResult("提交成功");
 		return resultVO;
 	}
 	

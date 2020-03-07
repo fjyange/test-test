@@ -174,6 +174,20 @@ public class ThirdAction {
 			resJson.setMapData("result", "此平台已被禁止传入数据");
 			return resJson;
 		}
+		Record<String, Object> checkOrder = this.activeRecordDAO.pandora()
+				.SELECT_ALL_FROM(Constant.TableName.T_ORDER_TAB).EQUAL("V_ORDER_NO", orderno).EQUAL("V_MONEY", money)
+				.EQUAL("V_BELONG_APP", appRecord.getString("ID")).get();
+		if(!CollectionUtils.isEmpty(checkOrder)) {
+			Record<String, Object> accountRecord = this.activeRecordDAO.pandora().SELECT_ALL_FROM(Constant.TableName.T_PAY_ACCOUNT).EQUAL("ID", checkOrder.getString("V_BELONG_ACCOUNT")).get();
+			Record<String, Object> fileRecord = this.activeRecordDAO.pandora().SELECT_ALL_FROM(Constant.TableName.T_FILE_TAB).EQUAL("ID", accountRecord.getString("V_FILE_ID")).get();
+			String url = Constant.WEB_URL + fileRecord.getString("V_NAME");
+			resJson.setMapData("result", url);
+			resJson.setMapData("view", Constant.VIEW_URL + "/showPayApp.jsp?id=" + checkOrder.getString("ID"));
+			resJson.setMapData("pcView", Constant.VIEW_URL + "/showPayPC.jsp?id=" + checkOrder.getString("ID"));
+			resJson.setSuccess(true);
+			resJson.setMsg("下单成功");
+			return resJson;
+		}
 		Record<String, Object> sendRecord = new RecordImpl<>();
 		sendRecord.setColumn("appid", appId);
 		sendRecord.setColumn("money", money);
@@ -267,6 +281,8 @@ public class ThirdAction {
 		params.setColumn("ID", id);
 		Record<String, Object> orderRecord = this.activeRecordDAO.statement().getOne("Order.getOrderMsg", params);
 		orderRecord.setColumn("IMG_URL", Constant.WEB_URL + orderRecord.getString("V_NAME"));
+		orderRecord.setColumn("ALI_URL", Constant.ALI_URL + orderRecord.getString("V_URL_SCHEME"));
+		orderRecord.setColumn("DOWN_URL", Constant.VIEW_URL +"/authorize/attach/downFile?ID="+ orderRecord.getString("ID"));
 		resJson.setSuccess(true);
 		resJson.setMap(orderRecord);
 		resJson.setMsg("订单获取成功");
@@ -291,7 +307,7 @@ public class ThirdAction {
 	public static void main(String[] args) throws Exception {
 		// for(int i = 0;i< 20;i++) {
 		Record<String, Object> record = new RecordImpl<>();
-		record.setColumn("appid", "0a82b4fb7e2446e2a52619d2bc0fd424");
+		record.setColumn("appid", "4f5442209f644ed3b44a78074c566f97");
 		 record.setColumn("money", "5");
 		record.setColumn("orderno", "201909142035013425921532");
 		 record.setColumn("paytype", "01");
@@ -299,13 +315,13 @@ public class ThirdAction {
 //		record.setColumn("orderno", "test12312");
 //		record.setColumn("money", "123");
 //		record.setColumn("status", "1");
-		String sign = getSign(record, "oRELu0wCXTvPovH");
+		String sign = getSign(record, "G6ZeCZ3rdYsQInD");
 		record.setColumn("sign", sign);
-		 System.out.println(HttpClientUtils.sendJsonPostRequest(
-		 "http://120.24.93.47/authorize/third/sendorder",
-		 JSONObject.toJSONString(record), "utf-8"));
-//		System.out.println(HttpClientUtils.sendJsonPostRequest(
-//				"http://120.24.93.47/authorize/third/confirmorder", JSONObject.toJSONString(record), "utf-8"));
+//		 System.out.println(HttpClientUtils.sendJsonPostRequest(
+//		 "http://www.tdwj.xyz/Pay_YfuScan_notifyurl.html",
+//		 JSONObject.toJSONString(record), "utf-8"));
+		System.out.println(HttpClientUtils.sendJsonPostRequest(
+				"http://www.shurenpay.com/authorize/third/sendorder", JSONObject.toJSONString(record), "utf-8"));
 		// }
 		// Record<String, Object> record = new RecordImpl<>();
 		// String url = "https://qr-test2.chinaums.com/netpay-route-server/api/";

@@ -68,7 +68,7 @@ function browserRedirect() {
 			    H=D-shengyuH*60*60*1000,//除去天、小时的毫秒数
 			    shengyuM=parseInt(H/(60*1000)),//除去天的毫秒数转换成分钟
 			    M=H-shengyuM*60*1000;//除去天、小时、分的毫秒数
-			  if (shenyu > 0){ 
+			 if (shenyu > 0){  
 			    S=parseInt((shenyu-shengyuD*60*60*24*1000-shengyuH*60*60*1000-shengyuM*60*1000)/1000)//除去天、小时、分的毫秒数转化为秒
 			    $("#hours").text(shengyuH + "时");
 			    $("#minutes").text(shengyuM + "分");
@@ -125,9 +125,27 @@ function browserRedirect() {
 	font-size: 40px;
 	line-height: 80px;
 }
+.msg-tip {
+	font-size: 40px;
+	line-height: 80px;
+	color:red;
+	margin-top:10px
+}
 
 .img-box {
-	margin: 10px 0 2px
+	margin: 10px 0 2px;
+	vertical-align: top;
+}
+
+.img-box span {
+	width: 30px;
+	height: 100%;
+	display: inline-block;
+	vertical-align: top;
+	word-wrap: break-word;
+	margin: 0px 10px;
+	color:red;
+	font-size:24px;
 }
 
 .img-box img {
@@ -223,8 +241,11 @@ function browserRedirect() {
 			<p class="order">
 				订单号: <span style="color: #ff6600;" id="pay_order"></span>
 			</p>
+			<p class="msg-tip">
+				<span>请不要保存扫码</span>
+			</p>
 			<div class="img-box">
-				<img title="支付二维码" id=qrcode src="" />
+				<span>请使用其他手机进行扫码支付</span> <img title="支付二维码" id=qrcode src="" /> <span>或使用电脑端登录扫码</span>
 			</div>
 			<div class="span-div">
 				订单 <span id="hours">0 时</span><span id="minutes" class="span">0
@@ -232,7 +253,7 @@ function browserRedirect() {
 			</div>
 			<div class="text">
 				<p class="gren"></p>
-				<p class="red" id="msg">正常十分钟到账，未到账请将改图给客服补单</p>
+				<p class="red" id="msg">正常十分钟到账，未到账请将支付记录提供给客服补单</p>
 				<div class="tips">
 					<p class="black">1、每张二维码仅限转账一次，多次转账将无法自动到账。</p>
 					<p class="black">2、如需转账多笔相同金额，请返回上步重新下单生成二维码。</p>
