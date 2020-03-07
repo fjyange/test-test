@@ -101,7 +101,7 @@ public class SendAction {
 							resJson.setMsg("重新发送成功");
 						}else {
 							JSONObject jsonObject = JSONObject.parseObject(result);
-							if (StringUtils.equals("success", jsonObject.getString("success"))) {
+							if (StringUtils.equals("success", jsonObject.getString("success")) || StringUtils.equals("true", jsonObject.getString("success"))) {
 								sendPar.setColumn("V_SEND_STATUS", "success");
 								resJson.setSuccess(true);
 								resJson.setMsg("重新发送成功");

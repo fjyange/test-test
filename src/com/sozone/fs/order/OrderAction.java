@@ -213,9 +213,9 @@ public class OrderAction {
 				updateRecord.setColumn("SURPLUS_BOND", String.valueOf(-money));
 				updateRecord.setColumn("V_LOCK_MONEY", "0");
 				statefulDAO.statement().update("Order.updateUser", updateRecord);
-				updateRecord.clear();
-				updateRecord.setColumn("V_ACCOUNT_ID", account);
-				statefulDAO.statement().update("Order.updateJAccountTimes");
+//				updateRecord.clear();
+//				updateRecord.setColumn("V_ACCOUNT_ID", account);
+//				statefulDAO.statement().update("Order.updateJAccountTimes");
 			} else if (StringUtils.equals("1", status) && StringUtils.equals("2", record.getString("V_STATUS"))) {
 				resultVO.setSuccess(false);
 				resultVO.setResult("订单已过期，请联系客服进行补单");
@@ -304,7 +304,7 @@ public class OrderAction {
 							sendPar.setColumn("V_SEND_STATUS", "success");
 						}else {
 							JSONObject jsonObject = JSONObject.parseObject(result);
-							if (StringUtils.equals("success", jsonObject.getString("success"))) {
+							if (StringUtils.equals("success", jsonObject.getString("success")) || StringUtils.equals("true", jsonObject.getString("success"))) {
 								sendPar.setColumn("V_SEND_STATUS", "success");
 							}else {
 								sendPar.setColumn("V_SEND_STATUS", "fail");

@@ -49,12 +49,12 @@ public class OrderJob implements AeolusJob {
 						paramsRecord.setColumn("V_USER_ID", record.getString("V_BELONG_USER"));
 						// 修改锁住金额
 						orderDao.statement().update("Order.updateUserLockMoney", paramsRecord);
-						paramsRecord.clear();
-						int times = record.getInteger("V_PAY_NUM");
-						times = times + 1;
-						paramsRecord.setColumn("V_PAY_NUM", times);
-						orderDao.pandora().UPDATE(Constant.TableName.T_ACCOUNT_SHOW)
-								.EQUAL("V_ACCOUNT_ID", record.getString("V_BELONG_ACCOUNT")).SET(paramsRecord).excute();
+//						paramsRecord.clear();
+//						int times = record.getInteger("V_PAY_NUM");
+//						times = times + 1;
+//						paramsRecord.setColumn("V_PAY_NUM", times);
+//						orderDao.pandora().UPDATE(Constant.TableName.T_ACCOUNT_SHOW)
+//								.EQUAL("V_ACCOUNT_ID", record.getString("V_BELONG_ACCOUNT")).SET(paramsRecord).excute();
 						orderDao.commit();
 					} catch (Exception e) {
 						orderDao.rollback();

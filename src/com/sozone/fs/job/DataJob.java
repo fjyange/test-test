@@ -30,7 +30,7 @@ public class DataJob implements AeolusJob {
 			statefulDAO = new StatefulDAOImpl();
 //			statefulDAO.pandora().DELETE_FROM(Constant.TableName.T_USER_SHOW).excute();
 //			statefulDAO.pandora().DELETE_FROM(Constant.TableName.T_ACCOUNT_SHOW).excute();
-			statefulDAO.sql("update T_ACCOUNT_SHOW set V_PAY_NUM = 10").update();
+			statefulDAO.sql("update T_ACCOUNT_SHOW set V_PAY_NUM = 0").update();
 			statefulDAO.sql("update T_ACCOUNT_COLLECTION set V_YS_TOTAL = V_TOTAL_MONEY").update();
 			statefulDAO.sql("update T_ACCOUNT_COLLECTION set V_TOTAL_MONEY = 0,V_ALI_MONEY= 0,V_WX_MONEY= 0,V_PAY_NUM = 0").update();
 			statefulDAO.sql("update t_bond_today set V_YS_RECEIVABLES = V_COUNT_RECEIVABLES").update();
@@ -39,12 +39,12 @@ public class DataJob implements AeolusJob {
 			statefulDAO.sql("update t_collection_tab set V_WX_COLLECTION = 0,V_ALI_COLLECTION = 0,V_TOTAL_COLLECTION = 0,V_LAST_COLLECTION = V_CASH_COLLECTION").update();
 			statefulDAO.pandora().DELETE_FROM(Constant.TableName.T_ORDER_OPT).excute();
 			statefulDAO.pandora().DELETE_FROM(Constant.TableName.T_SEND_TAB).excute();
-			statefulDAO.sql("delete from t_order_history where  date_add(V_CREATE_TIME, interval 10 DAY) < now()").delete();
+			statefulDAO.sql("delete from t_order_history where  date_add(V_CREATE_TIME, interval 30 DAY) < now()").delete();
 			statefulDAO.sql("insert into t_order_history select * from t_order_tab where V_CREATE_TIME < now()").insert();
 			statefulDAO.sql("delete from t_order_tab where V_CREATE_TIME < now()").delete();
 			statefulDAO.sql("delete from t_recieve_tab where date_add(V_RECIEVE_TIME, interval 1 DAY) < now()").delete();
-			statefulDAO.sql("delete from t_withdraw_tab where  date_add(V_APPLY_TIME, interval 5 DAY) < now()").delete();
-			statefulDAO.sql("delete from t_user_topup where  date_add(V_TOPUP_TIME, interval 5 DAY) < now()").delete();
+			statefulDAO.sql("delete from t_withdraw_tab where  date_add(V_APPLY_TIME, interval 30 DAY) < now()").delete();
+			statefulDAO.sql("delete from t_user_topup where  date_add(V_TOPUP_TIME, interval 30 DAY) < now()").delete();
 			statefulDAO.sql("delete from t_commission_tab where  date_add(V_COMMISSION_TIME, interval 5 DAY) < now()").delete();
 			statefulDAO.commit();
 		} catch (Exception e) {

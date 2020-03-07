@@ -16,12 +16,12 @@
 		<where>
 		<![CDATA[
 			tus.V_IS_PAY ='Y' and (tbt.V_SURPLUS_BOND - tbt.V_LOCK_MONEY)  >= #{V_MONEY}
-			and tas.V_PAY_NUM > 0 and  tpa.V_IS_MATCH = 'Y' and tpa.V_PAY_TYPE =#{V_PAY_TYPE} 
+			and  tpa.V_IS_MATCH = 'Y' and tpa.V_PAY_TYPE =#{V_PAY_TYPE} 
 			and (tpa.V_PAY_TOTAL = #{V_MONEY} or tpa.V_PAY_TOTAL = '0.00') and tpa.V_IS_LOCK = 'N'
 		]]>
 		</where>
 		<![CDATA[
-		order by tus.V_USER_LEVEL,tus.V_PAY_TIME,tas.V_PAY_TIME
+		order by tus.V_USER_LEVEL, tas.V_PAY_NUM,tus.V_PAY_TIME,tas.V_PAY_TIME
 		]]>
 	</select>
 

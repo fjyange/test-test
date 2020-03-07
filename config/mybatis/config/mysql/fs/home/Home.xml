@@ -140,4 +140,79 @@
 			</if>
 		</where>
 	</select>
+	
+	<select id="clacuOrderRate" resultType="record"
+		parameterType="record">
+		<![CDATA[
+		SELECT TT.*,TT.success/TT.sumc RATE from (select HOUR
+			( e.V_CREATE_TIME ) AS HOUR,
+		SUM(
+				CASE
+				WHEN e.V_STATUS = 1 THEN
+					1
+				WHEN e.V_STATUS = 3 THEN
+					1
+				ELSE
+					0
+				END
+			) success,
+			SUM(
+				CASE
+				WHEN e.V_STATUS = 2 THEN
+					1
+				ELSE
+					0
+				END
+			) fail,
+			SUM(CASE
+				WHEN e.V_STATUS != 0 then
+					1
+				ELSE
+					0
+				END) sumc,
+		tpa.V_PAY_NAME
+		FROM
+			t_order_tab e LEFT JOIN t_pay_account tpa on e.V_BELONG_ACCOUNT = tpa.ID
+		GROUP BY
+			HOUR ( e.V_CREATE_TIME )
+		ORDER BY
+			HOUR ( e.V_CREATE_TIME ))TT
+		]]>
+	</select>
+	<select id="calcuAcc" resultType="record"
+		parameterType="record">
+		<![CDATA[
+		SELECT TT.*,SUC_SUM/COU_SUM RATE from( select 
+			SUM(
+				CASE
+				WHEN tot.V_STATUS = 1 THEN
+					1
+				WHEN tot.V_STATUS = 3 THEN
+					1
+				ELSE
+					0
+				END
+			) SUC_SUM,
+			SUM(
+				CASE
+				WHEN tot.V_STATUS = 2 THEN
+					1
+				WHEN tot.V_STATUS = 0 THEN
+					1
+				ELSE
+					0
+				END
+			) FAIL_SUM,
+			SUM(1) COU_SUM,
+		tpa.V_PAY_NAME,
+		tsub.USER_NAME
+		FROM
+			t_order_tab tot 
+		LEFT JOIN t_pay_account tpa on tot.V_BELONG_ACCOUNT = tpa.ID
+		LEFT JOIN t_sys_user_base tsub on tot.V_BELONG_USER = tsub.USER_ID
+		where tpa.V_PAY_NAME is not null
+		GROUP BY
+			V_BELONG_ACCOUNT )TT where SUC_SUM/COU_SUM < 0.3
+		]]>
+	</select>
 </mapper>

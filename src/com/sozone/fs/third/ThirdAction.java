@@ -248,7 +248,7 @@ public class ThirdAction {
 		updateRecord.clear();
 		updateRecord.setColumn("V_ACCOUNT_ID", fileRecord.getString("PAY_ID"));
 		updateRecord.setColumn("V_PAY_TIME", DateUtils.getDateTime());
-		updateRecord.setColumn("V_PAY_NUM", "-1");
+		updateRecord.setColumn("V_PAY_NUM", "1");
 		// 修改账户支付次数
 		this.activeRecordDAO.statement().update("Order.updateAccountTimes", updateRecord);
 		resJson.setSuccess(true);
@@ -303,21 +303,22 @@ public class ThirdAction {
 	//
 	// }
 	public static void main(String[] args) throws Exception {
-		// for(int i = 0;i< 20;i++) {
+//		 for(int i = 0;i< 20;i++) {
 		Record<String, Object> record = new RecordImpl<>();
-		record.setColumn("appid", "68a4505e446744cfa47e60c02b57aafa");
+		record.setColumn("appid", "fe84986402b74ffca7439956107cc4c7");
 		record.setColumn("money", "5");
-		record.setColumn("orderno", "2019091420350134259215332");
-		record.setColumn("paytype", "02");
+		record.setColumn("orderno", Random.generateUUID());
+		record.setColumn("paytype", "01");
 		record.setColumn("notifyurl", "http://www.shurenpay.com/authorize/test/test");
 		// record.setColumn("orderno", "test12312");
 		// record.setColumn("money", "123");
 		// record.setColumn("status", "1");
-		String sign = getSign(record, "aE7u9B7HGrVPV48");
+		String sign = getSign(record, "lyKEvIZdVnoJGOz");
 		record.setColumn("sign", sign);
 		System.out.println(
-				HttpClientUtils.sendJsonPostRequest("http://120.78.222.26/authorize/third/sendorder",
+				HttpClientUtils.sendJsonPostRequest("http://www.longyuezhifu.com/authorize/third/sendorder",
 						JSONObject.toJSONString(record), "utf-8"));
+//		 }
 		// System.out.println(HttpClientUtils.sendJsonPostRequest(
 		// "http://120.24.93.47/authorize/third/confirmorder",
 		// JSONObject.toJSONString(record), "utf-8"));

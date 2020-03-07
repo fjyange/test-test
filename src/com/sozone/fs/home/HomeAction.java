@@ -4,6 +4,7 @@
 package com.sozone.fs.home;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -124,6 +125,10 @@ public class HomeAction {
 		Record<String, Object> commisionRecord = this.activeRecordDAO.statement().selectOne("Home.getAdminCommisionMoney");
 		record.setColumns(commisionRecord);
 		Record<String, Object> orderRecord = this.activeRecordDAO.statement().selectOne("Home.getOrderCount");
+		List<Record<String, Object>> list = this.activeRecordDAO.statement().selectList("Home.clacuOrderRate");
+		record.setColumn("list", list);
+		List<Record<String, Object>> accList = this.activeRecordDAO.statement().selectList("Home.calcuAcc");
+		record.setColumn("acc", accList);
 		if (!CollectionUtils.isEmpty(orderRecord)) {
 			double count = orderRecord.getDouble("ALL_COUNT");
 			double successCount = orderRecord.getDouble("SUCCESS_COUNT");
@@ -199,12 +204,12 @@ public class HomeAction {
 			
 			return resultVO;
 		}
-		Record<String, Object> payTimeRecord = this.activeRecordDAO.pandora()
-				.SELECT_ALL_FROM(Constant.TableName.T_PAYTIME_CONF).EQUAL("V_USER_ID", userId).get();
-		int time = 10;
-		if (!CollectionUtils.isEmpty(payTimeRecord)) {
-			time = payTimeRecord.getInteger("V_PAY_NUM");
-		}
+//		Record<String, Object> payTimeRecord = this.activeRecordDAO.pandora()
+//				.SELECT_ALL_FROM(Constant.TableName.T_PAYTIME_CONF).EQUAL("V_USER_ID", userId).get();
+		int time = 0;
+//		if (!CollectionUtils.isEmpty(payTimeRecord)) {
+//			time = payTimeRecord.getInteger("V_PAY_NUM");
+//		}
 		long accountCount = this.activeRecordDAO.pandora().SELECT_COUNT_FROM(Constant.TableName.T_PAY_ACCOUNT)
 				.EQUAL("V_CREATE_USER", userId).EQUAL("V_IS_MATCH", "Y").count();
 		if (accountCount == 0) {
@@ -213,8 +218,9 @@ public class HomeAction {
 		}
 		List<Record<String, Object>> list = this.activeRecordDAO.pandora()
 				.SELECT_ALL_FROM(Constant.TableName.T_PAY_ACCOUNT).EQUAL("V_CREATE_USER", userId).list();
+		Record<String, Object> params = new RecordImpl<>();
 		for (Record<String, Object> account : list) {
-			Record<String, Object> params = new RecordImpl<>();
+			params.clear();
 			params.setColumn("ID", Random.generateUUID());
 			params.setColumn("V_PAY_TIME", DateUtils.getDateTime());
 			params.setColumn("V_IS_SHOW", "Y");
@@ -223,7 +229,12 @@ public class HomeAction {
 			params.setColumn("V_ACCOUNT_ID", account.getString("ID"));
 			this.activeRecordDAO.pandora().INSERT_INTO(Constant.TableName.T_ACCOUNT_SHOW).VALUES(params).excute();
 		}
-		Record<String, Object> params = new RecordImpl<>();
+		if(list.size() > 0) {
+			params.clear();
+			params.setColumn("V_PAY_NUM", time);
+			this.activeRecordDAO.pandora().UPDATE(Constant.TableName.T_ACCOUNT_SHOW).SET(params).excute();
+		}
+		params.clear();
 		params.setColumn("V_USER_ID", userId);
 		params.setColumn("ID", Random.generateUUID());
 		params.setColumn("V_PAY_TIME", DateUtils.getDateTime());
