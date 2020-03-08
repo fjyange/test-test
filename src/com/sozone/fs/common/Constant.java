@@ -12,8 +12,8 @@ public interface Constant {
 	String CITY_THEME = "CITY_THEME";
 
 	String SYS_SWICH = "on";
-	String WEB_URL ="http://120.78.222.26:8090/";
-	String VIEW_URL = "http://120.78.222.26/";
+	String WEB_URL ="http://47.115.93.230:8090/";
+	String VIEW_URL = "http://47.115.93.230/";
 	String ALI_URL = "alipayqr://platformapi/startapp?saId=10000007&qrcode=";
 	public interface TableName {
 		/**

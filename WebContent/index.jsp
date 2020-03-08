@@ -8,7 +8,7 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	
-	<title>瀚海支付</title>
+	<title>蓝海支付</title>
 
 	<%@include file="static/include/inc.jsp"%>
 	

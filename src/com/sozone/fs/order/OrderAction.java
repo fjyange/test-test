@@ -155,7 +155,6 @@ public class OrderAction {
 		String userID = orderRecord.getString("V_BELONG_USER");
 		String account = orderRecord.getString("V_BELONG_ACCOUNT");
 		double money = orderRecord.getDouble("V_MONEY");
-		double actualPay = orderRecord.getDouble("V_ACTUAL_PAY");
 		try {
 			statefulDAO = new StatefulDAOImpl();
 			orderDao = new StatefulDAOImpl();
@@ -196,7 +195,6 @@ public class OrderAction {
 				orderDao.commit();
 				updateRecord.setColumn("V_APP_ID", appID);
 				updateRecord.setColumn("V_MONEY", String.valueOf(money));
-				updateRecord.setColumn("V_ACTUAL_MONEY", String.valueOf(actualPay));
 				if (StringUtils.equals("01", payType)) {
 					updateRecord.setColumn("ALI_MONEY", String.valueOf(money));
 					updateRecord.setColumn("WX_MONEY", "0");
@@ -242,7 +240,6 @@ public class OrderAction {
 				orderDao.commit();
 				updateRecord.setColumn("V_APP_ID", appID);
 				updateRecord.setColumn("V_MONEY", String.valueOf(money));
-				updateRecord.setColumn("V_ACTUAL_MONEY", String.valueOf(actualPay));
 				if (StringUtils.equals("01", payType)) {
 					updateRecord.setColumn("ALI_MONEY", String.valueOf(money));
 					updateRecord.setColumn("WX_MONEY", "0");
