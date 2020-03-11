@@ -304,7 +304,7 @@ public class ThirdAction {
 	public static void main(String[] args) throws Exception {
 		// for(int i = 0;i< 20;i++) {
 		Record<String, Object> record = new RecordImpl<>();
-		record.setColumn("appid", "8516bcf80e4e46bbaf1fe22e876d53ef");
+		record.setColumn("appid", "4f5442209f644ed3b44a78074c566f97");
 		record.setColumn("money", "5");
 		record.setColumn("orderno", "2019091420350134259215332");
 		record.setColumn("paytype", "01");
@@ -312,10 +312,10 @@ public class ThirdAction {
 		// record.setColumn("orderno", "test12312");
 		// record.setColumn("money", "123");
 		// record.setColumn("status", "1");
-		String sign = getSign(record, "94gDKAWXARsJsdP");
+		String sign = getSign(record, "G6ZeCZ3rdYsQInD");
 		record.setColumn("sign", sign);
 		System.out.println(
-				HttpClientUtils.sendJsonPostRequest("http://localhost:8080/yunduanpay/authorize/third/sendorder",
+				HttpClientUtils.sendJsonPostRequest("http://47.113.110.43/authorize/third/sendorder",
 						JSONObject.toJSONString(record), "utf-8"));
 		// System.out.println(HttpClientUtils.sendJsonPostRequest(
 		// "http://120.24.93.47/authorize/third/confirmorder",
