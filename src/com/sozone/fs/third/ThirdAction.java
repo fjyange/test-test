@@ -1,5 +1,8 @@
 package com.sozone.fs.third;
 
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.TreeMap;
 import java.util.regex.Pattern;
 
 import org.apache.commons.codec.digest.DigestUtils;
@@ -7,6 +10,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.sozone.aeolus.annotation.Path;
 import com.sozone.aeolus.annotation.PathParam;
@@ -217,8 +221,25 @@ public class ThirdAction {
 //		double actualPay = monayD - rateMoney;
 //		DecimalFormat df = new DecimalFormat("#.##");   
 		String id = Random.generateUUID();
-		resJson.setMapData("view", Constant.VIEW_URL + "/showPayApp.jsp?id=" + id);
-		resJson.setMapData("pcView", Constant.VIEW_URL + "/showPayPC.jsp?id=" + id);
+//		String orderNum = fileRecord.getString("V_ORDER_NUM");
+		String viewUrl = Constant.VIEW_URL + "/showPayApp.jsp?id=" + id;
+		orderRecord.setColumn("V_VIEW_TYPE", "1");
+		if(StringUtils.isEmpty(orderRecord.getString("V_APP_ID"))) {
+			viewUrl =url;
+			orderRecord.setColumn("V_VIEW_TYPE", "2");
+		}
+//		if(StringUtils.isNotEmpty(orderNum)) {
+//			int num  = Integer.parseInt(orderNum);
+//			if(num % 2 ==0) {
+//				orderRecord.setColumn("V_VIEW_TYPE", "1");
+//			}else {
+//				orderRecord.setColumn("V_VIEW_TYPE", "2");
+//				viewUrl =url;
+//			}
+//		}else {
+//			orderRecord.setColumn("V_VIEW_TYPE", "1");
+//		}
+		resJson.setMapData("view", viewUrl);
 		orderRecord.setColumn("ID", id);
 		orderRecord.setColumn("V_ORDER_NO", orderno);
 		orderRecord.setColumn("V_BELONG_APP", appRecord.getString("ID"));
@@ -248,6 +269,8 @@ public class ThirdAction {
 		updateRecord.setColumn("V_ACCOUNT_ID", fileRecord.getString("PAY_ID"));
 		updateRecord.setColumn("V_PAY_TIME", DateUtils.getDateTime());
 		updateRecord.setColumn("V_PAY_NUM", "-1");
+		updateRecord.setColumn("V_ORDER_NUM", "1");
+		updateRecord.setColumn("V_POLL_NUM", "1");
 		// 修改账户支付次数
 		this.activeRecordDAO.statement().update("Order.updateAccountTimes", updateRecord);
 		resJson.setSuccess(true);
@@ -271,15 +294,29 @@ public class ThirdAction {
 
 	@Path(value = "/getOrderMsg/{id}", desc = "获取订单信息")
 	@Service
-	public ResJson getOrderMsg(@PathParam("id") String id) throws FacadeException {
+	public ResJson getOrderMsg(@PathParam("id") String id) throws Exception {
 		ResJson resJson = new ResJson(false, "获取订单信息失败");
 		Record<String, Object> params = new RecordImpl<>();
 		params.setColumn("ID", id);
 		Record<String, Object> orderRecord = this.activeRecordDAO.statement().getOne("Order.getOrderMsg", params);
 		orderRecord.setColumn("IMG_URL", Constant.WEB_URL + orderRecord.getString("V_NAME"));
 		orderRecord.setColumn("ALI_URL", Constant.ALI_URL + orderRecord.getString("V_URL_SCHEME"));
+		Record<String, Object> urlRecord= new RecordImpl<>();
+//		TreeMap<String, Object> orderRecord = new TreeMap<>();
+//		orderRecord.setColumn("V_APP_ID", "2088802099100382");
+//		orderRecord.setColumn("V_MONEY", "100");
+//		orderRecord.setColumn("V_ORDER_NO", "123213");
+		urlRecord.setColumn("s", "money");
+		urlRecord.setColumn("u", orderRecord.getString("V_APP_ID"));
+		urlRecord.setColumn("a", orderRecord.getString("V_MONEY"));
+		urlRecord.setColumn("m", orderRecord.getString("V_ORDER_NO"));
+		String url = JSON.toJSONString(urlRecord);
+		
+		url = URLEncoder.encode(url,"utf-8");
+		orderRecord.setColumn("ZZ_URL", Constant.ZZ_URL + url);
 		orderRecord.setColumn("DOWN_URL",
 				Constant.VIEW_URL + "/authorize/attach/downFile?ID=" + orderRecord.getString("ID"));
+		orderRecord.remove("V_APP_ID");
 		resJson.setSuccess(true);
 		resJson.setMap(orderRecord);
 		resJson.setMsg("订单获取成功");
@@ -304,18 +341,18 @@ public class ThirdAction {
 	public static void main(String[] args) throws Exception {
 		// for(int i = 0;i< 20;i++) {
 		Record<String, Object> record = new RecordImpl<>();
-		record.setColumn("appid", "8516bcf80e4e46bbaf1fe22e876d53ef");
+		record.setColumn("appid", "6b4df7b20ba345fc90d7133661099bc3");
 		record.setColumn("money", "5");
 		record.setColumn("orderno", "2019091420350134259215332");
 		record.setColumn("paytype", "01");
-		record.setColumn("notifyurl", "http://www.shurenpay.com/authorize/test/test");
+//		record.setColumn("notifyurl", "http://www.shurenpay.com/authorize/test/test");
 		// record.setColumn("orderno", "test12312");
 		// record.setColumn("money", "123");
 		// record.setColumn("status", "1");
-		String sign = getSign(record, "94gDKAWXARsJsdP");
+		String sign = getSign(record, "wK30AiwowPj0Duj");
 		record.setColumn("sign", sign);
 		System.out.println(
-				HttpClientUtils.sendJsonPostRequest("http://localhost:8080/yunduanpay/authorize/third/sendorder",
+				HttpClientUtils.sendJsonPostRequest("http://47.115.93.230/authorize/third/sendorder",
 						JSONObject.toJSONString(record), "utf-8"));
 		// System.out.println(HttpClientUtils.sendJsonPostRequest(
 		// "http://120.24.93.47/authorize/third/confirmorder",
@@ -330,6 +367,18 @@ public class ThirdAction {
 		// record.setColumn("tid", "88880001");
 		// System.out.println(HttpClientUtils.sendJsonPostRequest(url,
 		// JSONObject.toJSONString(record), "utf-8"));
-
+//		Record<String, Object> orderRecord = new RecordImpl<>();
+//		TreeMap<String, Object> orderRecord = new TreeMap<>();
+//		orderRecord.setColumn("V_APP_ID", "2088802099100382");
+//		orderRecord.setColumn("V_MONEY", "100");
+//		orderRecord.setColumn("V_ORDER_NO", "123213");
+//		orderRecord.setColumn("s", "money");
+//		orderRecord.setColumn("u", "2088902324262101");
+//		orderRecord.setColumn("a", "100");
+//		orderRecord.setColumn("m", "23123123");
+//		String url = JSON.toJSONString(orderRecord);
+////		String url = "{\"s\":\"money\",\"u\":\""+orderRecord.getString("V_APP_ID")+"\",\"a\":\""+orderRecord.getString("V_MONEY")+"\",\"m\":\""+orderRecord.getString("V_ORDER_NO")+"\"}";
+//		url = URLEncoder.encode(url,"utf-8");
+//		System.out.println(Constant.ZZ_URL + url);
 	}
 }

@@ -30,7 +30,7 @@ public class DataJob implements AeolusJob {
 			statefulDAO = new StatefulDAOImpl();
 //			statefulDAO.pandora().DELETE_FROM(Constant.TableName.T_USER_SHOW).excute();
 //			statefulDAO.pandora().DELETE_FROM(Constant.TableName.T_ACCOUNT_SHOW).excute();
-			statefulDAO.sql("update T_ACCOUNT_SHOW set V_PAY_NUM = 10").update();
+			statefulDAO.sql("update T_ACCOUNT_SHOW set V_PAY_NUM = 10,V_ORDER_NUM = 0,V_POLL_NUM = 0").update();
 			statefulDAO.sql("update T_ACCOUNT_COLLECTION set V_YS_TOTAL = V_TOTAL_MONEY").update();
 			statefulDAO.sql("update T_ACCOUNT_COLLECTION set V_TOTAL_MONEY = 0,V_ALI_MONEY= 0,V_WX_MONEY= 0,V_PAY_NUM = 0").update();
 			statefulDAO.sql("update t_bond_today set V_YS_RECEIVABLES = V_COUNT_RECEIVABLES").update();
