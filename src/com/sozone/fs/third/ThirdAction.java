@@ -224,7 +224,7 @@ public class ThirdAction {
 //		String orderNum = fileRecord.getString("V_ORDER_NUM");
 		String viewUrl = Constant.VIEW_URL + "/showPayApp.jsp?id=" + id;
 		orderRecord.setColumn("V_VIEW_TYPE", "1");
-		if(StringUtils.isEmpty(orderRecord.getString("V_APP_ID"))) {
+		if(StringUtils.isEmpty(fileRecord.getString("V_APP_ID"))) {
 			viewUrl =url;
 			orderRecord.setColumn("V_VIEW_TYPE", "2");
 		}
@@ -343,7 +343,7 @@ public class ThirdAction {
 		Record<String, Object> record = new RecordImpl<>();
 		record.setColumn("appid", "6b4df7b20ba345fc90d7133661099bc3");
 		record.setColumn("money", "5");
-		record.setColumn("orderno", "2019091420350134259215332");
+		record.setColumn("orderno", "2019091420350134259215333");
 		record.setColumn("paytype", "01");
 //		record.setColumn("notifyurl", "http://www.shurenpay.com/authorize/test/test");
 		// record.setColumn("orderno", "test12312");

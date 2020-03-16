@@ -259,7 +259,7 @@ public class HomeAction {
 			this.activeRecordDAO.pandora().INSERT_INTO(Constant.TableName.T_ACCOUNT_SHOW).VALUES(params).excute();
 		}
 		params.clear();
-		params.setColumn("V_POLL_TIME", "0");
+		params.setColumn("V_POLL_NUM", "0");
 		this.activeRecordDAO.pandora().UPDATE(Constant.TableName.T_ACCOUNT_SHOW).SET(params).excute();
 	}
 }

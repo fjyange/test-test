@@ -21,7 +21,7 @@
 		]]>
 		</where>
 		<![CDATA[
-		order by tus.V_USER_LEVEL,tas.V_POLL_NUM,tus.V_PAY_TIME,tas.V_PAY_TIME
+		order by tus.V_USER_LEVEL,tus.V_PAY_TIME,tas.V_PAY_TIME
 		]]>
 	</select>
 
