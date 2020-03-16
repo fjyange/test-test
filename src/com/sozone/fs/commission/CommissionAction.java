@@ -69,7 +69,9 @@ public class CommissionAction {
 		Record<String, Object> record = aeolusData.getTableRecord(Constant.TableName.T_COMMISSION_TAB);
 		Record<String, Object> params = new RecordImpl<>();
 		params.setColumn("USER_ID", ApacheShiroUtils.getCurrentUserID());
-		Record<String, Object> appRecord = this.activeRecordDAO.statement().selectOne("Commission.getCommssion",
+		
+		
+		Record<String, Object> appRecord =this.activeRecordDAO.statement().selectOne("Commission.getCommssion",
 				params);
 		double cash = appRecord.getDouble("V_CASH_COLLECTION");
 		double money = record.getDouble("V_MONEY");
@@ -78,14 +80,33 @@ public class CommissionAction {
 			return resultVO;
 		}
 		double cashMoney = cash - money;
+		double rate = appRecord.getDouble("V_RATE");
 		double formalities = appRecord.getDouble("V_FORMALITIES");
-		double reality = money - formalities;
+		double reality = money - (money * rate) - formalities;
 		record.setColumn("ID", Random.generateUUID());
 		record.setColumn("V_APP_ID", appRecord.getString("V_APP_ID"));
 		record.setColumn("V_COMMISSION_TIME", DateUtils.getDateTime());
 		record.setColumn("V_RATE", appRecord.getString("V_RATE"));
 		record.setColumn("V_REALITY", reality);
 		record.setColumn("V_FORMALITIES", formalities);
+		
+//		Record<String, Object> appRecord = this.activeRecordDAO.statement().selectOne("Commission.getCommssion",
+//				params);
+//		double cash = appRecord.getDouble("V_CASH_COLLECTION");
+//		double money = record.getDouble("V_MONEY");
+//		if (cash < money) {
+//			resultVO.setResult("提成金额超出");
+//			return resultVO;
+//		}
+//		double cashMoney = cash - money;
+//		double formalities = appRecord.getDouble("V_FORMALITIES");
+//		double reality = money - formalities;
+//		record.setColumn("ID", Random.generateUUID());
+//		record.setColumn("V_APP_ID", appRecord.getString("V_APP_ID"));
+//		record.setColumn("V_COMMISSION_TIME", DateUtils.getDateTime());
+//		record.setColumn("V_RATE", appRecord.getString("V_RATE"));
+//		record.setColumn("V_REALITY", reality);
+//		record.setColumn("V_FORMALITIES", formalities);
 		this.activeRecordDAO.pandora().INSERT_INTO(Constant.TableName.T_COMMISSION_TAB).VALUES(record).excute();
 		params.clear();
 		params.setColumn("V_CASH_COLLECTION", cashMoney);

@@ -4,10 +4,11 @@
 	<select id="orderList" resultType="record"
 		parameterType="record">
 		<![CDATA[
-		 select tot.*,tat.V_APP_NAME,tsub.USER_NAME,tpa.V_PAY_NAME from t_order_tab tot 
+		 select tot.*,tat.V_APP_NAME,tsub.USER_NAME,tpa.V_PAY_NAME,tft.V_NAME from t_order_tab tot 
 		 left join t_app_tab tat on tot.V_BELONG_APP = tat.ID
 		 left join t_sys_user_base tsub on tot.V_BELONG_USER = tsub.USER_ID 
 		 left join t_pay_account tpa on tot.V_BELONG_ACCOUNT = tpa.ID
+		 left join t_file_tab tft on tpa.V_FILE_ID = tft.ID
 		]]>
 		<where>
 			<if test="IS_ADMIN !=null and IS_ADMIN !=''">
@@ -125,6 +126,8 @@
 		<![CDATA[
 		  update t_account_show set 
 		  V_PAY_NUM =V_PAY_NUM +  #{V_PAY_NUM} ,
+		  V_ORDER_NUM =V_ORDER_NUM +  #{V_ORDER_NUM} ,
+		  V_POLL_NUM =V_POLL_NUM +  #{V_POLL_NUM} ,
 		  V_PAY_TIME = now()
 		  where V_ACCOUNT_ID = #{V_ACCOUNT_ID}
 		]]>
@@ -212,7 +215,7 @@ LEFT JOIN (select SUM(V_MONEY) V_MONEY,V_TOPUP_USER from t_user_topup where V_ST
 		parameterType="record">
 		<![CDATA[
 			select tot.V_MONEY,tft.V_NAME,date_add(tot.V_CREATE_TIME, interval 10 minute) TIME_OUT,
-			tot.V_ORDER_NO,tft.ID,tpa.V_URL_SCHEME 
+			tot.V_ORDER_NO,tft.ID,tpa.V_URL_SCHEME,tpa.V_APP_ID,tot.V_VIEW_TYPE 
 			from t_order_tab tot
 			left join t_pay_account tpa on tot.V_BELONG_ACCOUNT = tpa.ID
 			left join t_file_tab tft on tpa.V_FILE_ID = tft.ID 
