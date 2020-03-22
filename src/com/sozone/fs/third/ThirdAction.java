@@ -332,7 +332,7 @@ public class ThirdAction {
 //		 "http://www.tdwj.xyz/Pay_YfuScan_notifyurl.html",
 //		 JSONObject.toJSONString(record), "utf-8"));
 		System.out.println(HttpClientUtils.sendJsonPostRequest(
-				"http://47.113.110.43/authorize/third/sendorder", JSONObject.toJSONString(record), "utf-8"));
+				"http://120.24.29.128/authorize/third/sendorder", JSONObject.toJSONString(record), "utf-8"));
 		// }
 		// Record<String, Object> record = new RecordImpl<>();
 		// String url = "https://qr-test2.chinaums.com/netpay-route-server/api/";
