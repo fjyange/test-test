@@ -335,6 +335,36 @@ public class ThirdAction {
 		return pattern.matcher(str).matches();
 	}
 
+	
+	@Path(value = "/accounttest/{id}", desc = "账户测试连接")
+	@Service
+	public ResJson accountTest(@PathParam("id") String id) throws Exception {
+		ResJson resJson = new ResJson(false, "获取订单信息失败");
+		Record<String, Object> account = this.activeRecordDAO.pandora().SELECT_ALL_FROM(Constant.TableName.T_PAY_ACCOUNT).EQUAL("ID", id).get();
+		if(CollectionUtils.isEmpty(account)) {
+			resJson.setMsg("账户不存在");
+			return resJson;
+		}
+		String appid = account.getString("V_APP_ID");
+		if(StringUtils.isEmpty(appid)) {
+			resJson.setMsg("appid未填写");
+			return resJson;
+		}
+		Record<String, Object> urlRecord= new RecordImpl<>();
+		urlRecord.setColumn("s", "money");
+		urlRecord.setColumn("u", appid);
+		urlRecord.setColumn("a", "3000");
+		urlRecord.setColumn("m", System.currentTimeMillis());
+		String url = JSON.toJSONString(urlRecord);
+		
+		url = URLEncoder.encode(url,"utf-8");
+		resJson.setSuccess(true);
+		resJson.setMapData("TEST_URL", Constant.ZZ_URL + url);
+		resJson.setMsg("订单获取成功");
+		return resJson;
+	}
+
+	
 	// private String newSign(Record<String, Object> record) {
 	//
 	// }
