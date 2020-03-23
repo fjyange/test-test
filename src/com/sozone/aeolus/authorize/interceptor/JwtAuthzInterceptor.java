@@ -36,14 +36,12 @@ public class JwtAuthzInterceptor implements Interceptor
 	/**
 	 * Basic
 	 */
-//	private static final String AUTHZ_HEADER_NAME = "YUNDUANPAYBasic";
-//	private static final String AUTHZ_HEADER_NAME = "JUNPAYBasic";
-	private static final String AUTHZ_HEADER_NAME = "DSPAYBasic";
+	private static final String AUTHZ_HEADER_NAME = "YUNXINPAYBasic";
 
 	/**
 	 * 登录固定Token key
 	 */
-	public final static String TOKEN_KEY = "a92flk3h";
+	public final static String TOKEN_KEY = "a93flk2h";
 
 	/*
 	 * (non-Javadoc)

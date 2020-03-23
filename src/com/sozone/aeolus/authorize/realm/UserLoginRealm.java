@@ -8,7 +8,6 @@ import org.apache.shiro.authc.SimpleAuthenticationInfo;
 
 import com.sozone.aeolus.dao.data.Record;
 import com.sozone.aeolus.exception.DAOException;
-import com.sozone.aeolus.exception.ServiceException;
 import com.sozone.fs.common.Constant;
 import com.sozone.fs.common.Constant.TableName;
 

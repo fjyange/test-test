@@ -1,8 +1,6 @@
 package com.sozone.fs.third;
 
-import java.net.URL;
 import java.net.URLEncoder;
-import java.util.TreeMap;
 import java.util.regex.Pattern;
 
 import org.apache.commons.codec.digest.DigestUtils;
@@ -30,6 +28,7 @@ import com.sozone.aeolus.util.CollectionUtils;
 import com.sozone.aeolus.utils.DateUtils;
 import com.sozone.fs.common.Constant;
 import com.sozone.fs.common.util.HttpClientUtils;
+import com.sozone.fs.common.util.IPUtils;
 import com.sozone.fs.common.util.UtilSign;
 
 @Path(value = "/third", desc = "第三方接入")
@@ -294,7 +293,7 @@ public class ThirdAction {
 
 	@Path(value = "/getOrderMsg/{id}", desc = "获取订单信息")
 	@Service
-	public ResJson getOrderMsg(@PathParam("id") String id) throws Exception {
+	public ResJson getOrderMsg(@PathParam("id") String id,AeolusData aeolusData) throws Exception {
 		ResJson resJson = new ResJson(false, "获取订单信息失败");
 		Record<String, Object> params = new RecordImpl<>();
 		params.setColumn("ID", id);
@@ -317,12 +316,46 @@ public class ThirdAction {
 		orderRecord.setColumn("DOWN_URL",
 				Constant.VIEW_URL + "/authorize/attach/downFile?ID=" + orderRecord.getString("ID"));
 		orderRecord.remove("V_APP_ID");
+		String ip = IPUtils.getIp(aeolusData.getHttpServletRequest());
+		params.clear();
+		params.setColumn("V_REQUEST_IP", ip);
+		this.activeRecordDAO.pandora().UPDATE(Constant.TableName.T_ORDER_TAB).EQUAL("ID", id).SET(params).excute();
 		resJson.setSuccess(true);
 		resJson.setMap(orderRecord);
 		resJson.setMsg("订单获取成功");
 		return resJson;
 	}
 
+	
+	@Path(value = "/gettestorder/{id}", desc = "获取订单信息")
+	@Service
+	public ResJson getTestOrderMsg(@PathParam("id") String id,AeolusData aeolusData) throws Exception {
+		ResJson resJson = new ResJson(false, "获取订单信息失败");
+		Record<String, Object> params = new RecordImpl<>();
+		params.setColumn("ID", id);
+		Record<String, Object> orderRecord = this.activeRecordDAO.statement().getOne("Order.getOrderMsg", params);
+		orderRecord.setColumn("IMG_URL", Constant.WEB_URL + orderRecord.getString("V_NAME"));
+		orderRecord.setColumn("ALI_URL", Constant.ALI_URL + orderRecord.getString("V_URL_SCHEME"));
+		Record<String, Object> urlRecord= new RecordImpl<>();
+//		TreeMap<String, Object> orderRecord = new TreeMap<>();
+//		orderRecord.setColumn("V_APP_ID", "2088802099100382");
+//		orderRecord.setColumn("V_MONEY", "100");
+//		orderRecord.setColumn("V_ORDER_NO", "123213");
+		urlRecord.setColumn("s", "money");
+		urlRecord.setColumn("u", orderRecord.getString("V_APP_ID"));
+		urlRecord.setColumn("a", orderRecord.getString("V_MONEY"));
+		urlRecord.setColumn("m", orderRecord.getString("V_ORDER_NO"));
+		String url = JSON.toJSONString(urlRecord);
+		
+		url = URLEncoder.encode(url,"utf-8");
+		orderRecord.setColumn("ZZ_URL", Constant.ZZ_URL + url);
+		orderRecord.setColumn("DOWN_URL",
+				Constant.VIEW_URL + "/authorize/attach/downFile?ID=" + orderRecord.getString("ID"));
+		resJson.setSuccess(true);
+		resJson.setMap(orderRecord);
+		resJson.setMsg("订单获取成功");
+		return resJson;
+	}
 	/*
 	 * 是否为浮点数？double或float类型。
 	 * 
@@ -355,7 +388,7 @@ public class ThirdAction {
 		urlRecord.setColumn("u", appid);
 		urlRecord.setColumn("a", "3000");
 		urlRecord.setColumn("m", System.currentTimeMillis());
-		String url = JSON.toJSONString(urlRecord);
+		String url = JSON.toJSONString(urlRecord);	
 		
 		url = URLEncoder.encode(url,"utf-8");
 		resJson.setSuccess(true);
@@ -364,6 +397,14 @@ public class ThirdAction {
 		return resJson;
 	}
 
+	
+	@Path(value = "/pagetime/{id}/{time}", desc = "用户停留时间")
+	@Service
+	public void pageTime(@PathParam("id") String id,@PathParam("time")String time) throws Exception {
+		Record<String, Object> record = new RecordImpl<>();
+		record.setColumn("V_LONG_TIME", time);
+		this.activeRecordDAO.pandora().UPDATE(Constant.TableName.T_ORDER_TAB).EQUAL("ID", id).SET(record).excute();
+	}
 	
 	// private String newSign(Record<String, Object> record) {
 	//
@@ -382,7 +423,7 @@ public class ThirdAction {
 		String sign = getSign(record, "wK30AiwowPj0Duj");
 		record.setColumn("sign", sign);
 		System.out.println(
-				HttpClientUtils.sendJsonPostRequest("http://47.115.93.230/authorize/third/sendorder",
+				HttpClientUtils.sendJsonPostRequest("http://47.115.114.43/authorize/third/sendorder",
 						JSONObject.toJSONString(record), "utf-8"));
 		// System.out.println(HttpClientUtils.sendJsonPostRequest(
 		// "http://120.24.93.47/authorize/third/confirmorder",
