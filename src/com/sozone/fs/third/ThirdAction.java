@@ -224,10 +224,13 @@ public class ThirdAction {
 		String id = Random.generateUUID();
 //		String orderNum = fileRecord.getString("V_ORDER_NUM");
 		String viewUrl = Constant.VIEW_URL + "/showPayApp.jsp?id=" + id;
-		orderRecord.setColumn("V_VIEW_TYPE", "1");
-		if(StringUtils.isEmpty(fileRecord.getString("V_APP_ID"))) {
-			viewUrl =url;
+		if(StringUtils.isNotEmpty(fileRecord.getString("V_APP_KEY"))) {
+			orderRecord.setColumn("V_VIEW_TYPE", "3");
+		}else if(StringUtils.isNotEmpty(fileRecord.getString("V_APP_ID"))) {
 			orderRecord.setColumn("V_VIEW_TYPE", "2");
+		}else {
+			viewUrl =url;
+			orderRecord.setColumn("V_VIEW_TYPE", "1");
 		}
 //		if(StringUtils.isNotEmpty(orderNum)) {
 //			int num  = Integer.parseInt(orderNum);
@@ -302,19 +305,25 @@ public class ThirdAction {
 		Record<String, Object> orderRecord = this.activeRecordDAO.statement().getOne("Order.getOrderMsg", params);
 		orderRecord.setColumn("IMG_URL", Constant.WEB_URL + orderRecord.getString("V_NAME"));
 		orderRecord.setColumn("ALI_URL", Constant.ALI_URL + orderRecord.getString("V_URL_SCHEME"));
-		Record<String, Object> urlRecord= new RecordImpl<>();
-//		TreeMap<String, Object> orderRecord = new TreeMap<>();
-//		orderRecord.setColumn("V_APP_ID", "2088802099100382");
-//		orderRecord.setColumn("V_MONEY", "100");
-//		orderRecord.setColumn("V_ORDER_NO", "123213");
-		urlRecord.setColumn("s", "money");
-		urlRecord.setColumn("u", orderRecord.getString("V_APP_ID"));
-		urlRecord.setColumn("a", orderRecord.getString("V_MONEY"));
-		urlRecord.setColumn("m", orderRecord.getString("V_ORDER_NO"));
-		String url = JSON.toJSONString(urlRecord);
-		
-		url = URLEncoder.encode(url,"utf-8");
-		orderRecord.setColumn("ZZ_URL", Constant.ZZ_URL + url);
+		String viewType = orderRecord.getString("V_VIEW_TYPE");
+		if(StringUtils.equals("3", viewType)) {
+			orderRecord.setColumn("ZZ_URL", Constant.KEY_URL + orderRecord.getString("V_APP_KEY"));
+		}else if(StringUtils.equals("2", viewType)) {
+			Record<String, Object> urlRecord= new RecordImpl<>();
+//			TreeMap<String, Object> orderRecord = new TreeMap<>();
+//			orderRecord.setColumn("V_APP_ID", "2088802099100382");
+//			orderRecord.setColumn("V_MONEY", "100");
+//			orderRecord.setColumn("V_ORDER_NO", "123213");
+			urlRecord.setColumn("s", "money");
+			urlRecord.setColumn("u", orderRecord.getString("V_APP_ID"));
+			urlRecord.setColumn("a", orderRecord.getString("V_MONEY"));
+			urlRecord.setColumn("m", orderRecord.getString("V_ORDER_NO"));
+			String url = JSON.toJSONString(urlRecord);
+			
+			url = URLEncoder.encode(url,"utf-8");
+			orderRecord.setColumn("ZZ_URL", Constant.ZZ_URL + url);
+		}
+
 		orderRecord.setColumn("DOWN_URL",
 				Constant.VIEW_URL + "/authorize/attach/downFile?ID=" + orderRecord.getString("ID"));
 		orderRecord.remove("V_APP_ID");
@@ -338,21 +347,29 @@ public class ThirdAction {
 		Record<String, Object> orderRecord = this.activeRecordDAO.statement().getOne("Order.getOrderMsg", params);
 		orderRecord.setColumn("IMG_URL", Constant.WEB_URL + orderRecord.getString("V_NAME"));
 		orderRecord.setColumn("ALI_URL", Constant.ALI_URL + orderRecord.getString("V_URL_SCHEME"));
-		Record<String, Object> urlRecord= new RecordImpl<>();
-//		TreeMap<String, Object> orderRecord = new TreeMap<>();
-//		orderRecord.setColumn("V_APP_ID", "2088802099100382");
-//		orderRecord.setColumn("V_MONEY", "100");
-//		orderRecord.setColumn("V_ORDER_NO", "123213");
-		urlRecord.setColumn("s", "money");
-		urlRecord.setColumn("u", orderRecord.getString("V_APP_ID"));
-		urlRecord.setColumn("a", orderRecord.getString("V_MONEY"));
-		urlRecord.setColumn("m", orderRecord.getString("V_ORDER_NO"));
-		String url = JSON.toJSONString(urlRecord);
-		
-		url = URLEncoder.encode(url,"utf-8");
-		orderRecord.setColumn("ZZ_URL", Constant.ZZ_URL + url);
+		String viewType = orderRecord.getString("V_VIEW_TYPE");
+		if(StringUtils.equals("3", viewType)) {
+			orderRecord.setColumn("ZZ_URL", Constant.KEY_URL + orderRecord.getString("V_APP_KEY"));
+		}else if(StringUtils.equals("2", viewType)) {
+			Record<String, Object> urlRecord= new RecordImpl<>();
+//			TreeMap<String, Object> orderRecord = new TreeMap<>();
+//			orderRecord.setColumn("V_APP_ID", "2088802099100382");
+//			orderRecord.setColumn("V_MONEY", "100");
+//			orderRecord.setColumn("V_ORDER_NO", "123213");
+			urlRecord.setColumn("s", "money");
+			urlRecord.setColumn("u", orderRecord.getString("V_APP_ID"));
+			urlRecord.setColumn("a", orderRecord.getString("V_MONEY"));
+			urlRecord.setColumn("m", orderRecord.getString("V_ORDER_NO"));
+			String url = JSON.toJSONString(urlRecord);
+			
+			url = URLEncoder.encode(url,"utf-8");
+			orderRecord.setColumn("ZZ_URL", Constant.ZZ_URL + url);
+		}
+
 		orderRecord.setColumn("DOWN_URL",
 				Constant.VIEW_URL + "/authorize/attach/downFile?ID=" + orderRecord.getString("ID"));
+		orderRecord.remove("V_APP_ID");
+
 		resJson.setSuccess(true);
 		resJson.setMap(orderRecord);
 		resJson.setMsg("订单获取成功");
@@ -452,6 +469,26 @@ public class ThirdAction {
 		url = URLEncoder.encode(url,"utf-8");
 		resJson.setSuccess(true);
 		resJson.setMapData("TEST_URL", Constant.ZZ_URL + url);
+		resJson.setMsg("订单获取成功");
+		return resJson;
+	}
+	
+	@Path(value = "/accountkeytest/{id}", desc = "账户测试连接")
+	@Service
+	public ResJson accountkeyTest(@PathParam("id") String id) throws Exception {
+		ResJson resJson = new ResJson(false, "获取订单信息失败");
+		Record<String, Object> account = this.activeRecordDAO.pandora().SELECT_ALL_FROM(Constant.TableName.T_PAY_ACCOUNT).EQUAL("ID", id).get();
+		if(CollectionUtils.isEmpty(account)) {
+			resJson.setMsg("账户不存在");
+			return resJson;
+		}
+		String appkey = account.getString("V_APP_KEY");
+		if(StringUtils.isEmpty(appkey)) {
+			resJson.setMsg("口令未填写");
+			return resJson;
+		}
+		resJson.setSuccess(true);
+		resJson.setMapData("TEST_URL", Constant.KEY_URL + appkey);
 		resJson.setMsg("订单获取成功");
 		return resJson;
 	}
