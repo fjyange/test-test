@@ -69,6 +69,8 @@ public class CommissionAction {
 		Record<String, Object> record = aeolusData.getTableRecord(Constant.TableName.T_COMMISSION_TAB);
 		Record<String, Object> params = new RecordImpl<>();
 		params.setColumn("USER_ID", ApacheShiroUtils.getCurrentUserID());
+		
+		
 		Record<String, Object> appRecord =this.activeRecordDAO.statement().selectOne("Commission.getCommssion",
 				params);
 		double cash = appRecord.getDouble("V_CASH_COLLECTION");
@@ -87,13 +89,28 @@ public class CommissionAction {
 		record.setColumn("V_RATE", appRecord.getString("V_RATE"));
 		record.setColumn("V_REALITY", reality);
 		record.setColumn("V_FORMALITIES", formalities);
+		
+//		Record<String, Object> appRecord = this.activeRecordDAO.statement().selectOne("Commission.getCommssion",
+//				params);
+//		double cash = appRecord.getDouble("V_CASH_COLLECTION");
+//		double money = record.getDouble("V_MONEY");
+//		if (cash < money) {
+//			resultVO.setResult("提成金额超出");
+//			return resultVO;
+//		}
+//		double cashMoney = cash - money;
+//		double formalities = appRecord.getDouble("V_FORMALITIES");
+//		double reality = money - formalities;
+//		record.setColumn("ID", Random.generateUUID());
+//		record.setColumn("V_APP_ID", appRecord.getString("V_APP_ID"));
+//		record.setColumn("V_COMMISSION_TIME", DateUtils.getDateTime());
+//		record.setColumn("V_RATE", appRecord.getString("V_RATE"));
+//		record.setColumn("V_REALITY", reality);
+//		record.setColumn("V_FORMALITIES", formalities);
 		this.activeRecordDAO.pandora().INSERT_INTO(Constant.TableName.T_COMMISSION_TAB).VALUES(record).excute();
 		params.clear();
 		params.setColumn("V_CASH_COLLECTION", cashMoney);
-		params.clear();
-		params.setColumn("V_CASH_COLLECTION", cashMoney);
-		this.activeRecordDAO.pandora()
-				.UPDATE(Constant.TableName.T_COLLECTION_TAB)
+		this.activeRecordDAO.pandora().UPDATE(Constant.TableName.T_COLLECTION_TAB)
 				.EQUAL("V_APP_ID", appRecord.getString("V_APP_ID")).SET(params).excute();
 		resultVO.setSuccess(true);
 		resultVO.setResult("申请成功");

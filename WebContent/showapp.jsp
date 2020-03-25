@@ -9,14 +9,12 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
-<title>树人支付</title>
+<title>瀚海支付</title>
 
 <script
 	src="${pageContext.request.contextPath}/static/res/jquery/jquery.min.js"
 	type="text/javascript"></script>
-<script
-	src="${pageContext.request.contextPath}/static/res/jquery/qrcode.js"
-	type="text/javascript"></script>
+
 <script type="text/javascript">
 window.onload = function(){
 		//屏蔽键盘事件
@@ -50,24 +48,15 @@ var time ;
 				contentType : 'application/json;charset=UTF-8',
 				success : function(result) {
 					if (result.success){
-						$("#alert_box").show();
-						$("#alert_num").html(result.V_MONEY);
 						$("#out_time").html(result.TIME_OUT);
 						$("#pay_money").html(result.V_MONEY);
 						$("#pay_order").html(result.V_ORDER_NO);
 						$("#money").html(result.V_MONEY);
-						var qrcode = new QRCode(document.getElementById("qrcode"), {
-							width : 250,
-							height : 300
-						});
-						qrcode.makeCode(result.V_URL_SCHEME);
-						var ua = navigator.userAgent.toLocaleLowerCase(); 
-						if (ua.match(/tencenttraveler/) != null || ua.match(/qqbrowse/) != null) { 
-							$("#payclick").attr("href",result.V_URL_SCHEME);
-						}else {
-							$("#payclick").attr("href",result.ALI_URL);
-						}
+						$("#qrcode").attr("src",result.IMG_URL);
+						$("#qrcode").attr("alt",result.V_NAME);
+						$("#payclick").attr("href",result.ALI_URL);
 						$("#downloadUrl").val(result.DOWN_URL);
+						
 						time =result.TIME_OUT;
 						setTimeout(clock,500);
 					}
@@ -81,9 +70,6 @@ var time ;
 		});
 		function openImg(){
 			location.href = $("#qrcode").attr("src");
-		}
-		function closeBtn(){
-			$("#alert_box").hide();
 		}
 		function clock(){
 			var today=new Date(),//当前时间
@@ -190,9 +176,6 @@ var time ;
 	margin: 10px 0 2px;
 	vertical-align: top;
 }
-.qrcode img{
-	margin: auto;
-}
 .img-box a{
 	width: 70%;height: 120px;font-size: 40px;border-radius: 20px;border: none;background-color:#108ee9;color:white;display: block;text-decoration: none;
 	line-height: 120px;
@@ -289,71 +272,11 @@ var time ;
 	width: 88%;
 	margin: 10px auto;
 }
-.alert_box {
-	display:none;
-	position:absolute;
-	top:0;
-	left:0;
-	width:100%;
-	height:100%;
-    background: rgba(0, 0, 0, 0.12);
-	z-index: 999;
-    overflow-y: hidden;
-}
-.alert_content{
-	width: 80%;
-	margin: 30% 10%;
-	background-color:#fff;
-	padding: 30px 0;
-	font-size: 42px;
-	border-radius: 30px;
-}
-.alert_pay_msg{
-	color:#555;
-	margin-bottom:10px;
-}
-.alert_pay_msg span{
-	color:#de0000;
-	margin-left:5px;
-	margin-right:5px;
-}
-.alert_pay_tip{
-	color:#108ee9;
-	margin-bottom:10px;
-}
-.alert_pay_warring{
-	color:#de0000;
-	font-size: 50px;
-	margin-bottom:10px;
-	margin-left: 40px;
-	margin-right: 40px;
-}
-.alert_pay_btn{
-	background-color:#108ee9;
-	width: 80%;
-	height: 100px;
-	border: 0px;
-	border-radius: 20px;
-	color:#fff;
-	font-size:44px;
-	margin-bottom:20px;
-	margin-top:50px;
-}
+Ï
 </style>
 </head>
 <body>
 	<div class="body">
-		<div id="alert_box" class="alert_box">
-			<div class="alert_content">
-				<div class="alert_pay_msg">请<span>扫码</span>支付<span id="alert_num"></span>元</div>
-				<div class="alert_pay_tip">平台指定收款方</div>
-				<div class="alert_pay_tip">安全放心，实时到账</div>
-				<div class="alert_pay_warring">如支付宝弹出安全提醒，请点击：继续支付</div>
-				<div>
-					<button class="alert_pay_btn"  onclick="closeBtn()">确定</button>
-				</div>
-			</div>
-		</div>
 		<div class="top">
 			<img src="${path}/static/images/alipay_logo.png">
 		</div>
@@ -365,20 +288,20 @@ var time ;
 				订单号: <span style="color: #ff6600;" id="pay_order"></span>
 			</p>
 			<div class="img-box">
-				<div id=qrcode class="qrcode"></div>
+				<span>如无法正常跳转到支付宝,请点击二维码后截图付款</span>
+				<img title="支付二维码" id=qrcode src="" onclick="openImg()"/>
+				<span>优先使用点击支付</span>
 			</div>
-			<!-- <div class="img-box">
+			<div class="img-box">
 				<input type="hidden" value="" id="downloadUrl"/>
 				<a href="" id="payclick">点击支付</button>
-			</div> -->
+			</div>
 			<div class="span-div">
 				订单 <span id="hours">0 时</span><span id="minutes" class="span">0
 					分</span><span id="seconds">0 秒</span> 后过期
 			</div>
 			<div class="text">
 				<p class="gren"></p>
-				<!--<p class="red" id="msg">优先使用点击支付，如无法正常跳转，请截图扫码付款</p>-->
-				<!--<p class="red" id="msg">请截图后，打开支付进行扫码付款</p>-->
 				<p class="red" id="msg">正常十分钟到账，未到账请将支付记录提供给客服补单</p>
 				<div class="tips">
 					<p class="black">1、每张二维码仅限转账一次，多次转账将无法自动到账。</p>

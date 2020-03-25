@@ -105,7 +105,7 @@ public class AccountAction {
 				params.setColumn("V_ACCOUNT_ID", id);
 				params.setColumn("V_USER_ID", ApacheShiroUtils.getCurrentUserID());
 				params.setColumn("V_IS_SHOW", userRecord.getString("IS_MATCH"));
-				params.setColumn("V_PAY_TIME", DateUtils.getDateTime());
+				params.setColumn("V_PAY_TIME", "");
 				if (CollectionUtils.isEmpty(timeRecord)) {
 					params.setColumn("V_PAY_NUM", "10");
 				} else {
@@ -113,6 +113,9 @@ public class AccountAction {
 				}
 
 				this.activeRecordDAO.pandora().INSERT_INTO(Constant.TableName.T_ACCOUNT_SHOW).VALUES(params).excute();
+				params.clear();
+				params.setColumn("V_POLL_NUM", "0");
+				this.activeRecordDAO.pandora().UPDATE(Constant.TableName.T_ACCOUNT_SHOW).SET(params).excute();
 			}
 		} else {
 			this.activeRecordDAO.auto().table(Constant.TableName.T_PAY_ACCOUNT).modify(record);

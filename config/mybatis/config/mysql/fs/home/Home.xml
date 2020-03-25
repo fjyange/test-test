@@ -11,14 +11,30 @@
 		]]>
 		<where>
 			<![CDATA[
-				 and (V_STATUS = '1' or V_STATUS='3')
+				and (V_STATUS = '1' or V_STATUS='3')
+			]]>
+		</where>
+	</select>
+	<select id="getAdminYSOrderMoney" resultType="record"
+		parameterType="record">
+		<![CDATA[
+			select ifnull(sum(V_MONEY),0) ORDER_YS_MONEY,ifnull(sum(CASE
+				WHEN  V_PAY_TYPE = '01' THEN V_MONEY ELSE 0 end ),0) ORDER_YS_ALI_MONEY,
+			ifnull(sum(CASE
+				WHEN V_PAY_TYPE = '02' THEN V_MONEY ELSE 0 end ),0) ORDER_YS_WX_MONEY from t_order_history  
+		]]>
+		<where>
+			<![CDATA[
+				and (V_STATUS = '1' or V_STATUS='3')  and (DATE_FORMAT(DATE_ADD(V_CREATE_TIME,INTERVAL 1 DAY),'%Y-%m-%d') = DATE_FORMAT(NOW(),'%Y-%m-%d'))
 			]]>
 		</where>
 	</select>
 	<select id="getAdminUserMoney" resultType="record"
 		parameterType="record">
 		<![CDATA[
-			select ifnull(sum(V_COUNT_RECEIVABLES),0) USER_TOTAL_COUNT,ifnull(sum(V_SURPLUS_BOND),0) USER_TOTAL_SURPLUS from t_bond_today tbt
+			select ifnull(sum(V_COUNT_RECEIVABLES),0) USER_TOTAL_COUNT,ifnull(sum(V_SURPLUS_BOND),0) USER_TOTAL_SURPLUS,
+			ifnull(sum(V_YS_RECEIVABLES),0) V_YS_RECEIVABLES 
+			from t_bond_today tbt
 			inner join  t_sys_user_base tsub on tbt.V_USER_ID = tsub.USER_ID 
 		]]>
 	</select>
@@ -32,7 +48,7 @@
 		parameterType="record">
 		<![CDATA[
 			SELECT
-			ifnull(sum(V_TOTAL_COLLECTION),0) APP_TOTAL_COUNT,ifnull(sum(V_CASH_COLLECTION),0) APP_CASH_COUNT
+			ifnull(sum(V_TOTAL_COLLECTION),0) APP_TOTAL_COUNT,ifnull(sum(V_CASH_COLLECTION),0) APP_CASH_COUNT,ifnull(sum(V_YS_COLLECTION),0) APP_YS_COUNT
 		FROM
 			T_COLLECTION_TAB
 		]]>
@@ -57,7 +73,8 @@
 		SELECT
 			ifnull(sum(V_TOTAL_COLLECTION),0) COUNT_MONEY,
 			ifnull(sum(V_ALI_COLLECTION),0) ALI_MONEY,
-			ifnull(sum(V_WX_COLLECTION),0) WX_MONEY
+			ifnull(sum(V_WX_COLLECTION),0) WX_MONEY,
+			ifnull(sum(V_YS_COLLECTION),0) APP_YS_COUNT
 		FROM
 			T_COLLECTION_TAB
 		]]>
@@ -76,7 +93,8 @@
 			ifnull(V_COUNT_RECEIVABLES,0) COUNT_MONEY,
 			ifnull(V_ALI_RECEIVABLES,0) ALI_MONEY,
 			ifnull(V_WX_RECEIVABLES,0) WX_MONEY,
-			ifnull(V_SURPLUS_BOND,0) SURPLUS_BOND
+			ifnull(V_SURPLUS_BOND,0) SURPLUS_BOND,
+			ifnull(V_YS_RECEIVABLES,0)V_YS_RECEIVABLES
 		FROM
 			t_bond_today tbt 
 		]]>

@@ -15,11 +15,16 @@
 	src="${pageContext.request.contextPath}/static/res/jquery/jquery.min.js"
 	type="text/javascript"></script>
 
-<script type="text/javascript">	
+<script type="text/javascript">
 		$(function(){
-			$("#test").attr("href","alipayqr://platformapi/startapp?saId=10000007&qrcode=${param.id}");
+			var sUserAgent = navigator.userAgent.toLowerCase();
+		  if (/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test(sUserAgent)) {
+			  location.href="${path}/showapp.jsp?id=${param.id}"
+		  } else {
+		   location.href="${path}/showPayPC.jsp?id=${param.id}"
+		  }
 		});
-		window.onload = function(){
+window.onload = function(){
 		//屏蔽键盘事件
 		document.onkeydown = function (){
 		var e = window.event || arguments[0];
@@ -43,8 +48,8 @@
 		}
 		}
 	</script>
+</style>
 </head>
 <body>
-	<a id="test"> 唤起应用 </a>
 </body>
 </html>
