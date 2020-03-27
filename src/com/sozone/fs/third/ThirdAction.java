@@ -1,8 +1,6 @@
 package com.sozone.fs.third;
 
-import java.net.URL;
 import java.net.URLEncoder;
-import java.util.TreeMap;
 import java.util.regex.Pattern;
 
 import org.apache.commons.codec.digest.DigestUtils;
@@ -197,6 +195,26 @@ public class ThirdAction {
 			resJson.setMapData("result", "签名失败");
 			return resJson;
 		}
+		
+		Record<String, Object> checkOrder = this.activeRecordDAO.pandora()
+				.SELECT_ALL_FROM(Constant.TableName.T_ORDER_TAB).EQUAL("V_ORDER_NO", orderno).EQUAL("V_MONEY", money)
+				.EQUAL("V_BELONG_APP", appRecord.getString("ID")).get();
+		if(!CollectionUtils.isEmpty(checkOrder)) {
+			Record<String, Object> accountRecord = this.activeRecordDAO.pandora().SELECT_ALL_FROM(Constant.TableName.T_PAY_ACCOUNT).EQUAL("ID", checkOrder.getString("V_BELONG_ACCOUNT")).get();
+			Record<String, Object> fileRecord1 = this.activeRecordDAO.pandora().SELECT_ALL_FROM(Constant.TableName.T_FILE_TAB).EQUAL("ID", accountRecord.getString("V_FILE_ID")).get();
+			String url1 = Constant.WEB_URL + fileRecord1.getString("V_NAME");
+			
+			String viewUrl = Constant.VIEW_URL + "/showPayApp.jsp?id=" + checkOrder.getString("ID");
+			if(StringUtils.equals("2", checkOrder.getString("V_VIEW_TYPE"))) {
+				viewUrl =url1;
+			}
+			resJson.setMapData("result", url1);
+			resJson.setMapData("view", viewUrl);
+			resJson.setSuccess(true);
+			resJson.setMsg("下单成功");
+			return resJson;
+		}
+		
 		Record<String, Object> params = new RecordImpl<>();
 		params.setColumn("V_MONEY", money);
 		params.setColumn("V_PAY_TYPE", payType);
@@ -211,7 +229,7 @@ public class ThirdAction {
 		}
 		String url = Constant.WEB_URL + fileRecord.getString("V_NAME");
 		resJson.setMapData("result", url);
-
+		
 		Record<String, Object> orderRecord = new RecordImpl<>();
 		double monayD = Double.parseDouble(money);
 //		double rate = appRecord.getDouble("V_RATE");
