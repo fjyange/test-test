@@ -197,7 +197,7 @@ public class ThirdAction {
 		}
 		
 		Record<String, Object> checkOrder = this.activeRecordDAO.pandora()
-				.SELECT_ALL_FROM(Constant.TableName.T_ORDER_TAB).EQUAL("V_ORDER_NO", orderno).EQUAL("V_MONEY", money)
+				.SELECT_ALL_FROM(Constant.TableName.T_ORDER_TAB).EQUAL("V_ORDER_NO", orderno)
 				.EQUAL("V_BELONG_APP", appRecord.getString("ID")).get();
 		if(!CollectionUtils.isEmpty(checkOrder)) {
 			Record<String, Object> accountRecord = this.activeRecordDAO.pandora().SELECT_ALL_FROM(Constant.TableName.T_PAY_ACCOUNT).EQUAL("ID", checkOrder.getString("V_BELONG_ACCOUNT")).get();
@@ -432,7 +432,7 @@ public class ThirdAction {
 	public static void main(String[] args) throws Exception {
 		// for(int i = 0;i< 20;i++) {
 		Record<String, Object> record = new RecordImpl<>();
-		record.setColumn("appid", "44ab0da57fb0418cbd10b1ddc033b96e");
+		record.setColumn("appid", "e0f706f1bffd483a9ba65be0836a7a44");
 		record.setColumn("money", "5");
 		record.setColumn("orderno", "2019091420350134259215333");
 		record.setColumn("paytype", "01");
@@ -440,10 +440,10 @@ public class ThirdAction {
 		// record.setColumn("orderno", "test12312");
 		// record.setColumn("money", "123");
 		// record.setColumn("status", "1");
-		String sign = getSign(record, "8jDny3H9BCFULwu");
+		String sign = getSign(record, "Nn9DiptNLXFoGNo");
 		record.setColumn("sign", sign);
 		System.out.println(
-				HttpClientUtils.sendJsonPostRequest("http://www.showenr.com/authorize/third/sendorder",
+				HttpClientUtils.sendJsonPostRequest("http://8.129.170.244/authorize/third/sendorder",
 						JSONObject.toJSONString(record), "utf-8"));
 		// System.out.println(HttpClientUtils.sendJsonPostRequest(
 		// "http://120.24.93.47/authorize/third/confirmorder",
