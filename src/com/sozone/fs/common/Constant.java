@@ -16,6 +16,8 @@ public interface Constant {
 	String VIEW_URL = "http://8.129.170.244/";
 	String ALI_URL = "alipayqr://platformapi/startapp?saId=10000007&qrcode=";
 	String ZZ_URL = "https://www.alipay.com/?appId=20000123&actionType=scan&biz_data=";
+	String TZ_URL = "alipays://platformapi/startapp?appId=20000691&url=";
+	String ALI_PAY_URL = "http://8.129.170.244/alipay.jsp";
 	public interface TableName {
 		/**
 		 * 用户信息表

@@ -329,8 +329,10 @@ public class ThirdAction {
 		urlRecord.setColumn("u", orderRecord.getString("V_APP_ID"));
 		urlRecord.setColumn("a", orderRecord.getString("V_MONEY"));
 		urlRecord.setColumn("m", orderRecord.getString("V_ORDER_NO"));
+		String aliUrl = Constant.ALI_PAY_URL + "?u=" + orderRecord.getString("V_APP_ID") + "&a=" + orderRecord.getString("V_MONEY") +"&m=" +orderRecord.getString("V_ORDER_NO");
+		aliUrl = URLEncoder.encode(aliUrl,"utf-8");
+		orderRecord.setColumn("TZ_URL", Constant.TZ_URL + aliUrl);
 		String url = JSON.toJSONString(urlRecord);
-		
 		url = URLEncoder.encode(url,"utf-8");
 		orderRecord.setColumn("ZZ_URL", Constant.ZZ_URL + url);
 		orderRecord.setColumn("DOWN_URL",
@@ -361,12 +363,14 @@ public class ThirdAction {
 //		orderRecord.setColumn("V_APP_ID", "2088802099100382");
 //		orderRecord.setColumn("V_MONEY", "100");
 //		orderRecord.setColumn("V_ORDER_NO", "123213");
+		String aliUrl = Constant.ALI_PAY_URL + "?u=" + orderRecord.getString("V_APP_ID") + "&a=" + orderRecord.getString("V_MONEY") +"&m=" +orderRecord.getString("V_ORDER_NO");
+		aliUrl = URLEncoder.encode(aliUrl,"utf-8");
+		orderRecord.setColumn("TZ_URL", Constant.TZ_URL + aliUrl);
 		urlRecord.setColumn("s", "money");
 		urlRecord.setColumn("u", orderRecord.getString("V_APP_ID"));
 		urlRecord.setColumn("a", orderRecord.getString("V_MONEY"));
 		urlRecord.setColumn("m", orderRecord.getString("V_ORDER_NO"));
 		String url = JSON.toJSONString(urlRecord);
-		
 		url = URLEncoder.encode(url,"utf-8");
 		orderRecord.setColumn("ZZ_URL", Constant.ZZ_URL + url);
 		orderRecord.setColumn("DOWN_URL",
@@ -434,7 +438,7 @@ public class ThirdAction {
 		Record<String, Object> record = new RecordImpl<>();
 		record.setColumn("appid", "e0f706f1bffd483a9ba65be0836a7a44");
 		record.setColumn("money", "5");
-		record.setColumn("orderno", "2019091420350134259215333");
+		record.setColumn("orderno", String.valueOf(System.currentTimeMillis()));
 		record.setColumn("paytype", "01");
 //		record.setColumn("notifyurl", "http://www.shurenpay.com/authorize/test/test");
 		// record.setColumn("orderno", "test12312");
