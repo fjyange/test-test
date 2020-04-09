@@ -20,7 +20,6 @@ import com.sozone.aeolus.config.AeolusConfigBuilder;
 import com.sozone.aeolus.context.AeolusContextImpl;
 import com.sozone.aeolus.ext.dao.MybatisEnvironmentEntry;
 import com.sozone.aeolus.plugin.AeolusPlugIn;
-import com.sozone.aeolus.sn.validate.AeolusSNValidate;
 import com.sozone.aeolus.util.Assert;
 import com.sozone.aeolus.util.LogFormatUtils;
 import com.sozone.aeolus.util.ResourceUtils;
