@@ -26,6 +26,9 @@
 			<if test="USER_NAME !=null and USER_NAME !=''">
 				<![CDATA[AND tsub.USER_NAME like CONCAT('%', #{USER_NAME}, '%')]]>
 			</if>
+			<if test="V_REQUEST_IP !=null and V_REQUEST_IP !=''">
+				<![CDATA[AND tot.V_REQUEST_IP like CONCAT('%', #{V_REQUEST_IP}, '%')]]>
+			</if>
 			<if test="V_APP_NAME !=null and V_APP_NAME !=''">
 				<![CDATA[AND tat.V_APP_NAME like CONCAT('%', #{V_APP_NAME}, '%')]]>
 			</if>
@@ -66,6 +69,9 @@
 			</if>
 			<if test="USER_NAME !=null and USER_NAME !=''">
 				<![CDATA[AND tsub.USER_NAME like CONCAT('%', #{USER_NAME}, '%')]]>
+			</if>
+			<if test="V_REQUEST_IP !=null and V_REQUEST_IP !=''">
+				<![CDATA[AND tot.V_REQUEST_IP like CONCAT('%', #{V_REQUEST_IP}, '%')]]>
 			</if>
 			<if test="V_APP_NAME !=null and V_APP_NAME !=''">
 				<![CDATA[AND tat.V_APP_NAME like CONCAT('%', #{V_APP_NAME}, '%')]]>
@@ -214,8 +220,8 @@ LEFT JOIN (select SUM(V_MONEY) V_MONEY,V_TOPUP_USER from t_user_topup where V_ST
 	<select id="getOrderMsg" resultType="record"
 		parameterType="record">
 		<![CDATA[
-			select tot.V_MONEY,tft.V_NAME,date_add(tot.V_CREATE_TIME, interval 10 minute) TIME_OUT,
-			tot.V_ORDER_NO,tft.ID,tpa.V_URL_SCHEME,tpa.V_APP_ID,tot.V_VIEW_TYPE 
+			select tot.V_MONEY,tft.V_NAME,date_add(tot.V_CREATE_TIME, interval 10 minute) TIME_OUT,tot.V_BELONG_APP,
+			tot.V_ORDER_NO,tft.ID,tpa.V_URL_SCHEME,tpa.V_APP_ID,tot.V_VIEW_TYPE,tot.V_QR_CODE 
 			from t_order_tab tot
 			left join t_pay_account tpa on tot.V_BELONG_ACCOUNT = tpa.ID
 			left join t_file_tab tft on tpa.V_FILE_ID = tft.ID 

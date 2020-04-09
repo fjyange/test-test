@@ -25,6 +25,9 @@
 			<if test="USER_NAME !=null and USER_NAME !=''">
 				<![CDATA[AND tsub.USER_NAME like CONCAT('%', #{USER_NAME}, '%')]]>
 			</if>
+			<if test="V_PAY_MODEL !=null and V_PAY_MODEL !=''">
+				<![CDATA[AND tpa.V_PAY_MODEL like CONCAT('%', #{V_PAY_MODEL}, '%')]]>
+			</if>
 		</where>
 	</select>
 </mapper>
