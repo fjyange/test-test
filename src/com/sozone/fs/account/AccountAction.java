@@ -64,6 +64,20 @@ public class AccountAction {
 		return resultVO;
 	}
 
+	@Path(value = "/onlineAccount", desc = "获取在线账户列表")
+	@Service
+	public ResultVO<Page<Record<String, Object>>> onlineAccount(AeolusData aeolusData) throws FacadeException {
+		logger.debug(LogUtils.format("获取在线账户列表", aeolusData));
+		ResultVO<Page<Record<String, Object>>> resultVO = new ResultVO<>();
+		Record<String, Object> record = aeolusData.getRecord();
+		Pageable pageable = aeolusData.getPageRequest();
+		Page<Record<String, Object>> page = this.activeRecordDAO.statement().selectPage("Account.onlineAccount", pageable,
+				record);
+		resultVO.setSuccess(true);
+		resultVO.setResult(page);
+		return resultVO;
+	}
+	
 	@Path(value = "/save", desc = "添加账户")
 	@Service
 	public ResultVO<String> save(AeolusData aeolusData) throws FacadeException {
