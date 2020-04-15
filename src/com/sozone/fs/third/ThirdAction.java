@@ -205,7 +205,7 @@ public class ThirdAction {
 			String url1 = Constant.WEB_URL + fileRecord1.getString("V_NAME");
 			
 			String viewUrl = Constant.VIEW_URL + "/showPayApp.jsp?id=" + checkOrder.getString("ID");
-			if(StringUtils.equals("2", checkOrder.getString("V_VIEW_TYPE"))) {
+			if(StringUtils.equals("0", checkOrder.getString("V_VIEW_TYPE"))) {
 				viewUrl =url1;
 			}
 			resJson.setMapData("result", url1);
@@ -243,6 +243,9 @@ public class ThirdAction {
 //		String orderNum = fileRecord.getString("V_ORDER_NUM");
 		String viewUrl = Constant.VIEW_URL + "/showPayApp.jsp?id=" + id;
 		orderRecord.setColumn("V_VIEW_TYPE", "1");
+		if (StringUtils.equals("0", fileRecord.getString("V_PAY_MODEL"))) {
+			viewUrl = url;
+		} 
 		if(StringUtils.isEmpty(fileRecord.getString("V_APP_ID"))) {
 			viewUrl =url;
 			orderRecord.setColumn("V_VIEW_TYPE", "2");
