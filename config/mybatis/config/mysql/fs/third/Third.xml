@@ -4,8 +4,10 @@
 	<select id="getpayimage" resultType="record"
 		parameterType="record">
 		<![CDATA[
-		select tus.ID,tus.V_USER_ID,tas.ID ACCOUNT_SHOW_ID,tbt.ID BOND_ID,tbt.V_WX_RECEIVABLES,tbt.V_ALI_RECEIVABLES,tpa.V_APP_ID,tpa.V_PAY_MODEL
-		,tbt.V_COUNT_RECEIVABLES,tbt.V_SURPLUS_BOND,tpa.ID PAY_ID,tft.ID FILE_ID,tft.V_PATH,tft.V_NAME, tas.V_ORDER_NUM,tas.V_ACCOUNT_ID 
+		select tus.ID,tus.V_USER_ID,tas.ID ACCOUNT_SHOW_ID,tbt.ID BOND_ID,
+		tbt.V_WX_RECEIVABLES,tbt.V_ALI_RECEIVABLES,tpa.V_APP_ID,tpa.V_PAY_MODEL,
+		tbt.V_COUNT_RECEIVABLES,tbt.V_SURPLUS_BOND,tpa.ID PAY_ID,
+		tft.ID FILE_ID,tft.V_PATH,tft.V_NAME, tas.V_ORDER_NUM,tas.V_ACCOUNT_ID 
 		from t_user_show tus
 		left join t_bond_today tbt on tus.V_USER_ID = tbt.V_USER_ID
 		left join t_account_show tas on tus.V_USER_ID = tas.V_USER_ID 
@@ -16,7 +18,7 @@
 		<where>
 		<![CDATA[
 			tus.V_IS_PAY ='Y' and (tbt.V_SURPLUS_BOND - tbt.V_LOCK_MONEY)  >= #{V_MONEY}
-			and tas.V_PAY_NUM > 0 and tas.V_ORDER_NUM < 15 and  tpa.V_IS_MATCH = 'Y' and tpa.V_PAY_TYPE =#{V_PAY_TYPE} 
+			and tas.V_PAY_NUM > 5 and  tpa.V_IS_MATCH = 'Y' and tpa.V_PAY_TYPE =#{V_PAY_TYPE} 
 			and (tpa.V_PAY_TOTAL = #{V_MONEY} or tpa.V_PAY_TOTAL = '0.00') and tpa.V_IS_LOCK = 'N'
 		]]>
 		</where>
