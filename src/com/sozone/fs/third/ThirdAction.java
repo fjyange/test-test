@@ -413,7 +413,7 @@ public class ThirdAction {
 		Record<String, Object> urlRecord= new RecordImpl<>();
 		urlRecord.setColumn("s", "money");
 		urlRecord.setColumn("u", appid);
-		urlRecord.setColumn("a", "3000");
+		urlRecord.setColumn("a", "6000");
 		urlRecord.setColumn("m", System.currentTimeMillis());
 		String url = JSON.toJSONString(urlRecord);	
 		
