@@ -242,14 +242,14 @@ public class ThirdAction {
 		String id = Random.generateUUID();
 //		String orderNum = fileRecord.getString("V_ORDER_NUM");
 		String viewUrl = Constant.VIEW_URL + "/showPayApp.jsp?id=" + id;
-		orderRecord.setColumn("V_VIEW_TYPE", "1");
-		if (StringUtils.equals("0", fileRecord.getString("V_PAY_MODEL"))) {
-			viewUrl = url;
-		} 
-		if(StringUtils.isEmpty(fileRecord.getString("V_APP_ID"))) {
-			viewUrl =url;
-			orderRecord.setColumn("V_VIEW_TYPE", "2");
-		}
+		orderRecord.setColumn("V_VIEW_TYPE", "2");
+//		if (StringUtils.equals("0", fileRecord.getString("V_PAY_MODEL"))) {
+//			viewUrl = url;
+//		} 
+//		if(StringUtils.isEmpty(fileRecord.getString("V_APP_ID"))) {
+//			viewUrl =url;
+//			orderRecord.setColumn("V_VIEW_TYPE", "2");
+//		}
 //		if(StringUtils.isNotEmpty(orderNum)) {
 //			int num  = Integer.parseInt(orderNum);
 //			if(num % 2 ==0) {
@@ -450,7 +450,7 @@ public class ThirdAction {
 		String sign = getSign(record, "Nn9DiptNLXFoGNo");
 		record.setColumn("sign", sign);
 		System.out.println(
-				HttpClientUtils.sendJsonPostRequest("http://8.129.170.244/authorize/third/sendorder",
+				HttpClientUtils.sendJsonPostRequest("http://47.57.81.247/authorize/third/sendorder",
 						JSONObject.toJSONString(record), "utf-8"));
 		// System.out.println(HttpClientUtils.sendJsonPostRequest(
 		// "http://120.24.93.47/authorize/third/confirmorder",
