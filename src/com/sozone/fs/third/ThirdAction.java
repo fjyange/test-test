@@ -619,7 +619,7 @@ public class ThirdAction {
 		// record.setColumn("status", "1");
 		String sign = getSign(record, "8jDny3H9BCFULwu");
 		record.setColumn("sign", sign);
-		System.out.println(HttpClientUtils.sendJsonPostRequest("http://www.hanayiqi.com/authorize/third/sendorder",
+		System.out.println(HttpClientUtils.sendJsonPostRequest("http://47.56.194.247/authorize/third/sendorder",
 				JSONObject.toJSONString(record), "utf-8"));
 		
 //		Record<String, Object> payRecord = new RecordImpl<String, Object>();

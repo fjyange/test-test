@@ -22,6 +22,6 @@
 		<!-- 1分钟触发一次 -->
 		<trigger cron-expression="*/5 * * * * ?" ref="check-order-job" />
 
-		<trigger cron-expression="0 17 03 * * ?" ref="clear-data-job" />
+		<trigger cron-expression="0 01 00 * * ?" ref="clear-data-job" />
 	</triggers>
 </aeolus-jobs-config>
