@@ -323,6 +323,7 @@ public class ThirdAction {
 	public static String getSign(Record<String, ?> record, String key) {
 		String paramStr = UtilSign.splicingStr(record);
 		String signStr = paramStr + "&key=" + key;
+		System.out.println(signStr);
 		String sign = DigestUtils.md5Hex(signStr).toUpperCase();
 		return sign;
 	}
@@ -356,7 +357,7 @@ public class ThirdAction {
 					params.setColumn("V_QR_CODE", qrcode);
 					orderRecord.setColumn("ZZ_URL", qrcode);
 				} catch (Exception e) {
-					logger.error(LogUtils.format("获取固码失败", e.getMessage()),e);
+					logger.error(LogUtils.format("获取固码失败", e.getMessage()), e);
 					Record<String, Object> urlRecord = new RecordImpl<>();
 					urlRecord.setColumn("s", "money");
 					urlRecord.setColumn("u", orderRecord.getString("V_APP_ID"));
@@ -468,23 +469,24 @@ public class ThirdAction {
 
 	@Path(value = "/testOrder/{model}", desc = "接收订单信息")
 	@Service
-	public synchronized ResJson testOrder(@PathParam("model") String model,AeolusData aeolusData) throws FacadeException {
+	public synchronized ResJson testOrder(@PathParam("model") String model, AeolusData aeolusData)
+			throws FacadeException {
 		logger.debug(LogUtils.format("接收订单信息", aeolusData));
 		ResJson resJson = new ResJson(false, "下单失败");
-		
+
 		String appId = "44ab0da57fb0418cbd10b1ddc033b96e";
 		String money = "5500";
-		String orderno =String.valueOf(System.currentTimeMillis());
+		String orderno = String.valueOf(System.currentTimeMillis());
 		String payType = "01";
 		Record<String, Object> appRecord = this.activeRecordDAO.pandora().SELECT_ALL_FROM(Constant.TableName.T_APP_TAB)
 				.EQUAL("V_APPID", appId).get();
-		
+
 		Record<String, Object> sendRecord = new RecordImpl<>();
 		sendRecord.setColumn("appid", appId);
 		sendRecord.setColumn("money", money);
 		sendRecord.setColumn("orderno", orderno);
 		sendRecord.setColumn("paytype", payType);
-		
+
 		Record<String, Object> params = new RecordImpl<>();
 		params.setColumn("V_MONEY", money);
 		params.setColumn("V_PAY_TYPE", payType);
@@ -548,7 +550,7 @@ public class ThirdAction {
 		resJson.setMsg("下单成功");
 		return resJson;
 	}
-	
+
 	@Path(value = "/pagetime/{id}/{time}", desc = "用户停留时间")
 	@Service
 	public void pageTime(@PathParam("id") String id, @PathParam("time") String time) throws Exception {
@@ -557,9 +559,17 @@ public class ThirdAction {
 		this.activeRecordDAO.pandora().UPDATE(Constant.TableName.T_ORDER_TAB).EQUAL("ID", id).SET(record).excute();
 	}
 
-	@Path(value="/acctest/{appid}",desc="appid")
+	@Path(value = "/pagetype/{id}/{type}", desc = "用户停留时间")
 	@Service
-	public ResJson acctest(@PathParam("appid")String appId) throws FacadeException {
+	public void pagetype(@PathParam("id") String id, @PathParam("type") String type) throws Exception {
+		Record<String, Object> record = new RecordImpl<>();
+		record.setColumn("V_TYPE", type);
+		this.activeRecordDAO.pandora().UPDATE(Constant.TableName.T_ORDER_TAB).EQUAL("ID", id).SET(record).excute();
+	}
+
+	@Path(value = "/acctest/{appid}", desc = "appid")
+	@Service
+	public ResJson acctest(@PathParam("appid") String appId) throws FacadeException {
 		logger.debug(LogUtils.format("测试连接", appId));
 		ResJson resJson = new ResJson(false, "测试失败");
 		Record<String, Object> payRecord = new RecordImpl<String, Object>();
@@ -578,10 +588,10 @@ public class ThirdAction {
 		resJson.setMapData("ORDERNO", orderNo);
 		return resJson;
 	}
-	
-	@Path(value="/ortest/{appid}/{orderno}",desc="获取二维码")
+
+	@Path(value = "/ortest/{appid}/{orderno}", desc = "获取二维码")
 	@Service
-	public ResJson ortest(@PathParam("appid")String appid,@PathParam("orderno")String order) throws Exception {
+	public ResJson ortest(@PathParam("appid") String appid, @PathParam("orderno") String order) throws Exception {
 		ResJson resJson = new ResJson(false, "获取二维码失败");
 		Thread.sleep(1000);
 		Record<String, Object> payRecord = new RecordImpl<String, Object>();
@@ -589,8 +599,8 @@ public class ThirdAction {
 		payRecord.setColumn("V_ORDERNO", order);
 		payRecord.setColumn("V_APPID", "testqpppp");
 		try {
-			String result = HttpClientUtils.sendJsonPostRequest(Constant.QRCODE_URL,
-					JSONObject.toJSONString(payRecord), "utf-8");
+			String result = HttpClientUtils.sendJsonPostRequest(Constant.QRCODE_URL, JSONObject.toJSONString(payRecord),
+					"utf-8");
 			JSONObject jsonObject = JSONObject.parseObject(result);
 			String qrcode = jsonObject.getString("V_QRCODE");
 			resJson.setSuccess(true);
@@ -601,41 +611,41 @@ public class ThirdAction {
 		}
 		return resJson;
 	}
-	
+
 	// private String newSign(Record<String, Object> record) {
 	//
 	// }
 	public static void main(String[] args) throws Exception {
 		// for(int i = 0;i< 20;i++) {
 		Record<String, Object> record = new RecordImpl<>();
-		record.setColumn("appid", "44ab0da57fb0418cbd10b1ddc033b96e");
-		record.setColumn("money", "5");
-		record.setColumn("orderno", String.valueOf(System.currentTimeMillis()));
+		record.setColumn("appid", "14490e4caf644983ae33c671ff349fb7");
+		record.setColumn("money", "1");
+		record.setColumn("orderno", "TEST20200513");
 		record.setColumn("paytype", "01");
-		// record.setColumn("notifyurl",
-		// "http://www.shurenpay.com/authorize/test/test");
+		record.setColumn("notifyurl", "");
 		// record.setColumn("orderno", "test12312");
 		// record.setColumn("money", "123");
 		// record.setColumn("status", "1");
-		String sign = getSign(record, "8jDny3H9BCFULwu");
+		String sign = getSign(record, "JGnpNxngdIJIkRP");
 		record.setColumn("sign", sign);
-		System.out.println(HttpClientUtils.sendJsonPostRequest("http://47.56.194.247/authorize/third/sendorder",
-				JSONObject.toJSONString(record), "utf-8"));
-		
-//		Record<String, Object> payRecord = new RecordImpl<String, Object>();
-//		payRecord.setColumn("V_RECID", orderRecord.getString("V_APP_ID"));
-//		payRecord.setColumn("V_ORDERNO", orderRecord.getString("V_ORDER_NO"));
-//		payRecord.setColumn("V_APPID", orderRecord.getString("V_BELONG_APP"));
-//		try {
-//			String result = HttpClientUtils.sendJsonPostRequest(Constant.QRCODE_URL,
-//					JSONObject.toJSONString(payRecord), "utf-8");
-//			JSONObject jsonObject = JSONObject.parseObject(result);
-//			String qrcode = jsonObject.getString("V_QRCODE");
-////			params.setColumn("V_QR_CODE", qrcode);
-////			orderRecord.setColumn("ZZ_URL", qrcode);
-//		} catch (Exception e) {
-//			logger.error(LogUtils.format("发送固码信息异常", e.getMessage()),e);
-//		}
+		System.out.println(sign);
+		// System.out.println(HttpClientUtils.sendJsonPostRequest("http://47.56.194.247/authorize/third/sendorder",
+		// JSONObject.toJSONString(record), "utf-8"));
+
+		// Record<String, Object> payRecord = new RecordImpl<String, Object>();
+		// payRecord.setColumn("V_RECID", orderRecord.getString("V_APP_ID"));
+		// payRecord.setColumn("V_ORDERNO", orderRecord.getString("V_ORDER_NO"));
+		// payRecord.setColumn("V_APPID", orderRecord.getString("V_BELONG_APP"));
+		// try {
+		// String result = HttpClientUtils.sendJsonPostRequest(Constant.QRCODE_URL,
+		// JSONObject.toJSONString(payRecord), "utf-8");
+		// JSONObject jsonObject = JSONObject.parseObject(result);
+		// String qrcode = jsonObject.getString("V_QRCODE");
+		//// params.setColumn("V_QR_CODE", qrcode);
+		//// orderRecord.setColumn("ZZ_URL", qrcode);
+		// } catch (Exception e) {
+		// logger.error(LogUtils.format("发送固码信息异常", e.getMessage()),e);
+		// }
 		// System.out.println(HttpClientUtils.sendJsonPostRequest(
 		// "http://120.24.93.47/authorize/third/confirmorder",
 		// JSONObject.toJSONString(record), "utf-8"));
