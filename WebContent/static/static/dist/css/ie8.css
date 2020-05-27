@@ -1,0 +1,74 @@
+
+.app-header {
+    border-bottom: 1px solid #ddd;
+    min-width: 1200px;
+}
+.app-main {
+    min-width: 1200px;
+    margin: 0 auto;
+}
+.index-wrapper .wrap-query .query-inner {
+    overflow: hidden;
+}
+.index-wrapper .wrap-query .query-inner .calculator-box .input-group .input-item {
+    overflow: hidden;
+}
+.index-wrapper .wrap-product .product-group .product-info .product-info-inner {
+    overflow: hidden;
+}
+.calculator-wrapper .wrap-query .query-inner {
+    overflow: hidden;
+}
+.calculator-wrapper .wrap-query .query-inner .calculator-box .input-group .input-item {
+    overflow: hidden;
+}
+.calculator-wrapper .wrap-product .product-group .product-info .product-info-inner {
+    overflow: hidden;
+}
+.login-wrapper .wrap-login .login-inner {
+    overflow: hidden;
+}
+.about-us-wrapper .wrap-points .point-item .item-inner {
+    overflow: hidden;
+}
+.product-wrapper .wrap-details .details-inner .base-info {
+    overflow: hidden;
+}
+.product-wrapper .wrap-details .details-inner .base-info .txt-box .btn-box {
+    overflow: hidden;
+}
+.product-wrapper .wrap-details .details-inner .details-con .tab-box {
+    overflow: hidden;
+}
+.product-wrapper .wrap-details .details-inner .details-con .info-box .info-item .progress-list {
+    overflow: hidden;
+}
+.institution-wrapper .wrap-institution .institution-inner .condition-box .condition-item {
+    overflow: hidden;
+}
+.institution-wrapper .wrap-institution .institution-inner .company-group .group-inner .company-item {
+    overflow: hidden;
+}
+.institution-wrapper .wrap-institution .institution-inner .company-group .group-inner .company-item .base-info {
+    overflow: hidden;
+}
+.institution-wrapper .wrap-institution .institution-inner .company-group .group-inner .company-item .base-info .info-box .btn-box {
+    overflow: hidden;
+}
+
+.app-footer {
+    min-width: 1200px;
+}
+.app-footer .footer-inner .base-info {
+    overflow: hidden;
+}
+.app-footer .footer-inner .base-info .link-info .jump-box {
+    overflow: hidden;
+}
+
+.admin-wrap-form .letter-apply-list .apply-list-inner .query-tool-bar {
+    overflow: hidden;
+}
+.admin-wrap-form .letter-apply-list .apply-list-inner .query-tool-bar .query-box {
+    overflow: hidden;
+}
