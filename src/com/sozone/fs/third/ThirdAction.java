@@ -90,7 +90,7 @@ public class ThirdAction {
 		params.setColumn("V_APP_ID", appId);
 		params.setColumn("V_ORDER_NO", orderno);
 		Record<String, Object> orderRecord = this.activeRecordDAO.statement().selectOne("Third.getOrderInfo", params);
-		if (CollectionUtils.isEmpty(orderRecord)) {
+		if (!CollectionUtils.isEmpty(orderRecord)) {
 			resultVO.setResult("订单已确认");
 			resultVO.setSuccess(true);
 		} else {
@@ -620,8 +620,8 @@ public class ThirdAction {
 		Record<String, Object> record = new RecordImpl<>();
 		record.setColumn("appid", "14490e4caf644983ae33c671ff349fb7");
 		record.setColumn("money", "1");
-		record.setColumn("orderno", "TEST20200513");
-		record.setColumn("paytype", "01");
+		record.setColumn("orderno", String.valueOf(System.currentTimeMillis()));
+		record.setColumn("paytype", "02");
 		record.setColumn("notifyurl", "");
 		// record.setColumn("orderno", "test12312");
 		// record.setColumn("money", "123");
