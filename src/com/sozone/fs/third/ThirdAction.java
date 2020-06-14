@@ -96,11 +96,11 @@ public class ThirdAction
 			return resultVO;
 		}
 		Record<String, Object> params = new RecordImpl<String, Object>();
-		params.setColumn("V_APP_ID", appId);
+		params.setColumn("V_APP_ID", appRecord.getString("ID"));
 		params.setColumn("V_ORDER_NO", orderno);
 		Record<String, Object> orderRecord = this.activeRecordDAO.statement()
 				.selectOne("Third.getOrderInfo", params);
-		if (CollectionUtils.isEmpty(orderRecord))
+		if (!CollectionUtils.isEmpty(orderRecord))
 		{
 			resultVO.setResult("订单已确认");
 			resultVO.setSuccess(true);
