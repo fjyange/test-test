@@ -41,7 +41,8 @@ import com.sozone.fs.common.Constant;
 
 @Path(value = "/attach", desc = "文件上传处理接口")
 @Permission(Level.Guest)
-public class AttachAction {
+public class AttachAction
+{
 
 	/**
 	 * 持久化接口
@@ -54,7 +55,8 @@ public class AttachAction {
 	 * @param activeRecordDAO
 	 *            the activeRecordDAO to set
 	 */
-	public void setActiveRecordDAO(ActiveRecordDAO activeRecordDAO) {
+	public void setActiveRecordDAO(ActiveRecordDAO activeRecordDAO)
+	{
 		this.activeRecordDAO = activeRecordDAO;
 	}
 
@@ -79,42 +81,45 @@ public class AttachAction {
 	@Service
 	@Handler(MultipartFormDataHandler.class)
 	@Permission(Level.Guest)
-	public void fileUpload(AeolusData data) throws Exception {
+	public void fileUpload(AeolusData data) throws Exception
+	{
 		logger.debug(LogUtils.format("fileupload文件上传", data));
-		ResultVO<Record<String, Object>> resultVO = new ResultVO<Record<String, Object>>(
-				false);
+		ResultVO<Record<String, Object>> resultVO = new ResultVO<Record<String, Object>>(false);
 		// 获取文件参数值
 		MultiValueMap<String, Object> paramsMap = data.getParamsMap();
 		Set<String> keySet = paramsMap.keySet();
 		Record<String, Object> params = new RecordImpl<String, Object>();
 		// StringBuffer errorString = new StringBuffer();
-		for (String key : keySet) {
+		for (String key : keySet)
+		{
 			Object obj = data.getParam(key);
-			if (null != obj && obj instanceof String) {
-				params.put(key, new String(
-						((String) obj).getBytes("ISO8859-1"), "UTF-8"));
+			if (null != obj && obj instanceof String)
+			{
+				params.put(key, new String(((String) obj).getBytes("ISO8859-1"), "UTF-8"));
 			}
 		}
 		// 获取文件信息
 		DiskFileItem fileItem = data.getParam("file");
 		// 处理文件名称
-		String fileSuffix = "."
-				+ StringUtils.lowerCase(FilenameUtils.getExtension(fileItem
-						.getName()));
+		String fileSuffix = "." + StringUtils.lowerCase(FilenameUtils.getExtension(fileItem.getName()));
 		String fileName = System.currentTimeMillis() + fileSuffix;
-		if (fileName.indexOf("\\") != -1) {
-			fileName = fileName.substring(fileName.lastIndexOf("\\") + 1,
-					fileName.length());
+		if (fileName.indexOf("\\") != -1)
+		{
+			fileName = fileName.substring(fileName.lastIndexOf("\\") + 1, fileName.length());
 		}
 		// 写入文件
 		String path = "FILE";
 		File newFile = new File(path, fileName);
-		if (!newFile.getParentFile().exists()) {
+		if (!newFile.getParentFile().exists())
+		{
 			newFile.getParentFile().mkdirs();
 		}
-		try {
+		try
+		{
 			fileItem.write(newFile);
-		} catch (Exception e) {
+		}
+		catch (Exception e)
+		{
 			// throw new ValidateException("", "文件上传失败:" + e.getMessage(), e);
 			logger.error(LogUtils.format("文件上传失败"));
 			resultVO.setErrorDesc("文件上传失败");
@@ -122,7 +127,8 @@ public class AttachAction {
 			return;
 		}
 		// 判断文件是否有值
-		if (StringUtils.isNotEmpty(fileName)) {
+		if (StringUtils.isNotEmpty(fileName))
+		{
 			resultVO = saveFile(path, fileName, data, resultVO);
 		}
 		renderHtmlStr(data.getHttpServletResponse(), resultVO.toString());
@@ -145,9 +151,9 @@ public class AttachAction {
 	 * @return
 	 * @throws DAOException
 	 */
-	private ResultVO<Record<String, Object>> saveFile(String path,
-			String fileName, AeolusData data,
-			ResultVO<Record<String, Object>> resultVO) throws DAOException {
+	private ResultVO<Record<String, Object>> saveFile(String path, String fileName, AeolusData data,
+			ResultVO<Record<String, Object>> resultVO) throws DAOException
+	{
 		// 附件信息保存
 		Record<String, Object> record = new RecordImpl<String, Object>();
 		String fileID = Random.generateUUID();
@@ -155,15 +161,12 @@ public class AttachAction {
 		record.setColumn("V_NAME", fileName);
 		record.setColumn("V_PATH", path);
 		record.setColumn("V_USER_ID", ApacheShiroUtils.getCurrentUserID());
-		this.activeRecordDAO.pandora()
-				.INSERT_INTO(Constant.TableName.T_FILE_TAB).VALUES(record)
-				.excute();
+		this.activeRecordDAO.pandora().INSERT_INTO(Constant.TableName.T_FILE_TAB).VALUES(record).excute();
 		resultVO.setSuccess(true);
 		Record<String, Object> resultRecord = new RecordImpl<String, Object>();
 		resultRecord.setColumn("ID", fileID);
 		resultRecord.setColumn("V_NAME", fileName);
-		resultRecord.setColumn("V_LETTER_NO",
-				FilenameUtils.getBaseName(fileName));
+		resultRecord.setColumn("V_LETTER_NO", FilenameUtils.getBaseName(fileName));
 		resultVO.setResult(resultRecord);
 		resultVO.setSuccess(true);
 		return resultVO;
@@ -172,21 +175,22 @@ public class AttachAction {
 	@Path(value = "/getFile", desc = "获取图片")
 	@Service
 	@Permission(Level.Guest)
-	public void getFile(AeolusData aeolusData) throws IOException {
+	public void getFile(AeolusData aeolusData) throws IOException
+	{
 		logger.debug(LogUtils.format("获取图片", aeolusData));
 		Record<String, Object> record = aeolusData.getRecord();
 		HttpServletResponse response = aeolusData.getHttpServletResponse();
 		OutputStream out = null;
 		FileInputStream inputFile = null;
-		try {
+		try
+		{
 			Record<String, Object> fileRecord = this.activeRecordDAO.pandora()
-					.SELECT_ALL_FROM(Constant.TableName.T_FILE_TAB)
-					.EQUAL("ID", record.getString("ID")).get();
-			if (CollectionUtils.isEmpty(fileRecord)) {
+					.SELECT_ALL_FROM(Constant.TableName.T_FILE_TAB).EQUAL("ID", record.getString("ID")).get();
+			if (CollectionUtils.isEmpty(fileRecord))
+			{
 				throw new Exception("图片丢失，请联系客服");
 			}
-			File file = new File(fileRecord.getString("V_PATH"),
-					fileRecord.getString("V_NAME"));
+			File file = new File(fileRecord.getString("V_PATH"), fileRecord.getString("V_NAME"));
 			inputFile = new FileInputStream(file);
 			int i = inputFile.available();
 			// byte数组用于存放图片字节数据
@@ -197,10 +201,14 @@ public class AttachAction {
 			out = response.getOutputStream();
 			out.write(buff);
 
-		} catch (Exception e) {
+		}
+		catch (Exception e)
+		{
 			logger.error(LogUtils.format("读取图片异常", e.getMessage()), e);
 			e.printStackTrace();
-		} finally {
+		}
+		finally
+		{
 			// 记得关闭输入流
 			inputFile.close();
 			// 关闭响应输出流
@@ -209,28 +217,29 @@ public class AttachAction {
 
 	}
 
-
 	@Path(value = "/downFile", desc = "下载图片")
 	@Service
 	@Permission(Level.Guest)
-	public void downFile(AeolusData aeolusData) throws Exception {
+	public void downFile(AeolusData aeolusData) throws Exception
+	{
 		HttpServletResponse response = aeolusData.getHttpServletResponse();
 		Record<String, Object> record = aeolusData.getRecord();
 		String fileId = record.getString("FILE_ID");
 		Record<String, Object> fileParams = new RecordImpl<String, Object>();
 		fileParams.setColumn("ID", fileId);
 		Record<String, Object> fileRecord = this.activeRecordDAO.pandora()
-				.SELECT_ALL_FROM(Constant.TableName.T_FILE_TAB)
-				.EQUAL("ID", record.getString("ID")).get();
-		if (CollectionUtils.isEmpty(fileRecord)) {
+				.SELECT_ALL_FROM(Constant.TableName.T_FILE_TAB).EQUAL("ID", record.getString("ID")).get();
+		if (CollectionUtils.isEmpty(fileRecord))
+		{
 			throw new Exception("图片丢失，请联系客服");
 		}
 		InputStream is = null;
 		OutputStream os = null;
-		try {
-			File file = new File(fileRecord.getString("V_PATH"),
-					fileRecord.getString("V_NAME"));
-			if (file.exists()) {
+		try
+		{
+			File file = new File(fileRecord.getString("V_PATH"), fileRecord.getString("V_NAME"));
+			if (file.exists())
+			{
 				response.reset();
 				response.addHeader("Content-Disposition",
 						"attachment;filename=" + new String(fileRecord.getString("V_NAME").getBytes(), "ISO-8859-1"));
@@ -240,40 +249,55 @@ public class AttachAction {
 				is = new BufferedInputStream(new FileInputStream(file));
 				byte[] buffer = new byte[1024];
 				int len;
-				while ((len = is.read(buffer)) != -1) {
+				while ((len = is.read(buffer)) != -1)
+				{
 					os.write(buffer, 0, len);
 				}
-			} else {
+			}
+			else
+			{
 				throw new ServiceException("文件不存在");
 			}
-		} catch (UnsupportedEncodingException e) {
+		}
+		catch (UnsupportedEncodingException e)
+		{
 			// TODO Auto-generated catch block
 			logger.error(LogUtils.format("操作错误", e.getMessage()), e);
-		} catch (IOException e) {
+		}
+		catch (IOException e)
+		{
 			// TODO Auto-generated catch block
 			logger.error(LogUtils.format("操作错误", e.getMessage()), e);
-		} finally {
-			if (os != null) {
+		}
+		finally
+		{
+			if (os != null)
+			{
 				os.flush();
 				os.close();
 			}
-			if (is != null) {
+			if (is != null)
+			{
 				is.close();
 			}
 		}
 	}
-	
+
 	/**
 	 * 渲染HTML输出
 	 * 
 	 * @param response
 	 * @param str
 	 */
-	protected void renderHtmlStr(HttpServletResponse response, String str) {
+	protected void renderHtmlStr(HttpServletResponse response, String str)
+	{
 		response.setContentType("text/html;charset=UTF-8");
-		try {
+		try
+		{
 			response.getWriter().write(str);
-		} catch (IOException e) {
+		}
+		catch (IOException e)
+		{
 			e.printStackTrace();
 		}
 	}

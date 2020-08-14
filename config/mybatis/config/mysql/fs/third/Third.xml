@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>  
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="Third">
-	<select id="getpayimage" resultType="record"
-		parameterType="record">
+	<select id="getpayimage" resultType="record" parameterType="record">
 		<![CDATA[
 		select tus.ID,tus.V_USER_ID,tas.ID ACCOUNT_SHOW_ID,tbt.ID BOND_ID,
 		tbt.V_WX_RECEIVABLES,tbt.V_ALI_RECEIVABLES,tpa.V_APP_ID,tpa.V_PAY_MODEL,
@@ -20,7 +19,8 @@
 			tus.V_IS_PAY ='Y' and (tbt.V_SURPLUS_BOND - tbt.V_LOCK_MONEY)  >= #{V_MONEY}
 			and tas.V_PAY_NUM > 5 and  tpa.V_IS_MATCH = 'Y' and tpa.V_PAY_TYPE =#{V_PAY_TYPE} 
 			and (tpa.V_PAY_TOTAL = #{V_MONEY} or tpa.V_PAY_TOTAL = '0.00') and tpa.V_IS_LOCK = 'N'
-			AND tpa.V_PAY_ACCOUNT is not null and tpa.V_PAY_NO is not null
+			AND tpa.V_PAY_ACCOUNT is not null and tpa.V_PAY_NO is not null 
+			AND DATE_FORMAT(DATE_ADD(tas.V_PAY_TIME,INTERVAL 20 MINUTE),'%Y-%m-%d %T') < DATE_FORMAT(now(),'%Y-%m-%d %T') 
 		]]>
 		</where>
 		<![CDATA[
@@ -28,8 +28,7 @@
 		]]>
 	</select>
 
-	<select id="getpaytestimage" resultType="record"
-		parameterType="record">
+	<select id="getpaytestimage" resultType="record" parameterType="record">
 		<![CDATA[
 		select tus.ID,tus.V_USER_ID,tas.ID ACCOUNT_SHOW_ID,tbt.ID BOND_ID,tbt.V_WX_RECEIVABLES,tbt.V_ALI_RECEIVABLES,tpa.V_APP_ID,tpa.V_PAY_MODEL
 		,tbt.V_COUNT_RECEIVABLES,tbt.V_SURPLUS_BOND,tpa.ID PAY_ID,tft.ID FILE_ID,tft.V_PATH,tft.V_NAME, tas.V_ORDER_NUM,tas.V_ACCOUNT_ID 
@@ -55,8 +54,7 @@
 		]]>
 	</select>
 
-	<select id="getOrderInfo" resultType="record"
-		parameterType="record">
+	<select id="getOrderInfo" resultType="record" parameterType="record">
 		<![CDATA[
 			select * from t_order_tab  
 		]]>
