@@ -1,14 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" ?>  
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="Order">
-	<select id="orderList" resultType="record"
-		parameterType="record">
+	<select id="orderList" resultType="record" parameterType="record">
 		<![CDATA[
-		 select tot.*,tat.V_APP_NAME,tsub.USER_NAME,tpa.V_PAY_NAME,tft.V_NAME from t_order_tab tot 
+		 select tot.*,tat.V_APP_NAME,tsub.USER_NAME,tpa.V_BANK_NAME from t_order_tab tot 
 		 left join t_app_tab tat on tot.V_BELONG_APP = tat.ID
 		 left join t_sys_user_base tsub on tot.V_BELONG_USER = tsub.USER_ID 
 		 left join t_pay_account tpa on tot.V_BELONG_ACCOUNT = tpa.ID
-		 left join t_file_tab tft on tpa.V_FILE_ID = tft.ID
 		]]>
 		<where>
 			<if test="IS_ADMIN !=null and IS_ADMIN !=''">
@@ -46,10 +44,9 @@
 		   order by tot.V_CREATE_TIME desc
 		]]>
 	</select>
-	<select id="historyList" resultType="record"
-		parameterType="record">
+	<select id="historyList" resultType="record" parameterType="record">
 		<![CDATA[
-		 select tot.*,tat.V_APP_NAME,tsub.USER_NAME,tpa.V_PAY_NAME from t_order_history tot 
+		 select tot.*,tat.V_APP_NAME,tsub.USER_NAME,tpa.V_BANK_NAME from t_order_history tot 
 		 left join t_app_tab tat on tot.V_BELONG_APP = tat.ID
 		 left join t_sys_user_base tsub on tot.V_BELONG_USER = tsub.USER_ID 
 		 left join t_pay_account tpa on tot.V_BELONG_ACCOUNT = tpa.ID
@@ -145,9 +142,8 @@
 		  where V_ACCOUNT_ID = #{V_ACCOUNT_ID}
 		]]>
 	</update>
-	
-	<select id="appOrder" resultType="record"
-		parameterType="record">
+
+	<select id="appOrder" resultType="record" parameterType="record">
 		<![CDATA[
 		SELECT
 			sum(tot.V_MONEY) V_MONEY ,
@@ -176,9 +172,8 @@
 			tat.V_APP_NAME DESC
 		]]>
 	</select>
-	
-	<select id="userOrder" resultType="record"
-		parameterType="record">
+
+	<select id="userOrder" resultType="record" parameterType="record">
 		<![CDATA[
 		SELECT
 			sum(tot.V_MONEY) V_MONEY ,
@@ -217,14 +212,20 @@ LEFT JOIN (select SUM(V_MONEY) V_MONEY,V_TOPUP_USER from t_user_topup where V_ST
 			tsub.USER_NAME DESC
 		]]>
 	</select>
-	<select id="getOrderMsg" resultType="record"
-		parameterType="record">
+	<select id="getOrderMsg" resultType="record" parameterType="record">
 		<![CDATA[
-			select tot.V_MONEY,tft.V_NAME,date_add(tot.V_CREATE_TIME, interval 10 minute) TIME_OUT,tot.V_BELONG_APP,
-			tot.V_ORDER_NO,tft.ID,tpa.V_URL_SCHEME,tpa.V_APP_ID,tot.V_VIEW_TYPE,tot.V_QR_CODE,tpa.V_PAY_ACCOUNT,tpa.V_PAY_NO  
-			from t_order_tab tot
-			left join t_pay_account tpa on tot.V_BELONG_ACCOUNT = tpa.ID
-			left join t_file_tab tft on tpa.V_FILE_ID = tft.ID 
+			SELECT
+				TOT.V_MONEY,
+				DATE_ADD( TOT.V_CREATE_TIME, INTERVAL 10 MINUTE ) TIME_OUT,
+				TOT.V_BELONG_APP,
+				TOT.V_ORDER_NO,
+				TOT.V_VIEW_TYPE,
+				TOT.V_QR_CODE,
+				TPA.V_BANK_NAME,
+				TPA.V_BANK_ACCOUNT 
+			FROM
+				T_ORDER_TAB TOT
+				LEFT JOIN T_PAY_ACCOUNT TPA ON TOT.V_BELONG_ACCOUNT = TPA.ID
 			]]>
 		<where>
 			<![CDATA[

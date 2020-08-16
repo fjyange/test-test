@@ -334,7 +334,7 @@ public class Export {
 			} 
 			OrderBean orderBean = new OrderBean(orderRecord.getString("V_ORDER_NO"),
 					orderRecord.getString("V_MONEY"), payType,
-					orderRecord.getString("V_APP_NAME"), orderRecord.getString("USER_NAME"), orderRecord.getString("V_PAY_NAME")
+					orderRecord.getString("V_APP_NAME"), orderRecord.getString("USER_NAME"), orderRecord.getString("V_BANK_NAME")
 					, orderRecord.getString("V_CREATE_TIME"),status);
 			orderBeans.add(orderBean);
 		}
@@ -400,7 +400,7 @@ public class Export {
 			} 
 			OrderBean orderBean = new OrderBean(orderRecord.getString("V_ORDER_NO"),
 					orderRecord.getString("V_MONEY"), payType,
-					orderRecord.getString("V_APP_NAME"), orderRecord.getString("USER_NAME"), orderRecord.getString("V_PAY_NAME")
+					orderRecord.getString("V_APP_NAME"), orderRecord.getString("USER_NAME"), orderRecord.getString("V_BANK_NAME")
 					, orderRecord.getString("V_CREATE_TIME"),status);
 			orderBeans.add(orderBean);
 		}

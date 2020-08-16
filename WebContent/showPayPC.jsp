@@ -1,5 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-	pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <%
@@ -14,29 +13,6 @@
 <script src="${pageContext.request.contextPath}/static/res/jquery/jquery.min.js" type="text/javascript"></script>
 
 <script type="text/javascript">
-window.onload = function(){
-		//屏蔽键盘事件
-		document.onkeydown = function (){
-		var e = window.event || arguments[0];
-		//F12
-		if(e.keyCode == 123){
-		return false;
-		//Ctrl+Shift+I
-		}else if((e.ctrlKey) && (e.shiftKey) && (e.keyCode == 73)){
-		return false;
-		//Shift+F10
-		}else if((e.shiftKey) && (e.keyCode == 121)){
-		return false;
-		//Ctrl+U
-		}else if((e.ctrlKey) && (e.keyCode == 85)){
-		return false;
-		}
-		};
-		//屏蔽鼠标右键
-		document.oncontextmenu = function (){
-		return false;
-		}
-		}
 var time ;
 		$(function(){
 			$.ajax({
@@ -51,7 +27,6 @@ var time ;
 						$("#pay_order").html(result.V_ORDER_NO);
 						$("#money").html(result.V_MONEY);
 						$("#qrcode").attr("src",result.IMG_URL);
-						time =result.TIME_OUT; 
 					}
 				},
 				// 失败回调
@@ -125,7 +100,6 @@ body, div, html {
 .p-w-bd::after, .pay-weixin::after {
 	display: table;
 	content: "";
-	clear: both;
 }
 
 .p-w-hd {
@@ -191,15 +165,15 @@ em {
 .pw-box-hd img {
 	width: 298px;
 	height: 298px;
-	background: url("${path}/static/images/pc_loading.gif") center
-		center no-repeat;
+	background: url("${path}/static/images/pc_loading.gif") center center
+		no-repeat;
 }
 
 .pw-box-ft-ali {
 	height: 44px;
 	padding: 8px 0 8px 125px;
-	background: #1e81d2 url("${path}/static/images/pc_scan.png")
-		50px 8px no-repeat;
+	background: #1e81d2 url("${path}/static/images/pc_scan.png") 50px 8px
+		no-repeat;
 }
 
 .pw-box-ft-ali p {
@@ -216,12 +190,12 @@ em {
 	height: 421px;
 	padding-left: 50px;
 	margin-top: -20px;
-	background: url("${path}/static/images/pc_ali.png")
-		50px 0 no-repeat;
+	background: url("${path}/static/images/pc_ali.png") 50px 0 no-repeat;
 }
+
 .p-w-bd {
-    padding-left: 130px;
-    margin-bottom: 30px;
+	padding-left: 130px;
+	margin-bottom: 30px;
 }
 </style>
 </head>
