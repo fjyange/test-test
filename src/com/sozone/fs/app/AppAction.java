@@ -23,10 +23,12 @@ import com.sozone.aeolus.ext.rs.ResultVO;
 import com.sozone.aeolus.util.CollectionUtils;
 import com.sozone.aeolus.utils.DateUtils;
 import com.sozone.fs.common.Constant;
+import com.sozone.fs.rsa.RSAEncrypt;
 
 @Path(value = "app", desc = "平台管理")
 @Permission(Level.Authenticated)
-public class AppAction {
+public class AppAction
+{
 
 	/**
 	 * 持久化接口
@@ -39,7 +41,8 @@ public class AppAction {
 	 * @param activeRecordDAO
 	 *            the activeRecordDAO to set
 	 */
-	public void setActiveRecordDAO(ActiveRecordDAO activeRecordDAO) {
+	public void setActiveRecordDAO(ActiveRecordDAO activeRecordDAO)
+	{
 		this.activeRecordDAO = activeRecordDAO;
 	}
 
@@ -50,7 +53,8 @@ public class AppAction {
 
 	@Path(value = "/findPage", desc = "获取平台列表")
 	@Service
-	public ResultVO<Page<Record<String, Object>>> findPage(AeolusData aeolusData) throws FacadeException {
+	public ResultVO<Page<Record<String, Object>>> findPage(AeolusData aeolusData) throws FacadeException
+	{
 		logger.debug(LogUtils.format("获取平台列表", aeolusData));
 		ResultVO<Page<Record<String, Object>>> resultVO = new ResultVO<>();
 		Record<String, Object> record = aeolusData.getRecord();
@@ -65,7 +69,8 @@ public class AppAction {
 
 	@Path(value = "/save", desc = "添加平台用户")
 	@Service
-	public ResultVO<String> save(AeolusData aeolusData) throws FacadeException {
+	public ResultVO<String> save(AeolusData aeolusData) throws Exception
+	{
 		logger.debug(LogUtils.format("添加平台用户", aeolusData));
 		ResultVO<String> resultVO = new ResultVO<>();
 		Record<String, Object> record = aeolusData.getRecord();
@@ -79,7 +84,8 @@ public class AppAction {
 		userRecord.setColumn("USER_NAME", record.getString("V_APP_NAME"));
 		userRecord.setColumn("USER_PHONE", record.getString("V_USER_PHONE"));
 		userRecord.setColumn("ROLE_ID", record.getString("V_ROLE_ID"));
-		if (StringUtils.isEmpty(userId)) {
+		if (StringUtils.isEmpty(userId))
+		{
 			userId = Random.generateUUID();
 			userRecord.setColumn("PASSWORD", DigestUtils.md5Hex(DigestUtils.md5Hex("111111")));
 			userRecord.setColumn("USER_ID", userId);
@@ -89,7 +95,9 @@ public class AppAction {
 			userRecord.setColumn("CREATE_USER", ApacheShiroUtils.getCurrentUserID());
 			this.activeRecordDAO.auto().table(Constant.TableName.T_SYS_USER_BASE).save(userRecord);
 			this.activeRecordDAO.auto().table(Constant.TableName.T_SYS_USER_ROLE).save(userRecord);
-		} else {
+		}
+		else
+		{
 			this.activeRecordDAO.auto().table(Constant.TableName.T_SYS_USER_BASE).modify(userRecord);
 			Record<String, Object> params = new RecordImpl<>();
 			params.setColumn("USER_ID", userId);
@@ -97,12 +105,16 @@ public class AppAction {
 			this.activeRecordDAO.auto().table(Constant.TableName.T_SYS_USER_ROLE).save(userRecord);
 		}
 		record.setColumn("V_USER_ID", userId);
-		if (StringUtils.isEmpty(id)) {
+		if (StringUtils.isEmpty(id))
+		{
 			id = Random.generateUUID();
 			record.setColumn("ID", id);
 			record.setColumn("V_APPID", Random.generateUUID());
 			record.setColumn("V_SECRET", getCode());
 			record.setColumn("V_CREATE_USER", ApacheShiroUtils.getCurrentUserID());
+			Record<String, Object> key = RSAEncrypt.genKeyPair();
+			record.setColumn("RSA_APP", key.getString("RSA_APP"));
+			record.setColumn("RSA_KEY", key.getString("RSA_KEY"));
 			this.activeRecordDAO.auto().table(Constant.TableName.T_APP_TAB).save(record);
 			Record<String, Object> params = new RecordImpl<>();
 			params.setColumn("ID", Random.generateUUID());
@@ -112,7 +124,9 @@ public class AppAction {
 			params.setColumn("V_TOTAL_COLLECTION", "0");
 			params.setColumn("V_CASH_COLLECTION", "0");
 			this.activeRecordDAO.pandora().INSERT_INTO(Constant.TableName.T_COLLECTION_TAB).VALUES(params).excute();
-		} else {
+		}
+		else
+		{
 			this.activeRecordDAO.auto().table(Constant.TableName.T_APP_TAB).modify(record);
 		}
 		resultVO.setSuccess(true);
@@ -122,13 +136,15 @@ public class AppAction {
 
 	@Path(value = "delete", desc = "删除平台")
 	@Service
-	public ResultVO<String> delete(AeolusData aeolusData) throws FacadeException {
+	public ResultVO<String> delete(AeolusData aeolusData) throws FacadeException
+	{
 		logger.debug(LogUtils.format("删除平台", aeolusData));
 		ResultVO<String> resultVO = new ResultVO<String>();
 		Record<String, Object> record = aeolusData.getRecord();
 		Record<String, Object> userRecord = this.activeRecordDAO.pandora().SELECT_ALL_FROM(Constant.TableName.T_APP_TAB)
 				.EQUAL("ID", record.getString("ID")).get();
-		if (CollectionUtils.isEmpty(userRecord)) {
+		if (CollectionUtils.isEmpty(userRecord))
+		{
 			resultVO.setSuccess(false);
 			resultVO.setResult("平台不存在");
 			return resultVO;
@@ -148,7 +164,8 @@ public class AppAction {
 
 	@Path(value = "/appConf", desc = "平台配置")
 	@Service
-	public ResultVO<String> appConf(AeolusData aeolusData) throws FacadeException {
+	public ResultVO<String> appConf(AeolusData aeolusData) throws FacadeException
+	{
 		ResultVO<String> resultVO = new ResultVO<>();
 		Record<String, Object> record = aeolusData.getRecord();
 		this.activeRecordDAO.auto().table(Constant.TableName.T_APP_TAB).setCondition("and", "ID=#{ID}").modify(record);
@@ -157,18 +174,26 @@ public class AppAction {
 		return resultVO;
 	}
 
-	public static String getCode() {
-		String string = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";// 保存数字0-9 和 大小写字母
+	public static String getCode()
+	{
+		String string = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";// 保存数字0-9
+																							// 和
+																							// 大小写字母
 		char[] ch = new char[15]; // 声明一个字符数组对象ch 保存 验证码
-		for (int i = 0; i < 15; i++) {
+		for (int i = 0; i < 15; i++)
+		{
 			java.util.Random random = new java.util.Random();// 创建一个新的随机数生成器
-			int index = random.nextInt(string.length());// 返回[0,string.length)范围的int值 作用：保存下标
-			ch[i] = string.charAt(index);// charAt() : 返回指定索引处的 char 值 ==》保存到字符数组对象ch里面
+			int index = random.nextInt(string.length());// 返回[0,string.length)范围的int值
+														// 作用：保存下标
+			ch[i] = string.charAt(index);// charAt() : 返回指定索引处的 char 值
+											// ==》保存到字符数组对象ch里面
 		}
 		// 将char数组类型转换为String类型保存到result
-		// String result = new String(ch);//方法一：直接使用构造方法 String(char[] value) ：分配一个新的
+		// String result = new String(ch);//方法一：直接使用构造方法 String(char[] value)
+		// ：分配一个新的
 		// String，使其表示字符数组参数中当前包含的字符序列。
-		String result = String.valueOf(ch);// 方法二： String方法 valueOf(char c) ：返回 char 参数的字符串表示形式。
+		String result = String.valueOf(ch);// 方法二： String方法 valueOf(char c) ：返回
+											// char 参数的字符串表示形式。
 		return result;
 	}
 }

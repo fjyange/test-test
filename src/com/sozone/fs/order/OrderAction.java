@@ -30,6 +30,7 @@ import com.sozone.aeolus.util.CollectionUtils;
 import com.sozone.aeolus.utils.DateUtils;
 import com.sozone.fs.common.Constant;
 import com.sozone.fs.common.util.HttpClientUtils;
+import com.sozone.fs.rsa.RSAEncrypt;
 import com.sozone.fs.third.ThirdAction;
 
 @Path(value = "/order", desc = "订单处理")
@@ -335,7 +336,7 @@ public class OrderAction
 			statefulDAO.close();
 			orderDao.close();
 		}
-		if (StringUtils.equals("3", status) || StringUtils.equals("1", status))
+		if (StringUtils.equals("3", status) || StringUtils.equals("1", status) || StringUtils.equals("4", status))
 		{
 			Record<String, Object> appRecord = this.activeRecordDAO.pandora()
 					.SELECT_ALL_FROM(Constant.TableName.T_APP_TAB).EQUAL("ID", appID).get();
@@ -345,8 +346,19 @@ public class OrderAction
 				sendRecord.setColumn("orderno", orderRecord.getString("V_ORDER_NO"));
 				sendRecord.setColumn("money", orderRecord.getString("V_MONEY"));
 				sendRecord.setColumn("status", "1");
-				String signStr = ThirdAction.getSign(sendRecord, appRecord.getString("V_SECRET"));
-				sendRecord.setColumn("sign", signStr);
+				if (StringUtils.equals("2", orderRecord.getString("V_EBCRYPT_TYPE")))
+				{
+					String signStr = RSAEncrypt.encryptPub(JSONObject.toJSONString(sendRecord),
+							appRecord.getString("RSA_APP"));
+					sendRecord.clear();
+					sendRecord.setColumn("data", signStr);
+				}
+				else
+				{
+					String signStr = ThirdAction.getSign(sendRecord, appRecord.getString("V_SECRET"));
+					sendRecord.setColumn("sign", signStr);
+				}
+
 				if (StringUtils.isNotBlank(orderRecord.getString("V_NOTIFY_URL")))
 				{
 					Record<String, Object> sendPar = new RecordImpl<>();

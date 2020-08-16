@@ -1,20 +1,41 @@
 <?xml version="1.0" encoding="UTF-8" ?>  
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="App">
-	<select id="list"  resultType="record" parameterType="record">
+	<select id="list" resultType="record" parameterType="record">
 		<![CDATA[
-		select tat.V_APPID,tat.ID,tat.V_SECRET,tat.V_APP_NAME,tat.V_RATE,tat.V_FORMALITIES
-		,tat.V_IS_MATCH,tsub.USER_ACCOUNT V_USER_ACCOUNT,tsub.USER_PHONE V_USER_PHONE
-		,tsub.USER_ID V_USER_ID,tsur.ROLE_ID V_ROLE_ID
-		,tct.V_WX_COLLECTION,tct.V_ALI_COLLECTION,tct.V_TOTAL_COLLECTION,tct.V_CASH_COLLECTION,
-		(select 1-(sum(CASE WHEN V_STATUS = '2' then 1 else 0 end)/SUM(1)) from T_ORDER_TAB TOT where TOT.V_BELONG_APP = tat.ID  ) V_SUCCESS_RATE
-		from t_app_tab  tat
-		left join t_collection_tab tct on tat.ID = tct.V_APP_ID
-		left join t_sys_user_base tsub on tat.V_USER_ID = tsub.USER_ID 
-		left join t_sys_user_role tsur on tsub.USER_ID = tsur.USER_ID
+		SELECT
+			TAT.V_APPID,
+			TAT.ID,
+			TAT.V_SECRET,
+			TAT.V_APP_NAME,
+			TAT.V_RATE,
+			TAT.V_FORMALITIES,
+			TAT.V_IS_MATCH,
+			TSUB.USER_ACCOUNT V_USER_ACCOUNT,
+			TSUB.USER_PHONE V_USER_PHONE,
+			TSUB.USER_ID V_USER_ID,
+			TSUR.ROLE_ID V_ROLE_ID,
+			TAT.RSA_KEY,
+			TCT.V_WX_COLLECTION,
+			TCT.V_ALI_COLLECTION,
+			TCT.V_TOTAL_COLLECTION,
+			TCT.V_CASH_COLLECTION,
+			(
+			SELECT
+				1- ( SUM( CASE WHEN V_STATUS = '2' THEN 1 ELSE 0 END ) / SUM( 1 ) ) 
+			FROM
+				T_ORDER_TAB TOT 
+			WHERE
+				TOT.V_BELONG_APP = TAT.ID 
+			) V_SUCCESS_RATE 
+		FROM
+			T_APP_TAB TAT
+			LEFT JOIN T_COLLECTION_TAB TCT ON TAT.ID = TCT.V_APP_ID
+			LEFT JOIN T_SYS_USER_BASE TSUB ON TAT.V_USER_ID = TSUB.USER_ID
+			LEFT JOIN T_SYS_USER_ROLE TSUR ON TSUB.USER_ID = TSUR.USER_ID
 		]]>
 		<where>
-		<if test="IS_ADMIN !=null and IS_ADMIN !=''">
+			<if test="IS_ADMIN !=null and IS_ADMIN !=''">
 				<choose>
 					<when test="IS_ADMIN == 0">
 						<if test="USER_ID !=null and USER_ID !=''">
@@ -23,16 +44,16 @@
 					</when>
 				</choose>
 			</if>
-		<if test="V_APP_NAME != null and V_APP_NAME != ''">
+			<if test="V_APP_NAME != null and V_APP_NAME != ''">
 			<![CDATA[
 			and tat.V_APP_NAME  like CONCAT('%', #{V_APP_NAME}, '%')
 			]]>
-		</if>
-		<if test="V_USER_ACCOUNT != null and V_USER_ACCOUNT != ''">
+			</if>
+			<if test="V_USER_ACCOUNT != null and V_USER_ACCOUNT != ''">
 			<![CDATA[
 			and tsub.USER_ACCOUNT  like CONCAT('%', #{V_USER_ACCOUNT}, '%')
 			]]>
-		</if>
+			</if>
 		</where>
 		<![CDATA[
 			order by tat.V_UPDATE_TIME desc
