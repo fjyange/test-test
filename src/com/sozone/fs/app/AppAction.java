@@ -23,7 +23,7 @@ import com.sozone.aeolus.ext.rs.ResultVO;
 import com.sozone.aeolus.util.CollectionUtils;
 import com.sozone.aeolus.utils.DateUtils;
 import com.sozone.fs.common.Constant;
-import com.sozone.fs.rsa.RSAEncrypt;
+import com.sozone.fs.rsa.RSAUtils;
 
 @Path(value = "app", desc = "平台管理")
 @Permission(Level.Authenticated)
@@ -112,9 +112,9 @@ public class AppAction
 			record.setColumn("V_APPID", Random.generateUUID());
 			record.setColumn("V_SECRET", getCode());
 			record.setColumn("V_CREATE_USER", ApacheShiroUtils.getCurrentUserID());
-			Record<String, Object> key = RSAEncrypt.genKeyPair();
-			record.setColumn("RSA_APP", key.getString("RSA_APP"));
-			record.setColumn("RSA_KEY", key.getString("RSA_KEY"));
+			Record<String, Object> key = RSAUtils.initKey(1024);
+			record.setColumn("RSA_APP", key.getString("RSAPublicKey"));
+			record.setColumn("RSA_KEY", key.getString("RSAPrivateKey"));
 			this.activeRecordDAO.auto().table(Constant.TableName.T_APP_TAB).save(record);
 			Record<String, Object> params = new RecordImpl<>();
 			params.setColumn("ID", Random.generateUUID());

@@ -4,6 +4,7 @@ import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +31,7 @@ import com.sozone.aeolus.util.CollectionUtils;
 import com.sozone.aeolus.utils.DateUtils;
 import com.sozone.fs.common.Constant;
 import com.sozone.fs.common.util.HttpClientUtils;
-import com.sozone.fs.rsa.RSAEncrypt;
+import com.sozone.fs.rsa.RSAUtils;
 import com.sozone.fs.third.ThirdAction;
 
 @Path(value = "/order", desc = "订单处理")
@@ -348,8 +349,9 @@ public class OrderAction
 				sendRecord.setColumn("status", "1");
 				if (StringUtils.equals("2", orderRecord.getString("V_EBCRYPT_TYPE")))
 				{
-					String signStr = RSAEncrypt.encryptPub(JSONObject.toJSONString(sendRecord),
+					byte[] signByte = RSAUtils.encryptByPublicKey(JSONObject.toJSONString(sendRecord).getBytes(),
 							appRecord.getString("RSA_APP"));
+					String signStr = Base64.encodeBase64String(signByte);
 					sendRecord.clear();
 					sendRecord.setColumn("data", signStr);
 				}

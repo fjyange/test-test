@@ -24,10 +24,10 @@ import com.sozone.aeolus.utils.DateUtils;
 import com.sozone.fs.common.Constant;
 import com.sozone.fs.third.ThirdAction;
 
-
 @Path(value = "/account", desc = "用户信息处理接口")
 @Permission(Level.Authenticated)
-public class AccountAction {
+public class AccountAction
+{
 	/**
 	 * 持久化接口
 	 */
@@ -39,7 +39,8 @@ public class AccountAction {
 	 * @param activeRecordDAO
 	 *            the activeRecordDAO to set
 	 */
-	public void setActiveRecordDAO(ActiveRecordDAO activeRecordDAO) {
+	public void setActiveRecordDAO(ActiveRecordDAO activeRecordDAO)
+	{
 		this.activeRecordDAO = activeRecordDAO;
 	}
 
@@ -50,7 +51,8 @@ public class AccountAction {
 
 	@Path(value = "/findPage", desc = "获取账户列表")
 	@Service
-	public ResultVO<Page<Record<String, Object>>> findPage(AeolusData aeolusData) throws FacadeException {
+	public ResultVO<Page<Record<String, Object>>> findPage(AeolusData aeolusData) throws FacadeException
+	{
 		logger.debug(LogUtils.format("获取账户列表", aeolusData));
 		ResultVO<Page<Record<String, Object>>> resultVO = new ResultVO<>();
 		Record<String, Object> record = aeolusData.getRecord();
@@ -66,21 +68,23 @@ public class AccountAction {
 
 	@Path(value = "/onlineAccount", desc = "获取在线账户列表")
 	@Service
-	public ResultVO<Page<Record<String, Object>>> onlineAccount(AeolusData aeolusData) throws FacadeException {
+	public ResultVO<Page<Record<String, Object>>> onlineAccount(AeolusData aeolusData) throws FacadeException
+	{
 		logger.debug(LogUtils.format("获取在线账户列表", aeolusData));
 		ResultVO<Page<Record<String, Object>>> resultVO = new ResultVO<>();
 		Record<String, Object> record = aeolusData.getRecord();
 		Pageable pageable = aeolusData.getPageRequest();
-		Page<Record<String, Object>> page = this.activeRecordDAO.statement().selectPage("Account.onlineAccount", pageable,
-				record);
+		Page<Record<String, Object>> page = this.activeRecordDAO.statement().selectPage("Account.onlineAccount",
+				pageable, record);
 		resultVO.setSuccess(true);
 		resultVO.setResult(page);
 		return resultVO;
 	}
-	
+
 	@Path(value = "/save", desc = "添加账户")
 	@Service
-	public ResultVO<String> save(AeolusData aeolusData) throws FacadeException {
+	public ResultVO<String> save(AeolusData aeolusData) throws FacadeException
+	{
 		logger.debug(LogUtils.format("添加账户", aeolusData));
 		ResultVO<String> resultVO = new ResultVO<>();
 		Record<String, Object> record = aeolusData.getRecord();
@@ -89,10 +93,12 @@ public class AccountAction {
 		record.setColumn("V_MATCH_TIME", DateUtils.getDateTime());
 		record.setColumn("V_MATCH_USER", ApacheShiroUtils.getCurrentUserID());
 		String fileId = record.getString("V_FILE_ID");
-		if (StringUtils.isEmpty(fileId)) {
+		if (StringUtils.isEmpty(fileId))
+		{
 			record.remove("V_FILE_ID");
 		}
-		if (StringUtils.isEmpty(id)) {
+		if (StringUtils.isEmpty(id))
+		{
 			id = Random.generateUUID();
 			record.setColumn("ID", id);
 			record.setColumn("V_CREATE_USER", ApacheShiroUtils.getCurrentUserID());
@@ -107,7 +113,8 @@ public class AccountAction {
 					.excute();
 			long count = this.activeRecordDAO.pandora().SELECT_COUNT_FROM(Constant.TableName.T_USER_SHOW)
 					.EQUAL("V_USER_ID", ApacheShiroUtils.getCurrentUserID()).count();
-			if (count > 0) {
+			if (count > 0)
+			{
 				Record<String, Object> userRecord = this.activeRecordDAO.pandora()
 						.SELECT_ALL_FROM(Constant.TableName.T_SYS_USER_BASE)
 						.EQUAL("USER_ID", ApacheShiroUtils.getCurrentUserID()).get();
@@ -119,10 +126,13 @@ public class AccountAction {
 				params.setColumn("V_ACCOUNT_ID", id);
 				params.setColumn("V_USER_ID", ApacheShiroUtils.getCurrentUserID());
 				params.setColumn("V_IS_SHOW", userRecord.getString("IS_MATCH"));
-				params.setColumn("V_PAY_TIME", "");
-				if (CollectionUtils.isEmpty(timeRecord)) {
+				params.setColumn("V_PAY_TIME", DateUtils.getDateTime());
+				if (CollectionUtils.isEmpty(timeRecord))
+				{
 					params.setColumn("V_PAY_NUM", "10");
-				} else {
+				}
+				else
+				{
 					params.setColumn("V_PAY_NUM", timeRecord.getString("V_PAY_NUM"));
 				}
 
@@ -131,7 +141,9 @@ public class AccountAction {
 				params.setColumn("V_POLL_NUM", "0");
 				this.activeRecordDAO.pandora().UPDATE(Constant.TableName.T_ACCOUNT_SHOW).SET(params).excute();
 			}
-		} else {
+		}
+		else
+		{
 			this.activeRecordDAO.auto().table(Constant.TableName.T_PAY_ACCOUNT).modify(record);
 		}
 		Record<String, Object> param = new RecordImpl<>();
@@ -145,7 +157,8 @@ public class AccountAction {
 
 	@Path(value = "delete", desc = "删除账户")
 	@Service
-	public ResultVO<String> delete(AeolusData aeolusData) throws FacadeException {
+	public ResultVO<String> delete(AeolusData aeolusData) throws FacadeException
+	{
 		logger.debug(LogUtils.format("删除用户", aeolusData));
 		ResultVO<String> resultVO = new ResultVO<String>();
 		Record<String, Object> record = aeolusData.getRecord();
@@ -158,23 +171,30 @@ public class AccountAction {
 
 	@Path(value = "/accountConf", desc = "账户配置")
 	@Service
-	public ResultVO<String> accountConf(AeolusData aeolusData) throws FacadeException {
+	public ResultVO<String> accountConf(AeolusData aeolusData) throws FacadeException
+	{
 		ResultVO<String> resultVO = new ResultVO<>();
 		Record<String, Object> record = aeolusData.getRecord();
-		if (StringUtils.isNotBlank(record.getString("V_PAY_TOTAL"))) {
-			if (!ThirdAction.isDoubleOrFloat(record.getString("V_PAY_TOTAL"))) {
+		if (StringUtils.isNotBlank(record.getString("V_PAY_TOTAL")))
+		{
+			if (!ThirdAction.isDoubleOrFloat(record.getString("V_PAY_TOTAL")))
+			{
 				resultVO.setResult("金额不是数字");
 				return resultVO;
 			}
 		}
-		
+
 		this.activeRecordDAO.auto().table(Constant.TableName.T_PAY_ACCOUNT).setCondition("and", "ID=#{ID}")
 				.modify(record);
-		if (StringUtils.isNotBlank(record.getString("V_IS_MATCH"))) {
+		if (StringUtils.isNotBlank(record.getString("V_IS_MATCH")))
+		{
 			Record<String, Object> params = new RecordImpl<>();
-			if (StringUtils.equals("N", record.getString("V_IS_MATCH"))) {
+			if (StringUtils.equals("N", record.getString("V_IS_MATCH")))
+			{
 				params.setColumn("V_IS_SHOW", "N");
-			} else {
+			}
+			else
+			{
 				params.setColumn("V_IS_SHOW", "Y");
 			}
 			this.activeRecordDAO.pandora().UPDATE(Constant.TableName.T_ACCOUNT_SHOW)

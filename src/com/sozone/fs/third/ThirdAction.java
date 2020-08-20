@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -33,7 +34,8 @@ import com.sozone.fs.common.Constant;
 import com.sozone.fs.common.util.HttpClientUtils;
 import com.sozone.fs.common.util.IPUtils;
 import com.sozone.fs.common.util.UtilSign;
-import com.sozone.fs.rsa.RSAEncrypt;
+import com.sozone.fs.rsa.RSAUtils;
+import com.sun.org.apache.bcel.internal.generic.NEW;
 
 @Path(value = "/third", desc = "第三方接入")
 @Permission(Level.Guest)
@@ -737,7 +739,8 @@ public class ThirdAction
 
 		String appkey = appRecord.getString("RSA_APP");
 		String content = record.getString("data");
-		String dataStr = RSAEncrypt.decryptPub(content, appkey);
+		byte[] dataByte = RSAUtils.decryptByPublicKey(Base64.decodeBase64(content.getBytes()), appkey);
+		String dataStr = new String(dataByte);
 		if (StringUtils.isEmpty(dataStr))
 		{
 			logRecord.setColumn("V_RECIEVE_STATUS", "2");
@@ -927,7 +930,8 @@ public class ThirdAction
 		}
 		String appkey = appRecord.getString("RSA_APP");
 		String content = record.getString("data");
-		String dataStr = RSAEncrypt.decryptPub(content, appkey);
+		byte[] dataByte = RSAUtils.decryptByPublicKey(Base64.decodeBase64(content.getBytes()), appkey);
+		String dataStr = new String(dataByte);
 
 		if (StringUtils.isEmpty(dataStr))
 		{
@@ -983,9 +987,16 @@ public class ThirdAction
 		map.put("orderno", String.valueOf(System.currentTimeMillis()));
 		map.put("paytype", "01");
 		map.put("notifyurl", "www.baidu.com");
-		String data = RSAEncrypt.encryptPri(JSONObject.toJSONString(map), "rsa私钥");
+
+		byte[] dataByte = RSAUtils.encryptByPrivateKey(JSONObject.toJSONString(map).getBytes(),
+				"MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBAKXJAqmjxrrOThqA+z/AvSo47hsXJ+iExQgoCV+p+oxq4OniVxJDc0Xs0Ru9FCeRghkWx3SPJ0zZzY6SmYAJWAPxyF2tHMR/OiflJi7rjRCTqy7kR34uVSnnNihtOReClceoTNIZlk2j7UxebyExwts1FmYFlvgeJ0Hw4j1YC+ilAgMBAAECgYAm/zmZHeVJW+4TXfO782KL5AheZvwEPfb7DC/oSNue3CU73voMWcFr2WD23Ws4Q4oOzMTuLh5YfYNU3jctXwVMxrsOZRUXEG6uZbdL3WfoIerfDl5rD1hOU5YW48TukevZNe/qLoNvBCSRvmqbhLZ4iUQ02r42pwk+0e+7d3U6AQJBAOXP8w6ydTHM+9TVLCc9pBh/0qC9VyqpwakQvNyEhrM+9ZSf4e2RW2Jmd0oi8rgkcPQ8dsNcdebPxQ3mP0MpS3ECQQC4rUWNOEopmDwQwNfpT/77t6H9K/BRVJAIZt+k97+XgJ20Z3TIBgzVMfoYNfawldNXW1xYXQa2WNoYA9+sME51AkEA0RE2OIenUFAARiZMjcJpF5SppGu78ecPdGPyvNafyE+dkMFHAx46ubEoErzqfRVB4R9kl+P0qq8XwMZXhRz7MQJAQRACjfND5Y2Vs81NBAzD54jVkC1XuD+TkvIzXppOLKEKbpF4SjQfd0jpNHhmleXjFEbCrPrxL3L0Ozu6JJ7MNQJARDPUrI5JuTeshNYFzDOPlVBr85//bYjk10NjJcrKvsSEH8upy0MPgxbC4dAWUSJsFZKe1/bf2i+eI1QQBspmtA==");
+		String data = Base64.encodeBase64String(dataByte);
+		System.out.println(data);
+		byte[] bytes4 = RSAUtils.decryptByPublicKey(Base64.decodeBase64(data),
+				"MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQClyQKpo8a6zk4agPs/wL0qOO4bFyfohMUIKAlfqfqMauDp4lcSQ3NF7NEbvRQnkYIZFsd0jydM2c2OkpmACVgD8chdrRzEfzon5SYu640Qk6su5Ed+LlUp5zYobTkXgpXHqEzSGZZNo+1MXm8hMcLbNRZmBZb4HidB8OI9WAvopQIDAQAB");
+		System.out.println(new String(bytes4));
 		Map<String, Object> sendMap = new HashMap<String, Object>();
-		sendMap.put("appid", "平台id");
+		sendMap.put("appid", "4a1cccf003a44a25858f67fad90fc3cb");
 		sendMap.put("data", data);
 		System.out.println(HttpClientUtils.sendJsonPostRequest("http://120.25.250.167/authorize/third/sdr",
 				JSONObject.toJSONString(sendMap), "utf-8"));
