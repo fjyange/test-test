@@ -3,7 +3,7 @@
 <mapper namespace="Order">
 	<select id="orderList" resultType="record" parameterType="record">
 		<![CDATA[
-		 select tot.*,tat.V_APP_NAME,tsub.USER_NAME,tpa.V_BANK_NAME from t_order_tab tot 
+		 select tot.*,tat.V_APP_NAME,tsub.USER_NAME,tpa.V_BANK_NAME,tpa.V_BANK_TYPE from t_order_tab tot 
 		 left join t_app_tab tat on tot.V_BELONG_APP = tat.ID
 		 left join t_sys_user_base tsub on tot.V_BELONG_USER = tsub.USER_ID 
 		 left join t_pay_account tpa on tot.V_BELONG_ACCOUNT = tpa.ID

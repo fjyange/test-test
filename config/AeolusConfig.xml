@@ -21,7 +21,7 @@
         <data-source dialect="mysql" type="druid" id="authorize" scanPattern="T_%,V_%,FS_%">
             <user value="DB_YUNDUAN_PAY" />
             <password value="DB_YUNDUAN_PAY" />
-            <url value="jdbc:mysql://127.0.0.1/DB_YUNDUAN_PAY?characterEncoding=utf-8" /> 
+            <url value="jdbc:mysql://rm-wz9jj7jfxt4ek5335bo.mysql.rds.aliyuncs.com/DB_YUNDUAN_PAY?characterEncoding=utf-8" /> 
             <!-- 配置初始化大小、最小、最大 -->
             <property name="initialSize" value="10" />
             <property name="minIdle" value="10" />
@@ -42,7 +42,7 @@
         <data-source dialect="mysql" type="druid" id="log" scanPattern="LOGGING_%">
             <user value="DB_YUNDUAN_PAY_LOG" />
             <password value="DB_YUNDUAN_PAY_LOG" />
-            <url value="jdbc:mysql://127.0.0.1/DB_YUNDUAN_PAY_LOG?characterEncoding=utf-8" />
+            <url value="jdbc:mysql://rm-wz9jj7jfxt4ek5335bo.mysql.rds.aliyuncs.com/DB_YUNDUAN_PAY_LOG?characterEncoding=utf-8" />
             <!-- 配置初始化大小、最小、最大 -->
             <property name="initialSize" value="5" />
             <property name="minIdle" value="5" />
