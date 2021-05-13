@@ -18,6 +18,7 @@ import com.sozone.aeolus.authorize.annotation.Permission;
 import com.sozone.aeolus.authorize.utlis.ApacheShiroUtils;
 import com.sozone.aeolus.authorize.utlis.LogUtils;
 import com.sozone.aeolus.authorize.utlis.Random;
+import com.sozone.aeolus.base.utils.time.SZUtilsTime;
 import com.sozone.aeolus.dao.ActiveRecordDAO;
 import com.sozone.aeolus.dao.StatefulDAO;
 import com.sozone.aeolus.dao.StatefulDAOImpl;
@@ -33,6 +34,7 @@ import com.sozone.fs.common.Constant;
 import com.sozone.fs.common.util.HttpClientUtils;
 import com.sozone.fs.rsa.RSAUtils;
 import com.sozone.fs.third.ThirdAction;
+import com.sozone.fs.thread.SendThread;
 
 @Path(value = "/order", desc = "订单处理")
 @Permission(Level.Authenticated)
@@ -339,73 +341,7 @@ public class OrderAction
 		}
 		if (StringUtils.equals("3", status) || StringUtils.equals("1", status) || StringUtils.equals("4", status))
 		{
-			Record<String, Object> appRecord = this.activeRecordDAO.pandora()
-					.SELECT_ALL_FROM(Constant.TableName.T_APP_TAB).EQUAL("ID", appID).get();
-			if (!CollectionUtils.isEmpty(appRecord))
-			{
-				Record<String, String> sendRecord = new RecordImpl<>();
-				sendRecord.setColumn("orderno", orderRecord.getString("V_ORDER_NO"));
-				sendRecord.setColumn("money", orderRecord.getString("V_MONEY"));
-				sendRecord.setColumn("status", "1");
-				if (StringUtils.equals("2", orderRecord.getString("V_EBCRYPT_TYPE")))
-				{
-					byte[] signByte = RSAUtils.encryptByPublicKey(JSONObject.toJSONString(sendRecord).getBytes(),
-							appRecord.getString("RSA_APP"));
-					String signStr = Base64.encodeBase64String(signByte);
-					sendRecord.clear();
-					sendRecord.setColumn("data", signStr);
-				}
-				else
-				{
-					String signStr = ThirdAction.getSign(sendRecord, appRecord.getString("V_SECRET"));
-					sendRecord.setColumn("sign", signStr);
-				}
-
-				if (StringUtils.isNotBlank(orderRecord.getString("V_NOTIFY_URL")))
-				{
-					Record<String, Object> sendPar = new RecordImpl<>();
-					try
-					{
-						sendPar.setColumn("ID", Random.generateUUID());
-						sendPar.setColumn("V_SEND_URL", orderRecord.getString("V_NOTIFY_URL"));
-						sendPar.setColumn("V_SEND_ORDER", id);
-						sendPar.setColumn("V_SEND_TIME", System.currentTimeMillis());
-						String result = HttpClientUtils.sendJsonPostRequest(orderRecord.getString("V_NOTIFY_URL"),
-								JSONObject.toJSONString(sendRecord), "utf-8");
-						sendPar.setColumn("V_SEND_MSG", JSONObject.toJSONString(sendRecord));
-						if (StringUtils.equals("success", result))
-						{
-							sendPar.setColumn("V_SEND_STATUS", "success");
-						}
-						else
-						{
-							JSONObject jsonObject = JSONObject.parseObject(result);
-							if (StringUtils.equals("success", jsonObject.getString("success")))
-							{
-								sendPar.setColumn("V_SEND_STATUS", "success");
-							}
-							else
-							{
-								sendPar.setColumn("V_SEND_STATUS", "fail");
-							}
-						}
-						sendPar.setColumn("V_RETURN_MSG", result);
-						sendPar.setColumn("V_RETURN_TIME", System.currentTimeMillis());
-					}
-					catch (Exception e)
-					{
-						sendPar.setColumn("V_SEND_STATUS", "fail");
-						sendPar.setColumn("V_RETURN_MSG", e.getMessage());
-						sendPar.setColumn("V_RETURN_TIME", System.currentTimeMillis());
-						logger.error(LogUtils.format("发送数据失败", e.getMessage()), e);
-					}
-					finally
-					{
-						this.activeRecordDAO.pandora().INSERT_INTO(Constant.TableName.T_SEND_TAB).VALUES(sendPar)
-								.excute();
-					}
-				}
-			}
+			new Thread(new SendThread(id, appID)).start();
 		}
 		resultVO.setSuccess(true);
 		resultVO.setResult("操作成功");
@@ -440,4 +376,106 @@ public class OrderAction
 		}
 		return request.getRemoteAddr();
 	}
+
+	public void sendOrder(String id, String appid) throws Exception
+	{
+
+		StatefulDAO statefulDAO = null;
+		try
+		{
+			statefulDAO = new StatefulDAOImpl();
+			Record<String, Object> appRecord = statefulDAO.pandora().SELECT_ALL_FROM(Constant.TableName.T_APP_TAB)
+					.EQUAL("ID", appid).get();
+			Record<String, Object> orderRecord = statefulDAO.pandora().SELECT_ALL_FROM(Constant.TableName.T_ORDER_TAB)
+					.EQUAL("ID", id).get();
+			if (!CollectionUtils.isEmpty(appRecord))
+			{
+				Record<String, String> sendRecord = new RecordImpl<>();
+				sendRecord.setColumn("orderno", orderRecord.getString("V_ORDER_NO"));
+				sendRecord.setColumn("money", orderRecord.getString("V_MONEY"));
+				sendRecord.setColumn("status", "1");
+				if (StringUtils.equals("2", orderRecord.getString("V_EBCRYPT_TYPE")))
+				{
+					byte[] signByte = RSAUtils.encryptByPublicKey(JSONObject.toJSONString(sendRecord).getBytes(),
+							appRecord.getString("RSA_APP"));
+					String signStr = Base64.encodeBase64String(signByte);
+					sendRecord.clear();
+					sendRecord.setColumn("data", signStr);
+				}
+				else
+				{
+					String signStr = ThirdAction.getSign(sendRecord, appRecord.getString("V_SECRET"));
+					sendRecord.setColumn("sign", signStr);
+				}
+
+				if (StringUtils.isNotBlank(orderRecord.getString("V_NOTIFY_URL")))
+				{
+					Record<String, Object> sendPar = new RecordImpl<String, Object>();
+					try
+					{
+
+						sendPar.setColumn("V_SEND_URL", orderRecord.getString("V_NOTIFY_URL"));
+						sendPar.setColumn("V_SEND_TIME", SZUtilsTime.getTime());
+						String result = HttpClientUtils.sendJsonPostRequest(orderRecord.getString("V_NOTIFY_URL"),
+								JSONObject.toJSONString(sendRecord), "utf-8");
+						sendPar.setColumn("V_SEND_MSG", JSONObject.toJSONString(sendRecord));
+						if (StringUtils.equals("success", result))
+						{
+							sendPar.setColumn("V_SEND_STATUS", "success");
+						}
+						else
+						{
+							JSONObject jsonObject = JSONObject.parseObject(result);
+							if (StringUtils.equals("success", jsonObject.getString("success")))
+							{
+								sendPar.setColumn("V_SEND_STATUS", "success");
+							}
+							else
+							{
+								sendPar.setColumn("V_SEND_STATUS", "fail");
+							}
+						}
+						sendPar.setColumn("V_RETURN_MSG", result);
+						sendPar.setColumn("V_RETURN_TIME", SZUtilsTime.getTime());
+					}
+					catch (Exception e)
+					{
+						sendPar.setColumn("V_SEND_STATUS", "fail");
+						sendPar.setColumn("V_RETURN_MSG", e.getMessage());
+						sendPar.setColumn("V_RETURN_TIME", SZUtilsTime.getTime());
+						logger.error(LogUtils.format("发送数据失败", e.getMessage()), e);
+					}
+					finally
+					{
+
+						long count = statefulDAO.pandora().SELECT_COUNT_FROM(Constant.TableName.T_SEND_TAB)
+								.EQUAL("V_SEND_ORDER", id).count();
+						if (count > 0)
+						{
+							statefulDAO.pandora().UPDATE(Constant.TableName.T_SEND_TAB).SET(sendPar)
+									.EQUAL("V_SEND_ORDER", id).excute();
+						}
+						else
+						{
+							sendPar.setColumn("ID", Random.generateUUID());
+							sendPar.setColumn("V_SEND_ORDER", id);
+							statefulDAO.pandora().INSERT_INTO(Constant.TableName.T_SEND_TAB).VALUES(sendPar).excute();
+						}
+
+					}
+				}
+			}
+			statefulDAO.commit();
+		}
+		catch (Exception e)
+		{
+			statefulDAO.rollback();
+			logger.error(LogUtils.format("发送数据异常", e.getMessage()), e);
+		}
+		finally
+		{
+			statefulDAO.close();
+		}
+	}
+
 }

@@ -11,50 +11,25 @@
 
 <title>云鑫支付</title>
 
-<script src="${pageContext.request.contextPath}/static/res/jquery/jquery.min.js" type="text/javascript"></script>
+<script
+	src="${pageContext.request.contextPath}/static/res/jquery/jquery.min.js"
+	type="text/javascript"></script>
 <script
 	src="${pageContext.request.contextPath}/static/res/jquery/qrcode.js"
 	type="text/javascript"></script>
 <script type="text/javascript">
-window.onload = function(){
-		//屏蔽键盘事件
-		document.onkeydown = function (){
-		var e = window.event || arguments[0];
-		//F12
-		if(e.keyCode == 123){
-		return false;
-		//Ctrl+Shift+I
-		}else if((e.ctrlKey) && (e.shiftKey) && (e.keyCode == 73)){
-		return false;
-		//Shift+F10
-		}else if((e.shiftKey) && (e.keyCode == 121)){
-		return false;
-		//Ctrl+U
-		}else if((e.ctrlKey) && (e.keyCode == 85)){
-		return false;
-		}
-		};
-		//屏蔽鼠标右键
-		document.oncontextmenu = function (){
-		return false;
-		}
-		}
+
+		
 var time ;
 		$(function(){
 			$.ajax({
-				url : '${path}/authorize/third/getOrderMsg/${param.id}',
+				url : '${path}/authorize/third/acctest/${param.id}',
 				// 设置请求方法
 				type : 'POST',
 				contentType : 'application/json;charset=UTF-8',
 				success : function(result) {
 					if (result.success){
-						$("#out_time").html(result.TIME_OUT);
-						$("#pay_money").html(result.V_MONEY);
-						$("#pay_order").html(result.V_ORDER_NO);
-						$("#money").html(result.V_MONEY);
-						var qrcode = new QRCode(document.getElementById("qrcode"));
-						qrcode.makeCode(result.ZZ_URL);
-						time =result.TIME_OUT; 
+						testOrder(result.ORDERNO);
 					}
 				},
 				// 失败回调
@@ -64,35 +39,27 @@ var time ;
 				}
 			});
 		});
-		/* window.onload=clock; */
-		function clock(){
-			var today=new Date(),//当前时间
-			    h=today.getHours(),
-			    m=today.getMinutes(),
-			    s=today.getSeconds();
-		    var stopTime=new Date(time),//结束时间
-			    stopH=stopTime.getHours(),
-			    stopM=stopTime.getMinutes(),
-			    stopS=stopTime.getSeconds();
-		  	var shenyu=stopTime.getTime()-today.getTime(),//倒计时毫秒数
-		 
-			  shengyuD=parseInt(shenyu/(60*60*24*1000)),//转换为天
-			    D=parseInt(shenyu)-parseInt(shengyuD*60*60*24*1000),//除去天的毫秒数
-			    shengyuH=parseInt(D/(60*60*1000)),//除去天的毫秒数转换成小时
-			    H=D-shengyuH*60*60*1000,//除去天、小时的毫秒数
-			    shengyuM=parseInt(H/(60*1000)),//除去天的毫秒数转换成分钟
-			    M=H-shengyuM*60*1000;//除去天、小时、分的毫秒数
-			  if (shenyu > 0){ 
-			    S=parseInt((shenyu-shengyuD*60*60*24*1000-shengyuH*60*60*1000-shengyuM*60*1000)/1000)//除去天、小时、分的毫秒数转化为秒
-			    $("#hours").text(shengyuH + "时");
-			    $("#minutes").text(shengyuM + "分");
-			    $("#seconds").text(S + "秒");
-			    // setTimeout("clock()",500);
-			    setTimeout(clock,500);
-		  }else {
-			 window.location.replace("${path}/timeOut.jsp");
-		  } 
-		   
+		function testOrder(order) {
+			$.ajax({
+				url : '${path}/authorize/third/ortest/${param.id}/' + order,
+				// 设置请求方法
+				type : 'POST',
+				contentType : 'application/json;charset=UTF-8',
+				success : function(result) {
+					if (result.success){
+						$("#pay_order").html(order);
+						var qrcode = new QRCode(document.getElementById("qrcode"));
+						qrcode.makeCode(result.ZZ_URL);
+					}else {
+						alert(result.msg);
+					}
+				},
+				// 失败回调
+				error : function(XMLHttpRequest, textStatus, errorThrown) {
+					var result = jQuery.parseJSON(XMLHttpRequest.responseText);
+					top.$.messager.alert('操作失败', "操作失败[" + result.errorDesc + "]");
+				}
+			});
 		}
 	</script>
 <style type="text/css">
@@ -256,6 +223,5 @@ em {
 			</div>
 		</div>
 	</div>
-	Ï
 </body>
 </html>

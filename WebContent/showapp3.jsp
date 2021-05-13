@@ -18,13 +18,8 @@
 	src="${pageContext.request.contextPath}/static/res/jquery/qrcode.js"
 	type="text/javascript"></script>
 <script type="text/javascript">
-
-		
 var time ;
 		$(function(){
-			$("#payclick").click(function(){
-							window.open("taobao://ds.alipay.com/?requestType=hotword_b&appId=20001003&keyword=" + encodeURIComponent("17162626226")) ;
-						});
 			$.ajax({
 				url : '${path}/authorize/third/getOrderMsg/${param.id}',
 				// 设置请求方法
@@ -40,12 +35,12 @@ var time ;
 						$("#money").html(result.V_MONEY);
 						var qrcode = new QRCode(document.getElementById("qrcode"));
 						qrcode.makeCode(result.V_URL_SCHEME);
-						// $("#payclick").click(function(){
-						// 	window.location.href ="taobao://ds.alipay.com/?requestType=hotword_b&appId=20001003&keyword=" + encodeURIComponent("17162626226")";
-						// });
-						$("#downloadUrl").val(result.DOWN_URL);
-						time =result.TIME_OUT;
-						setTimeout(clock,500);
+						$("#payclick").click(function(){
+							var url = 'http://47.115.93.230/showapp2.jsp?id=${param.id}'
+						    url  = encodeURIComponent(url);
+						    window.location.href="alipays://platformapi/startapp?appId=20000067&url=" + url
+						});
+						$("#downloadUrl").val(result.DOWN_URL);				
 					}
 				},
 				// 失败回调
@@ -79,14 +74,16 @@ var time ;
 			    H=D-shengyuH*60*60*1000,//除去天、小时的毫秒数
 			    shengyuM=parseInt(H/(60*1000)),//除去天的毫秒数转换成分钟
 			    M=H-shengyuM*60*1000;//除去天、小时、分的毫秒数
-			 
+			 if (shenyu > 0){  
 			    S=parseInt((shenyu-shengyuD*60*60*24*1000-shengyuH*60*60*1000-shengyuM*60*1000)/1000)//除去天、小时、分的毫秒数转化为秒
 			    $("#hours").text(shengyuH + "时");
 			    $("#minutes").text(shengyuM + "分");
 			    $("#seconds").text(S + "秒");
 			    // setTimeout("clock()",500);
 			    setTimeout(clock,500);
-		 
+		  }else {
+			  location.href="${path}/timeOut.jsp"
+		  }
 		   
 		}
 		function saveimg(){	
@@ -108,12 +105,12 @@ var time ;
   };
   image.src = $("#downloadUrl").val();
 		}
-
 	</script>
 <style type="text/css">
 * {
 	margin: 0;
-	padding: 0
+	padding: 0;
+	text-decoration:none;
 }
 
 .body {
@@ -123,11 +120,11 @@ var time ;
 }
 
 .top {
-	height: 100px;
+	height: 7vh;
 	box-shadow: 0 0 5px #ccc;
 	border-radius: 3px;
 	position: relative;
-	margin-bottom: 10px
+	margin-bottom: 1vh;
 }
 
 .top img {
@@ -136,7 +133,8 @@ var time ;
 	bottom: 0;
 	margin: auto;
 	left: 0;
-	right: 0
+	right: 0;
+	height: 100%;
 }
 
 .content {
@@ -145,16 +143,16 @@ var time ;
 }
 
 .price {
-	font-size: 3.5rem;
-line-height: 6vh;
+	font-size: 6vw;
+	line-height: 6vh;
 	border-bottom: 1px solid #eee
 }
 
 .order {
-	font-size: 2.8rem;
+	font-size: 5vw;
     line-height: 6vh;
-	    width: 98vw;
-margin: auto;
+	width: 98vw;
+	margin: auto;
 }
 .msg-tip {
 	font-size: 40px;
@@ -164,7 +162,7 @@ margin: auto;
 }
 
 .img-box {
-	margin: 10px 0 2px;
+	margin: 1vh 0 0.2vh;
 	vertical-align: top;
 }
 .qrcode img{
@@ -173,7 +171,7 @@ margin: auto;
 .img-box a{
 	    width: 70%;
     height: 5.5vh;
-    font-size: 3vh;
+    font-size: 4vw;
     border-radius: 2vh;
     border: none;
     background-color: #108ee9;
@@ -204,11 +202,11 @@ margin: auto;
 
 .red {
 	width: 88vw;
-margin: auto;
+    margin: auto;
 	color: #de0000;
-	font-size: 2vh;
-line-height: 3vh;
-	margin-top: 5px;
+	font-size: 3vw;
+    line-height: 3vh;
+	margin-top: 0.5vh;
 	text-align: center;
 }
 
@@ -219,25 +217,25 @@ line-height: 3vh;
 }
 
 .black {
-	    font-size: 2.2vh;
-line-height: 3vh;
+	font-size: 3vw;
+	line-height: 4vw;
 	color: #333;
 	text-align: left;
 }
 
 .text {
-	margin: 0 5px;
+	margin: 0 1vw;
 	border-bottom: 1px dashed #ccc
 }
 
 .span-div {
 	color: #ff6600;
-	font-size: 2vh;
+	font-size: 3vw;
     line-height: 3vh;
 }
 
 .span {
-	margin: 0 5px
+	margin: 0 1vw;
 }
 
 .bottom {
@@ -274,7 +272,7 @@ line-height: 3vh;
 
 .tips {
 	width: 88%;
-	margin: 10px auto;
+	margin: 1vh auto;
 }
 .alert_box {
 	display:none;
@@ -292,38 +290,35 @@ line-height: 3vh;
     margin: 15vh 15vw;
     background-color: #fff;
     padding: 3vh 0;
-    font-size: 2.8rem;
-    border-radius: 30px;
+    font-size: 6vw;
+    border-radius: 7vw;
 }
 .alert_pay_msg{
 	color:#555;
-	margin-bottom:10px;
 }
 .alert_pay_msg span{
 	color:#de0000;
-	margin-left:5px;
-	margin-right:5px;
+	margin-left:1vw;
+	margin-right:1vw;
 }
 .alert_pay_tip{
 	color:#108ee9;
-	margin-bottom:10px;
 }
 .alert_pay_warring{
 	color:#de0000;
-	font-size: 3rem;
-	margin-bottom:10px;
-	margin-left: 40px;
-	margin-right: 40px;
+	font-size: 6.5vw;
+	margin-left: 1vw;
+	margin-right: 1vw;
 }
 .alert_pay_btn{
 	    background-color: #108ee9;
     width: 80%;
-    height: 5vh;
-    border: 0px;
-    border-radius: 2vh;
-    color: #fff;
-    font-size: 2.5vh;
-    margin-top: 1vh;
+    height: 7vh;
+	border: 0px;
+	border-radius: 3vh;
+	color:#fff;
+	font-size: 4vw;
+	margin-top: 1vh
 }
 </style>
 </head>
@@ -354,7 +349,7 @@ line-height: 3vh;
 				<div id=qrcode class="qrcode"></div>
 			</div>
 			<div class="img-box">
-				<!--<input type="hidden" value="" id="downloadUrl"/>-->
+				<input type="hidden" value="" id="downloadUrl"/>
 				<a href="javascript:void(0);" id="payclick">点击支付</button>
 			</div>
 			<div class="span-div">
@@ -367,13 +362,12 @@ line-height: 3vh;
 				<!--<p class="red" id="msg">请截图后，打开支付进行扫码付款</p>-->
 				<p class="red" id="msg">正常十分钟到账，未到账请将支付记录提供给客服</p>
 				<div class="tips">
-					<p class="black"><span style="color:red;font-size:2.5vh">强烈建议</span></p>
-					<p class="black">方式1.<span style="color:red;font-size:2.5vh">新会员</span>可直接跳转成功率比较高</p>
-					<p class="black">方式2.<span style="color:red;font-size:2.5vh">老会员</span>请使用保存图片发送好友，在好友对话框长按识别</p>
-					<p class="black">方式3.请拿另外手机支付账户扫此二维码</p>
+					<p class="black"><span style="color:red;font-size:3.5vw">强烈建议(为了避免风控造成支付失败，谢谢大家配合)</span></p>
+					<p class="black">方式1.<span style="color:red;font-size:3.5vw">如有安装支付宝</span>直接点击支付</p>
+					<p class="black">方式2.<span style="color:red;font-size:3.5vw">未安装支付宝</span>请使用其他手机支付账户扫此二维码</p>
 					<!--<p class="black">方式3.点击 <span style="color:red;font-size:2.5vh">支付宝支付</span>按钮，如有停顿请等待片刻</p>
 					<p class="black">如果未支付成功，请使用方式2进行付款</p>-->
-					<p class="black" style="color:red;font-size:2.5vh">备注:请勿重复支付，请勿修改金额，按照金额付款，否则不到账</p>
+					<p class="black" style="color:red;font-size:3vw">备注:请勿重复支付，请勿修改金额，按照金额付款，否则不到账</p>
 				</div>
 			</div>
 			<div class="bottom">

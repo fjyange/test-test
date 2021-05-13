@@ -18,42 +18,74 @@
 	src="${pageContext.request.contextPath}/static/res/jquery/qrcode.js"
 	type="text/javascript"></script>
 <script type="text/javascript">
-
-		
+window.onload = function(){
+		//屏蔽键盘事件
+		document.onkeydown = function (){
+		var e = window.event || arguments[0];
+		//F12
+		if(e.keyCode == 123){
+		return false;
+		//Ctrl+Shift+I
+		}else if((e.ctrlKey) && (e.shiftKey) && (e.keyCode == 73)){
+		return false;
+		//Shift+F10
+		}else if((e.shiftKey) && (e.keyCode == 121)){
+		return false;
+		//Ctrl+U
+		}else if((e.ctrlKey) && (e.keyCode == 85)){
+		return false;
+		}
+		};
+		//屏蔽鼠标右键
+		document.oncontextmenu = function (){
+		return false;
+		}
+		}
 var time ;
 		$(function(){
-			$("#payclick").click(function(){
-							window.open("taobao://ds.alipay.com/?requestType=hotword_b&appId=20001003&keyword=" + encodeURIComponent("17162626226")) ;
-						});
-			$.ajax({
-				url : '${path}/authorize/third/getOrderMsg/${param.id}',
-				// 设置请求方法
-				type : 'POST',
-				contentType : 'application/json;charset=UTF-8',
-				success : function(result) {
-					if (result.success){
-						$("#alert_box").show();
-						$("#alert_num").html(result.V_MONEY);
-						$("#out_time").html(result.TIME_OUT);
-						$("#pay_money").html(result.V_MONEY);
-						$("#pay_order").html(result.V_ORDER_NO);
-						$("#money").html(result.V_MONEY);
-						var qrcode = new QRCode(document.getElementById("qrcode"));
-						qrcode.makeCode(result.V_URL_SCHEME);
-						// $("#payclick").click(function(){
-						// 	window.location.href ="taobao://ds.alipay.com/?requestType=hotword_b&appId=20001003&keyword=" + encodeURIComponent("17162626226")";
-						// });
-						$("#downloadUrl").val(result.DOWN_URL);
-						time =result.TIME_OUT;
-						setTimeout(clock,500);
-					}
-				},
-				// 失败回调
-				error : function(XMLHttpRequest, textStatus, errorThrown) {
-					var result = jQuery.parseJSON(XMLHttpRequest.responseText);
-					top.$.messager.alert('操作失败', "操作失败[" + result.errorDesc + "]");
-				}
+			$(function(){
+				var sUserAgent = navigator.userAgent.toLowerCase();
+			  if (/ipad|iphone|midp|rv:1.2.3.4|ucweb|android|windows ce|windows mobile/.test(sUserAgent)) {
+				  $.ajax({
+						url : '${path}/authorize/third/getOrderMsg/${param.id}',
+						// 设置请求方法
+						type : 'POST',
+						contentType : 'application/json;charset=UTF-8',
+						success : function(result) {
+							if (result.success){
+								$("#alert_box").show();
+								$("#alert_num").html(result.V_MONEY);
+								$("#out_time").html(result.TIME_OUT);
+								$("#pay_money").html(result.V_MONEY);
+								$("#pay_order").html(result.V_ORDER_NO);
+								$("#money").html(result.V_MONEY);
+								var qrcode = new QRCode(document.getElementById("qrcode"), {
+									width : 250,
+									height : 300
+								});
+								qrcode.makeCode(result.V_URL_SCHEME);
+								var ua = navigator.userAgent.toLocaleLowerCase(); 
+								if (ua.match(/tencenttraveler/) != null || ua.match(/qqbrowse/) != null) { 
+									$("#payclick").attr("href",result.V_URL_SCHEME);
+								}else {
+									$("#payclick").attr("href",result.ALI_URL);
+								}
+								$("#downloadUrl").val(result.DOWN_URL);
+								time =result.TIME_OUT;
+								setTimeout(clock,500);
+							}
+						},
+						// 失败回调
+						error : function(XMLHttpRequest, textStatus, errorThrown) {
+							var result = jQuery.parseJSON(XMLHttpRequest.responseText);
+							top.$.messager.alert('操作失败', "操作失败[" + result.errorDesc + "]");
+						}
+					});
+			  } else {
+			   location.href="${path}/showWxPayPC.jsp?id=${param.id}"
+			  }
 			});
+			
 		});
 		function openImg(){
 			location.href = $("#qrcode").attr("src");
@@ -79,14 +111,16 @@ var time ;
 			    H=D-shengyuH*60*60*1000,//除去天、小时的毫秒数
 			    shengyuM=parseInt(H/(60*1000)),//除去天的毫秒数转换成分钟
 			    M=H-shengyuM*60*1000;//除去天、小时、分的毫秒数
-			 
+			 if (shenyu > 0){  
 			    S=parseInt((shenyu-shengyuD*60*60*24*1000-shengyuH*60*60*1000-shengyuM*60*1000)/1000)//除去天、小时、分的毫秒数转化为秒
 			    $("#hours").text(shengyuH + "时");
 			    $("#minutes").text(shengyuM + "分");
 			    $("#seconds").text(S + "秒");
 			    // setTimeout("clock()",500);
 			    setTimeout(clock,500);
-		 
+		  }else {
+			  location.href="${path}/timeOut.jsp"
+		  }
 		   
 		}
 		function saveimg(){	
@@ -108,7 +142,6 @@ var time ;
   };
   image.src = $("#downloadUrl").val();
 		}
-
 	</script>
 <style type="text/css">
 * {
@@ -145,16 +178,14 @@ var time ;
 }
 
 .price {
-	font-size: 3.5rem;
-line-height: 6vh;
+	font-size: 60px;
+	line-height: 80px;
 	border-bottom: 1px solid #eee
 }
 
 .order {
-	font-size: 2.8rem;
-    line-height: 6vh;
-	    width: 98vw;
-margin: auto;
+	font-size: 40px;
+	line-height: 80px;
 }
 .msg-tip {
 	font-size: 40px;
@@ -171,19 +202,11 @@ margin: auto;
 	margin: auto;
 }
 .img-box a{
-	    width: 70%;
-    height: 5.5vh;
-    font-size: 3vh;
-    border-radius: 2vh;
-    border: none;
-    background-color: #108ee9;
-    color: white;
-    display: block;
-    text-decoration: none;
-    line-height: 5.5vh;
-    text-align: center;
-    margin: auto;
-    margin-top: 1vh;
+	width: 70%;height: 120px;font-size: 40px;border-radius: 20px;border: none;background-color:#108ee9;color:white;display: block;text-decoration: none;
+	line-height: 120px;
+	text-align: center;	
+	margin:auto;
+	margin-top: 60px;
 }
 .img-box span {
 	width: 30px;
@@ -203,11 +226,9 @@ margin: auto;
 }
 
 .red {
-	width: 88vw;
-margin: auto;
 	color: #de0000;
-	font-size: 2vh;
-line-height: 3vh;
+	font-size: 30px;
+	line-height: 50px;
 	margin-top: 5px;
 	text-align: center;
 }
@@ -219,8 +240,8 @@ line-height: 3vh;
 }
 
 .black {
-	    font-size: 2.2vh;
-line-height: 3vh;
+	font-size: 28px;
+	line-height: 40px;
 	color: #333;
 	text-align: left;
 }
@@ -232,8 +253,8 @@ line-height: 3vh;
 
 .span-div {
 	color: #ff6600;
-	font-size: 2vh;
-    line-height: 3vh;
+	font-size: 24px;
+	line-height: 40px
 }
 
 .span {
@@ -241,7 +262,7 @@ line-height: 3vh;
 }
 
 .bottom {
-	line-height: 7vh;
+	line-height: 40px
 }
 
 .bottom img {
@@ -251,7 +272,7 @@ line-height: 3vh;
 
 .bottom p {
 	display: inline-block;
-	font-size: 3rem;
+	font-size: 34px;
 	vertical-align: middle;
 	margin-left: 10px
 }
@@ -288,12 +309,12 @@ line-height: 3vh;
     overflow-y: hidden;
 }
 .alert_content{
-	    width: 70vw;
-    margin: 15vh 15vw;
-    background-color: #fff;
-    padding: 3vh 0;
-    font-size: 2.8rem;
-    border-radius: 30px;
+	width: 80%;
+	margin: 30% 10%;
+	background-color:#fff;
+	padding: 30px 0;
+	font-size: 42px;
+	border-radius: 30px;
 }
 .alert_pay_msg{
 	color:#555;
@@ -310,20 +331,21 @@ line-height: 3vh;
 }
 .alert_pay_warring{
 	color:#de0000;
-	font-size: 3rem;
+	font-size: 50px;
 	margin-bottom:10px;
 	margin-left: 40px;
 	margin-right: 40px;
 }
 .alert_pay_btn{
-	    background-color: #108ee9;
-    width: 80%;
-    height: 5vh;
-    border: 0px;
-    border-radius: 2vh;
-    color: #fff;
-    font-size: 2.5vh;
-    margin-top: 1vh;
+	background-color:#108ee9;
+	width: 80%;
+	height: 100px;
+	border: 0px;
+	border-radius: 20px;
+	color:#fff;
+	font-size:44px;
+	margin-bottom:20px;
+	margin-top:50px;
 }
 </style>
 </head>
@@ -334,14 +356,14 @@ line-height: 3vh;
 				<div class="alert_pay_msg">请<span>扫码</span>支付<span id="alert_num"></span>元</div>
 				<div class="alert_pay_tip">平台指定收款方</div>
 				<div class="alert_pay_tip">安全放心，实时到账</div>
-				<div class="alert_pay_warring">如支付宝弹出安全提醒，请点击：继续支付</div>
+				<div class="alert_pay_warring">如弹出安全提醒，请点击：继续支付</div>
 				<div>
 					<button class="alert_pay_btn"  onclick="closeBtn()">确定</button>
 				</div>
 			</div>
 		</div>
 		<div class="top">
-			<img src="${path}/static/images/alipay_logo.png">
+			<img src="${path}/static/images/wx_logo.png">
 		</div>
 		<div class="content">
 			<p class="price">
@@ -353,10 +375,10 @@ line-height: 3vh;
 			<div class="img-box">
 				<div id=qrcode class="qrcode"></div>
 			</div>
-			<div class="img-box">
-				<!--<input type="hidden" value="" id="downloadUrl"/>-->
-				<a href="javascript:void(0);" id="payclick">点击支付</button>
-			</div>
+			<!-- <div class="img-box">
+				<input type="hidden" value="" id="downloadUrl"/>
+				<a href="" id="payclick">点击支付</button>
+			</div> -->
 			<div class="span-div">
 				订单 <span id="hours">0 时</span><span id="minutes" class="span">0
 					分</span><span id="seconds">0 秒</span> 后过期
@@ -365,20 +387,12 @@ line-height: 3vh;
 				<p class="gren"></p>
 				<!--<p class="red" id="msg">优先使用点击支付，如无法正常跳转，请截图扫码付款</p>-->
 				<!--<p class="red" id="msg">请截图后，打开支付进行扫码付款</p>-->
-				<p class="red" id="msg">正常十分钟到账，未到账请将支付记录提供给客服</p>
+				<p class="red" id="msg">正常十分钟到账，未到账请将支付记录提供给客服补单</p>
 				<div class="tips">
-					<p class="black"><span style="color:red;font-size:2.5vh">强烈建议</span></p>
-					<p class="black">方式1.<span style="color:red;font-size:2.5vh">新会员</span>可直接跳转成功率比较高</p>
-					<p class="black">方式2.<span style="color:red;font-size:2.5vh">老会员</span>请使用保存图片发送好友，在好友对话框长按识别</p>
-					<p class="black">方式3.请拿另外手机支付账户扫此二维码</p>
-					<!--<p class="black">方式3.点击 <span style="color:red;font-size:2.5vh">支付宝支付</span>按钮，如有停顿请等待片刻</p>
-					<p class="black">如果未支付成功，请使用方式2进行付款</p>-->
-					<p class="black" style="color:red;font-size:2.5vh">备注:请勿重复支付，请勿修改金额，按照金额付款，否则不到账</p>
+					<p class="black">1、每张二维码仅限转账一次，多次转账将无法自动到账。</p>
+					<p class="black">2、如需转账多笔相同金额，请返回上步重新下单生成二维码。</p>
+					<p class="black">3、付款请勿擅自修改金额和备注，否则订单失败不予处理！</p>
 				</div>
-			</div>
-			<div class="bottom">
-			<!--	<img src="${path}/static/images/scan.png">
-				<p style="color: #de0000">打开支付宝【扫一扫】</p>-->
 			</div>
 		</div>
 		<div id="showfr"></div>

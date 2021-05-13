@@ -31,9 +31,8 @@
 			</if>
 		</where>
 	</select>
-	
-	<select id="onlineAccount" resultType="record"
-		parameterType="record">
+
+	<select id="onlineAccount" resultType="record" parameterType="record">
 		<![CDATA[
 		SELECT
 			tpa.ID,
@@ -53,9 +52,13 @@
 		]]>
 		<where>
 		<![CDATA[
-			and tus.V_IS_PAY ='Y' 
-			and tas.V_PAY_NUM > 0 and tas.V_ORDER_NUM < 15 
-			and tpa.V_IS_MATCH = 'Y'  and tpa.V_IS_LOCK = 'N'
+			AND tus.V_IS_PAY = 'Y'
+			AND tas.V_PAY_NUM > 5
+			AND tpa.V_IS_MATCH = 'Y'
+			AND tpa.V_PAY_TYPE = '01'
+			AND tpa.V_IS_LOCK = 'N'
+			AND tpa.V_PAY_ACCOUNT IS NOT NULL
+			AND tpa.V_PAY_NO IS NOT NULL
 		]]>
 			<if test="USER_NAME !=null and USER_NAME !=''">
 				<![CDATA[AND tsub.USER_NAME like CONCAT('%', #{USER_NAME}, '%')]]>

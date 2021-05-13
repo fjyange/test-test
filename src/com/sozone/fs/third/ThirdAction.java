@@ -1,8 +1,6 @@
 package com.sozone.fs.third;
 
 import java.net.URLEncoder;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.apache.commons.codec.binary.Base64;
@@ -35,7 +33,6 @@ import com.sozone.fs.common.util.HttpClientUtils;
 import com.sozone.fs.common.util.IPUtils;
 import com.sozone.fs.common.util.UtilSign;
 import com.sozone.fs.rsa.RSAUtils;
-import com.sun.org.apache.bcel.internal.generic.NEW;
 
 @Path(value = "/third", desc = "第三方接入")
 @Permission(Level.Guest)
@@ -57,7 +54,6 @@ public class ThirdAction
 	{
 		this.activeRecordDAO = activeRecordDAO;
 	}
-
 	/**
 	 * 日志
 	 */
@@ -966,85 +962,43 @@ public class ThirdAction
 	public static void main(String[] args) throws Exception
 	{
 		// for(int i = 0;i< 20;i++) {
-		// Record<String, Object> record = new RecordImpl<>();
-		// record.setColumn("appid", "37b9833269a3403fbaa446c787fd5925");
-		// record.setColumn("money", "6000");
-		// record.setColumn("orderno",
-		// String.valueOf(System.currentTimeMillis()));
-		// record.setColumn("paytype", "01");
-		// record.setColumn("notifyurl", "www.baidu.com");
-		// // record.setColumn("orderno", "test12312");
-		// // record.setColumn("money", "123");
-		// // record.setColumn("status", "1");
-		// String sign = getSign(record, "n0h6Ag6uRttzCwv");
-		// record.setColumn("sign", sign);
-		// System.out.println(sign);
-		// System.out.println(HttpClientUtils.sendJsonPostRequest("http://120.25.250.167/authorize/third/sendorder",
-		// JSONObject.toJSONString(record), "utf-8"));
+		Record<String, Object> record = new RecordImpl<>();
+		record.setColumn("appid", "b317cc1f66454a9d94e51d52f2dc6a5c");
+		record.setColumn("money", "100");
+		record.setColumn("orderno", String.valueOf(System.currentTimeMillis()));
+		record.setColumn("paytype", "01");
+		record.setColumn("notifyurl", "http://8.135.98.190/authorize/call");
+		// record.setColumn("orderno", "test12312");
+		// record.setColumn("money", "123");
+		// record.setColumn("status", "1");
+		String sign = getSign(record, "8cJM2ftPo9lTVvt");
+		record.setColumn("sign", sign);
+		System.out.println(sign);
+		System.out.println(HttpClientUtils.sendJsonPostRequest("http://8.135.98.190/authorize/third/sendorder",
+				JSONObject.toJSONString(record), "utf-8"));
 
-		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("money", "6000");
-		map.put("orderno", String.valueOf(System.currentTimeMillis()));
-		map.put("paytype", "01");
-		map.put("notifyurl", "www.baidu.com");
+		/**
+		 * rsa 测试
+		 */
+//		Map<String, Object> map = new HashMap<String, Object>();
+//		map.put("money", "6000");
+//		map.put("orderno", String.valueOf(System.currentTimeMillis()));
+//		map.put("paytype", "01");
+//		map.put("notifyurl", "www.baidu.com");
+//
+//		byte[] dataByte = RSAUtils.encryptByPrivateKey(JSONObject.toJSONString(map).getBytes(),
+//				"MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBAKXJAqmjxrrOThqA+z/AvSo47hsXJ+iExQgoCV+p+oxq4OniVxJDc0Xs0Ru9FCeRghkWx3SPJ0zZzY6SmYAJWAPxyF2tHMR/OiflJi7rjRCTqy7kR34uVSnnNihtOReClceoTNIZlk2j7UxebyExwts1FmYFlvgeJ0Hw4j1YC+ilAgMBAAECgYAm/zmZHeVJW+4TXfO782KL5AheZvwEPfb7DC/oSNue3CU73voMWcFr2WD23Ws4Q4oOzMTuLh5YfYNU3jctXwVMxrsOZRUXEG6uZbdL3WfoIerfDl5rD1hOU5YW48TukevZNe/qLoNvBCSRvmqbhLZ4iUQ02r42pwk+0e+7d3U6AQJBAOXP8w6ydTHM+9TVLCc9pBh/0qC9VyqpwakQvNyEhrM+9ZSf4e2RW2Jmd0oi8rgkcPQ8dsNcdebPxQ3mP0MpS3ECQQC4rUWNOEopmDwQwNfpT/77t6H9K/BRVJAIZt+k97+XgJ20Z3TIBgzVMfoYNfawldNXW1xYXQa2WNoYA9+sME51AkEA0RE2OIenUFAARiZMjcJpF5SppGu78ecPdGPyvNafyE+dkMFHAx46ubEoErzqfRVB4R9kl+P0qq8XwMZXhRz7MQJAQRACjfND5Y2Vs81NBAzD54jVkC1XuD+TkvIzXppOLKEKbpF4SjQfd0jpNHhmleXjFEbCrPrxL3L0Ozu6JJ7MNQJARDPUrI5JuTeshNYFzDOPlVBr85//bYjk10NjJcrKvsSEH8upy0MPgxbC4dAWUSJsFZKe1/bf2i+eI1QQBspmtA==");
+//		String data = Base64.encodeBase64String(dataByte);
+//		System.out.println(data);
+//		byte[] bytes4 = RSAUtils.decryptByPublicKey(Base64.decodeBase64(data),
+//				"MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQClyQKpo8a6zk4agPs/wL0qOO4bFyfohMUIKAlfqfqMauDp4lcSQ3NF7NEbvRQnkYIZFsd0jydM2c2OkpmACVgD8chdrRzEfzon5SYu640Qk6su5Ed+LlUp5zYobTkXgpXHqEzSGZZNo+1MXm8hMcLbNRZmBZb4HidB8OI9WAvopQIDAQAB");
+//		System.out.println(new String(bytes4));
+//		Map<String, Object> sendMap = new HashMap<String, Object>();
+//		sendMap.put("appid", "4a1cccf003a44a25858f67fad90fc3cb");
+//		sendMap.put("data", data);
+//		System.out.println(HttpClientUtils.sendJsonPostRequest("http://120.25.250.167/authorize/third/sdr",
+//				JSONObject.toJSONString(sendMap), "utf-8"));
 
-		byte[] dataByte = RSAUtils.encryptByPrivateKey(JSONObject.toJSONString(map).getBytes(),
-				"MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBAKXJAqmjxrrOThqA+z/AvSo47hsXJ+iExQgoCV+p+oxq4OniVxJDc0Xs0Ru9FCeRghkWx3SPJ0zZzY6SmYAJWAPxyF2tHMR/OiflJi7rjRCTqy7kR34uVSnnNihtOReClceoTNIZlk2j7UxebyExwts1FmYFlvgeJ0Hw4j1YC+ilAgMBAAECgYAm/zmZHeVJW+4TXfO782KL5AheZvwEPfb7DC/oSNue3CU73voMWcFr2WD23Ws4Q4oOzMTuLh5YfYNU3jctXwVMxrsOZRUXEG6uZbdL3WfoIerfDl5rD1hOU5YW48TukevZNe/qLoNvBCSRvmqbhLZ4iUQ02r42pwk+0e+7d3U6AQJBAOXP8w6ydTHM+9TVLCc9pBh/0qC9VyqpwakQvNyEhrM+9ZSf4e2RW2Jmd0oi8rgkcPQ8dsNcdebPxQ3mP0MpS3ECQQC4rUWNOEopmDwQwNfpT/77t6H9K/BRVJAIZt+k97+XgJ20Z3TIBgzVMfoYNfawldNXW1xYXQa2WNoYA9+sME51AkEA0RE2OIenUFAARiZMjcJpF5SppGu78ecPdGPyvNafyE+dkMFHAx46ubEoErzqfRVB4R9kl+P0qq8XwMZXhRz7MQJAQRACjfND5Y2Vs81NBAzD54jVkC1XuD+TkvIzXppOLKEKbpF4SjQfd0jpNHhmleXjFEbCrPrxL3L0Ozu6JJ7MNQJARDPUrI5JuTeshNYFzDOPlVBr85//bYjk10NjJcrKvsSEH8upy0MPgxbC4dAWUSJsFZKe1/bf2i+eI1QQBspmtA==");
-		String data = Base64.encodeBase64String(dataByte);
-		System.out.println(data);
-		byte[] bytes4 = RSAUtils.decryptByPublicKey(Base64.decodeBase64(data),
-				"MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQClyQKpo8a6zk4agPs/wL0qOO4bFyfohMUIKAlfqfqMauDp4lcSQ3NF7NEbvRQnkYIZFsd0jydM2c2OkpmACVgD8chdrRzEfzon5SYu640Qk6su5Ed+LlUp5zYobTkXgpXHqEzSGZZNo+1MXm8hMcLbNRZmBZb4HidB8OI9WAvopQIDAQAB");
-		System.out.println(new String(bytes4));
-		Map<String, Object> sendMap = new HashMap<String, Object>();
-		sendMap.put("appid", "4a1cccf003a44a25858f67fad90fc3cb");
-		sendMap.put("data", data);
-		System.out.println(HttpClientUtils.sendJsonPostRequest("http://120.25.250.167/authorize/third/sdr",
-				JSONObject.toJSONString(sendMap), "utf-8"));
-
-		// Record<String, Object> payRecord = new RecordImpl<String, Object>();
-		// payRecord.setColumn("V_RECID", orderRecord.getString("V_APP_ID"));
-		// payRecord.setColumn("V_ORDERNO",
-		// orderRecord.getString("V_ORDER_NO"));
-		// payRecord.setColumn("V_APPID",
-		// orderRecord.getString("V_BELONG_APP"));
-		// try {
-		// String result =
-		// HttpClientUtils.sendJsonPostRequest(Constant.QRCODE_URL,
-		// JSONObject.toJSONString(payRecord), "utf-8");
-		// JSONObject jsonObject = JSONObject.parseObject(result);
-		// String qrcode = jsonObject.getString("V_QRCODE");
-		//// params.setColumn("V_QR_CODE", qrcode);
-		//// orderRecord.setColumn("ZZ_URL", qrcode);
-		// } catch (Exception e) {
-		// logger.error(LogUtils.format("发送固码信息异常", e.getMessage()),e);
-		// }
-		// System.out.println(HttpClientUtils.sendJsonPostRequest(
-		// "http://120.24.93.47/authorize/third/confirmorder",
-		// JSONObject.toJSONString(record), "utf-8"));
-		// }
-		// Record<String, Object> record = new RecordImpl<>();
-		// String url =
-		// "https://qr-test2.chinaums.com/netpay-route-server/api/";
-		// record.setColumn("msgSrc", "WWW.TEST.COM");
-		// record.setColumn("msgType", "bills.getQRCode");
-		// record.setColumn("requestTimestamp", DateUtils.getDateTime());
-		// record.setColumn("mid", "898340149000005");
-		// record.setColumn("tid", "88880001");
-		// System.out.println(HttpClientUtils.sendJsonPostRequest(url,
-		// JSONObject.toJSONString(record), "utf-8"));
-		// Record<String, Object> orderRecord = new RecordImpl<>();
-		// TreeMap<String, Object> orderRecord = new TreeMap<>();
-		// orderRecord.setColumn("V_APP_ID", "2088802099100382");
-		// orderRecord.setColumn("V_MONEY", "100");
-		// orderRecord.setColumn("V_ORDER_NO", "123213");
-		// orderRecord.setColumn("s", "money");
-		// orderRecord.setColumn("u", "2088902324262101");
-		// orderRecord.setColumn("a", "100");
-		// orderRecord.setColumn("m", "23123123");
-		// String url = JSON.toJSONString(orderRecord);
-		//// String url =
-		// "{\"s\":\"money\",\"u\":\""+orderRecord.getString("V_APP_ID")+"\",\"a\":\""+orderRecord.getString("V_MONEY")+"\",\"m\":\""+orderRecord.getString("V_ORDER_NO")+"\"}";
-		// url = URLEncoder.encode(url,"utf-8");
-		// System.out.println(Constant.ZZ_URL + url);
+		
 	}
 }
