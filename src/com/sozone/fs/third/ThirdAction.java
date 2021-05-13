@@ -54,6 +54,7 @@ public class ThirdAction
 	{
 		this.activeRecordDAO = activeRecordDAO;
 	}
+
 	/**
 	 * 日志
 	 */
@@ -158,6 +159,16 @@ public class ThirdAction
 			resJson.setMapData("result", "金额不是数字");
 			return resJson;
 		}
+		double moneyDouble = Double.parseDouble(money);
+		if (!(moneyDouble >= 2000 && moneyDouble <= 50000))
+		{
+			logRecord.setColumn("V_RECIEVE_STATUS", "2");
+			logRecord.setColumn("V_RECIEVE_MSG", "区间在2000-50000间");
+			writeLog(logRecord);
+			resJson.setMsg("金额区间在2000-50000间");
+			resJson.setMapData("result", "金额区间在2000-50000间");
+			return resJson;
+		}
 		String orderno = record.getString("orderno");
 		if (StringUtils.isEmpty(orderno))
 		{
@@ -232,12 +243,11 @@ public class ThirdAction
 					.get();
 			String url1 = Constant.WEB_URL + fileRecord1.getString("V_NAME");
 
-			String viewUrl = Constant.VIEW_URL + "/showPayApp.jsp?id=" + checkOrder.getString("ID");
+			String viewUrl = aeolusData.getBasePath() + "/pay.jsp?id=" + checkOrder.getString("ID");
 			if (StringUtils.equals("2", checkOrder.getString("V_VIEW_TYPE")))
 			{
 				viewUrl = url1;
 			}
-			resJson.setMapData("result", url1);
 			resJson.setMapData("view", viewUrl);
 			resJson.setSuccess(true);
 			resJson.setMsg("下单成功");
@@ -258,7 +268,7 @@ public class ThirdAction
 			return resJson;
 		}
 		String url = Constant.WEB_URL + fileRecord.getString("V_NAME");
-		resJson.setMapData("result", url);
+		// resJson.setMapData("result", url);
 
 		Record<String, Object> orderRecord = new RecordImpl<>();
 		double monayD = Double.parseDouble(money);
@@ -266,12 +276,12 @@ public class ThirdAction
 		String viewUrl = null;
 		if (StringUtils.equals("02", payType))
 		{
-			viewUrl = Constant.VIEW_URL + "/showWxPayPC.jsp?id=" + id;
+			viewUrl = aeolusData.getBasePath() + "/pay.jsp?id=" + id;
 		}
 		else
 		{
 			String payModel = fileRecord.getString("V_PAY_MODEL");
-			viewUrl = Constant.VIEW_URL + "/showPayApp.jsp?id=" + id;
+			viewUrl = aeolusData.getBasePath() + "/pay.jsp?id=" + id;
 			orderRecord.setColumn("V_VIEW_TYPE", payModel);
 			if (StringUtils.equals("0", payModel))
 			{
@@ -412,7 +422,7 @@ public class ThirdAction
 			orderRecord.setColumn("ZZ_URL", Constant.ZZ_URL + url);
 		}
 		orderRecord.setColumn("DOWN_URL",
-				Constant.VIEW_URL + "/authorize/attach/downFile?ID=" + orderRecord.getString("ID"));
+				aeolusData.getBasePath() + "/authorize/attach/downFile?ID=" + orderRecord.getString("ID"));
 		orderRecord.remove("V_APP_ID");
 		String ip = IPUtils.getIp(aeolusData.getHttpServletRequest());
 		params.setColumn("V_REQUEST_IP", ip);
@@ -458,7 +468,7 @@ public class ThirdAction
 			orderRecord.setColumn("ZZ_URL", Constant.ZZ_URL + url);
 		}
 		orderRecord.setColumn("DOWN_URL",
-				Constant.VIEW_URL + "/authorize/attach/downFile?ID=" + orderRecord.getString("ID"));
+				aeolusData.getBasePath() + "/authorize/attach/downFile?ID=" + orderRecord.getString("ID"));
 		resJson.setSuccess(true);
 		resJson.setMap(orderRecord);
 		resJson.setMsg("订单获取成功");
@@ -543,7 +553,7 @@ public class ThirdAction
 		double monayD = Double.parseDouble(money);
 		String id = Random.generateUUID();
 		String payModel = fileRecord.getString("V_PAY_MODEL");
-		String viewUrl = Constant.VIEW_URL + "/showPayApp.jsp?id=" + id;
+		String viewUrl = aeolusData.getBasePath() + "/pay.jsp?id=" + id;
 		orderRecord.setColumn("V_VIEW_TYPE", payModel);
 		if (StringUtils.equals("0", payModel))
 		{
@@ -802,7 +812,7 @@ public class ThirdAction
 					.get();
 			String url1 = Constant.WEB_URL + fileRecord1.getString("V_NAME");
 
-			String viewUrl = Constant.VIEW_URL + "/showPayApp.jsp?id=" + checkOrder.getString("ID");
+			String viewUrl =aeolusData.getBasePath()+ "/pay.jsp?id=" + checkOrder.getString("ID");
 			if (StringUtils.equals("2", checkOrder.getString("V_VIEW_TYPE")))
 			{
 				viewUrl = url1;
@@ -836,12 +846,12 @@ public class ThirdAction
 		String viewUrl = null;
 		if (StringUtils.equals("02", payType))
 		{
-			viewUrl = Constant.VIEW_URL + "/showWxPayPC.jsp?id=" + id;
+			viewUrl = aeolusData.getBasePath() + "/pay.jsp?id=" + id;
 		}
 		else
 		{
 			String payModel = fileRecord.getString("V_PAY_MODEL");
-			viewUrl = Constant.VIEW_URL + "/showPayApp.jsp?id=" + id;
+			viewUrl = aeolusData.getBasePath() + "/pay.jsp?id=" + id;
 			orderRecord.setColumn("V_VIEW_TYPE", payModel);
 			if (StringUtils.equals("0", payModel))
 			{
@@ -963,42 +973,43 @@ public class ThirdAction
 	{
 		// for(int i = 0;i< 20;i++) {
 		Record<String, Object> record = new RecordImpl<>();
-		record.setColumn("appid", "b317cc1f66454a9d94e51d52f2dc6a5c");
-		record.setColumn("money", "100");
+		record.setColumn("appid", "16fa9965fa384194adb47e6e7970d91f");
+		record.setColumn("money", "2000");
 		record.setColumn("orderno", String.valueOf(System.currentTimeMillis()));
 		record.setColumn("paytype", "01");
-		record.setColumn("notifyurl", "http://8.135.98.190/authorize/call");
+		record.setColumn("notifyurl", "http://47.119.195.5/authorize/call");
 		// record.setColumn("orderno", "test12312");
 		// record.setColumn("money", "123");
 		// record.setColumn("status", "1");
-		String sign = getSign(record, "8cJM2ftPo9lTVvt");
+		String sign = getSign(record, "uY349Wv0HovIL60");
 		record.setColumn("sign", sign);
 		System.out.println(sign);
-		System.out.println(HttpClientUtils.sendJsonPostRequest("http://8.135.98.190/authorize/third/sendorder",
+		System.out.println(HttpClientUtils.sendJsonPostRequest("http://47.119.195.5//authorize/third/sendorder",
 				JSONObject.toJSONString(record), "utf-8"));
 
 		/**
 		 * rsa 测试
 		 */
-//		Map<String, Object> map = new HashMap<String, Object>();
-//		map.put("money", "6000");
-//		map.put("orderno", String.valueOf(System.currentTimeMillis()));
-//		map.put("paytype", "01");
-//		map.put("notifyurl", "www.baidu.com");
-//
-//		byte[] dataByte = RSAUtils.encryptByPrivateKey(JSONObject.toJSONString(map).getBytes(),
-//				"MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBAKXJAqmjxrrOThqA+z/AvSo47hsXJ+iExQgoCV+p+oxq4OniVxJDc0Xs0Ru9FCeRghkWx3SPJ0zZzY6SmYAJWAPxyF2tHMR/OiflJi7rjRCTqy7kR34uVSnnNihtOReClceoTNIZlk2j7UxebyExwts1FmYFlvgeJ0Hw4j1YC+ilAgMBAAECgYAm/zmZHeVJW+4TXfO782KL5AheZvwEPfb7DC/oSNue3CU73voMWcFr2WD23Ws4Q4oOzMTuLh5YfYNU3jctXwVMxrsOZRUXEG6uZbdL3WfoIerfDl5rD1hOU5YW48TukevZNe/qLoNvBCSRvmqbhLZ4iUQ02r42pwk+0e+7d3U6AQJBAOXP8w6ydTHM+9TVLCc9pBh/0qC9VyqpwakQvNyEhrM+9ZSf4e2RW2Jmd0oi8rgkcPQ8dsNcdebPxQ3mP0MpS3ECQQC4rUWNOEopmDwQwNfpT/77t6H9K/BRVJAIZt+k97+XgJ20Z3TIBgzVMfoYNfawldNXW1xYXQa2WNoYA9+sME51AkEA0RE2OIenUFAARiZMjcJpF5SppGu78ecPdGPyvNafyE+dkMFHAx46ubEoErzqfRVB4R9kl+P0qq8XwMZXhRz7MQJAQRACjfND5Y2Vs81NBAzD54jVkC1XuD+TkvIzXppOLKEKbpF4SjQfd0jpNHhmleXjFEbCrPrxL3L0Ozu6JJ7MNQJARDPUrI5JuTeshNYFzDOPlVBr85//bYjk10NjJcrKvsSEH8upy0MPgxbC4dAWUSJsFZKe1/bf2i+eI1QQBspmtA==");
-//		String data = Base64.encodeBase64String(dataByte);
-//		System.out.println(data);
-//		byte[] bytes4 = RSAUtils.decryptByPublicKey(Base64.decodeBase64(data),
-//				"MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQClyQKpo8a6zk4agPs/wL0qOO4bFyfohMUIKAlfqfqMauDp4lcSQ3NF7NEbvRQnkYIZFsd0jydM2c2OkpmACVgD8chdrRzEfzon5SYu640Qk6su5Ed+LlUp5zYobTkXgpXHqEzSGZZNo+1MXm8hMcLbNRZmBZb4HidB8OI9WAvopQIDAQAB");
-//		System.out.println(new String(bytes4));
-//		Map<String, Object> sendMap = new HashMap<String, Object>();
-//		sendMap.put("appid", "4a1cccf003a44a25858f67fad90fc3cb");
-//		sendMap.put("data", data);
-//		System.out.println(HttpClientUtils.sendJsonPostRequest("http://120.25.250.167/authorize/third/sdr",
-//				JSONObject.toJSONString(sendMap), "utf-8"));
+		// Map<String, Object> map = new HashMap<String, Object>();
+		// map.put("money", "6000");
+		// map.put("orderno", String.valueOf(System.currentTimeMillis()));
+		// map.put("paytype", "01");
+		// map.put("notifyurl", "www.baidu.com");
+		//
+		// byte[] dataByte =
+		// RSAUtils.encryptByPrivateKey(JSONObject.toJSONString(map).getBytes(),
+		// "MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBAKXJAqmjxrrOThqA+z/AvSo47hsXJ+iExQgoCV+p+oxq4OniVxJDc0Xs0Ru9FCeRghkWx3SPJ0zZzY6SmYAJWAPxyF2tHMR/OiflJi7rjRCTqy7kR34uVSnnNihtOReClceoTNIZlk2j7UxebyExwts1FmYFlvgeJ0Hw4j1YC+ilAgMBAAECgYAm/zmZHeVJW+4TXfO782KL5AheZvwEPfb7DC/oSNue3CU73voMWcFr2WD23Ws4Q4oOzMTuLh5YfYNU3jctXwVMxrsOZRUXEG6uZbdL3WfoIerfDl5rD1hOU5YW48TukevZNe/qLoNvBCSRvmqbhLZ4iUQ02r42pwk+0e+7d3U6AQJBAOXP8w6ydTHM+9TVLCc9pBh/0qC9VyqpwakQvNyEhrM+9ZSf4e2RW2Jmd0oi8rgkcPQ8dsNcdebPxQ3mP0MpS3ECQQC4rUWNOEopmDwQwNfpT/77t6H9K/BRVJAIZt+k97+XgJ20Z3TIBgzVMfoYNfawldNXW1xYXQa2WNoYA9+sME51AkEA0RE2OIenUFAARiZMjcJpF5SppGu78ecPdGPyvNafyE+dkMFHAx46ubEoErzqfRVB4R9kl+P0qq8XwMZXhRz7MQJAQRACjfND5Y2Vs81NBAzD54jVkC1XuD+TkvIzXppOLKEKbpF4SjQfd0jpNHhmleXjFEbCrPrxL3L0Ozu6JJ7MNQJARDPUrI5JuTeshNYFzDOPlVBr85//bYjk10NjJcrKvsSEH8upy0MPgxbC4dAWUSJsFZKe1/bf2i+eI1QQBspmtA==");
+		// String data = Base64.encodeBase64String(dataByte);
+		// System.out.println(data);
+		// byte[] bytes4 =
+		// RSAUtils.decryptByPublicKey(Base64.decodeBase64(data),
+		// "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQClyQKpo8a6zk4agPs/wL0qOO4bFyfohMUIKAlfqfqMauDp4lcSQ3NF7NEbvRQnkYIZFsd0jydM2c2OkpmACVgD8chdrRzEfzon5SYu640Qk6su5Ed+LlUp5zYobTkXgpXHqEzSGZZNo+1MXm8hMcLbNRZmBZb4HidB8OI9WAvopQIDAQAB");
+		// System.out.println(new String(bytes4));
+		// Map<String, Object> sendMap = new HashMap<String, Object>();
+		// sendMap.put("appid", "4a1cccf003a44a25858f67fad90fc3cb");
+		// sendMap.put("data", data);
+		// System.out.println(HttpClientUtils.sendJsonPostRequest("http://120.25.250.167/authorize/third/sdr",
+		// JSONObject.toJSONString(sendMap), "utf-8"));
 
-		
 	}
 }

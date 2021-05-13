@@ -3,24 +3,37 @@
 <mapper namespace="Third">
 	<select id="getpayimage" resultType="record" parameterType="record">
 		<![CDATA[
-		select tus.ID,tus.V_USER_ID,tas.ID ACCOUNT_SHOW_ID,tbt.ID BOND_ID,
-		tbt.V_WX_RECEIVABLES,tbt.V_ALI_RECEIVABLES,tpa.V_APP_ID,tpa.V_PAY_MODEL,
-		tbt.V_COUNT_RECEIVABLES,tbt.V_SURPLUS_BOND,tpa.ID PAY_ID,
-		tft.ID FILE_ID,tft.V_PATH,tft.V_NAME, tas.V_ORDER_NUM,tas.V_ACCOUNT_ID 
-		from t_user_show tus
-		left join t_bond_today tbt on tus.V_USER_ID = tbt.V_USER_ID
-		left join t_account_show tas on tus.V_USER_ID = tas.V_USER_ID 
-		left join t_pay_account tpa on tas.V_ACCOUNT_ID = tpa.ID
-		left join t_file_tab tft on tpa.V_FILE_ID= tft.ID 
-		left join t_account_collection tac on tas.V_ACCOUNT_ID = tac.V_ACCOUNT_ID 
+		SELECT
+			TUS.ID,
+			TUS.V_USER_ID,
+			TAS.ID ACCOUNT_SHOW_ID,
+			TBT.ID BOND_ID,
+			TBT.V_WX_RECEIVABLES,
+			TBT.V_ALI_RECEIVABLES,
+			TPA.V_APP_ID,
+			TPA.V_PAY_MODEL,
+			TBT.V_COUNT_RECEIVABLES,
+			TBT.V_SURPLUS_BOND,
+			TPA.ID PAY_ID,
+			TFT.ID FILE_ID,
+			TFT.V_PATH,
+			TFT.V_NAME,
+			TAS.V_ORDER_NUM,
+			TAS.V_ACCOUNT_ID
+		FROM
+			T_USER_SHOW TUS
+		LEFT JOIN T_BOND_TODAY TBT ON TUS.V_USER_ID = TBT.V_USER_ID
+		LEFT JOIN T_ACCOUNT_SHOW TAS ON TUS.V_USER_ID = TAS.V_USER_ID
+		LEFT JOIN T_PAY_ACCOUNT TPA ON TAS.V_ACCOUNT_ID = TPA.ID
+		LEFT JOIN T_FILE_TAB TFT ON TPA.V_FILE_ID = TFT.ID
+		LEFT JOIN T_ACCOUNT_COLLECTION TAC ON TAS.V_ACCOUNT_ID = TAC.V_ACCOUNT_ID
 		]]>
 		<where>
 		<![CDATA[
-			tus.V_IS_PAY ='Y' and (tbt.V_SURPLUS_BOND - tbt.V_LOCK_MONEY)  >= #{V_MONEY}
-			and tas.V_PAY_NUM > 5 and  tpa.V_IS_MATCH = 'Y' and tpa.V_PAY_TYPE =#{V_PAY_TYPE} 
-			and (tpa.V_PAY_TOTAL = #{V_MONEY} or tpa.V_PAY_TOTAL = '0.00') and tpa.V_IS_LOCK = 'N'
-			AND tpa.V_PAY_ACCOUNT is not null and tpa.V_PAY_NO is not null 
-			AND DATE_FORMAT(DATE_ADD(tas.V_PAY_TIME,INTERVAL 20 MINUTE),'%Y-%m-%d %T') < DATE_FORMAT(now(),'%Y-%m-%d %T') 
+			TUS.V_IS_PAY ='Y' AND (TBT.V_SURPLUS_BOND - TBT.V_LOCK_MONEY)  >= #{V_MONEY}
+			AND  TPA.V_IS_MATCH = 'Y' AND TPA.V_PAY_TYPE =#{V_PAY_TYPE} 
+			AND (TPA.V_PAY_TOTAL = #{V_MONEY} OR TPA.V_PAY_TOTAL = '0.00') AND TPA.V_IS_LOCK = 'N'
+			AND TPA.V_PAY_ACCOUNT IS NOT NULL AND TPA.V_PAY_NO IS NOT NULL 
 		]]>
 		</where>
 		<![CDATA[

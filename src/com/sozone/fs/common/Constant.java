@@ -13,7 +13,7 @@ public interface Constant {
 
 	String SYS_SWICH = "on";
 	String WEB_URL ="http://8.135.98.190:8090/";
-	String VIEW_URL = "http://8.135.98.190/";
+//	String VIEW_URL = "http://8.135.98.190/";
 	String ALI_URL = "alipayqr://platformapi/startapp?saId=10000007&qrcode=";
 	String ZZ_URL = "https://www.alipay.com/?appId=20000123&actionType=scan&biz_data=";
 	String INSER_ORDER = "http://47.115.93.230/authorize/order/in";
